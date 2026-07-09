@@ -1973,6 +1973,35 @@
             }
 
             </style>
+    /* ===== 框架迷你交互演示 ===== */
+    .mini-demo{margin-top:30px;padding:22px 24px;background:linear-gradient(135deg,#F8FAFC 0%,#EEF2FF 100%);border:1px solid #E0E7FF;border-radius:16px;}
+    .mini-demo-head{display:flex;align-items:center;gap:10px;margin-bottom:3px;}
+    .mini-demo-emoji{font-size:22px;}
+    .mini-demo-title{font-size:16px;font-weight:800;color:#0F172A;margin:0;}
+    .mini-demo-tip{font-size:12.5px;color:#64748B;margin:4px 0 16px;line-height:1.6;}
+    .mini-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+    .mini-chip{padding:9px 15px;border-radius:999px;border:1.5px solid #CBD5E1;background:#fff;font-size:13px;font-weight:600;color:#475569;cursor:pointer;transition:all .15s;font-family:inherit;}
+    .mini-chip:hover{border-color:#6366F1;color:#4338CA;transform:translateY(-1px);}
+    .mini-chip.active{background:#6366F1;border-color:#6366F1;color:#fff;box-shadow:0 3px 10px rgba(99,102,241,.32);}
+    .mini-out{display:none;padding:18px;background:#fff;border-radius:12px;border:1px solid #E2E8F0;animation:miniFade .25s ease;}
+    .mini-out.show{display:block;}
+    @keyframes miniFade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+    .mini-out h5{font-size:14px;font-weight:800;color:#0F172A;margin:0 0 10px;}
+    .mini-sentence{font-size:14px;line-height:1.85;color:#334155;background:#F8FAFC;border-radius:8px;padding:12px 14px;margin-bottom:12px;}
+    .mini-out ul{margin:0;padding-left:18px;font-size:13px;color:#475569;line-height:1.85;}
+    .mini-tag{display:inline-block;padding:2px 9px;border-radius:6px;font-size:11px;font-weight:700;margin-right:6px;color:#fff;}
+    .mini-card{background:#F8FAFC;border-radius:10px;padding:12px 14px;margin-bottom:10px;border-left:3px solid #6366F1;font-size:13px;color:#475569;line-height:1.7;}
+    .mini-card b{color:#0F172A;}
+    .mini-slider-wrap{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+    .mini-slider-wrap label{font-size:13px;font-weight:600;color:#475569;width:96px;}
+    .mini-slider-wrap input[type=range]{flex:1;accent-color:#6366F1;}
+    .mini-slider-val{font-size:13px;font-weight:700;color:#4338CA;width:26px;text-align:right;}
+    .quad-board{position:relative;width:100%;max-width:540px;height:330px;margin:0 auto 12px;background:#fff;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;touch-action:none;}
+    .quad-board .qb-x{position:absolute;top:50%;left:0;right:0;border-top:1px dashed #CBD5E1;}
+    .quad-board .qb-y{position:absolute;left:50%;top:0;bottom:0;border-left:1px dashed #CBD5E1;}
+    .qb-lab{position:absolute;font-size:11px;font-weight:700;color:#94A3B8;padding:6px;pointer-events:none;}
+    .qb-dot{position:absolute;width:28px;height:28px;border-radius:50%;background:#6366F1;border:3px solid #fff;box-shadow:0 2px 10px rgba(99,102,241,.5);cursor:grab;transform:translate(-50%,-50%);left:72%;top:28%;}
+    .qb-dot:active{cursor:grabbing;}
 </head>
 <body>
 
@@ -3327,6 +3356,17 @@
             </div>
         </div>
 
+        <div class="mini-demo">
+            <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · JTBD 句式生成器</h4></div>
+            <p class="mini-demo-tip">选一个用户场景，看它如何被拆成「功能性 / 情感性 / 社会性」三层任务——这就是 JTBD 框架的真实打法。</p>
+            <div class="mini-row" id="jtbdRow">
+                <span class="mini-chip" onclick="miniJtbd('release',this)">😮‍💨 快速释放压力</span>
+                <span class="mini-chip" onclick="miniJtbd('real',this)">🔥 想要真实体验</span>
+                <span class="mini-chip" onclick="miniJtbd('privacy',this)">🤫 在意隐私安全</span>
+            </div>
+            <div class="mini-out" id="jtbdOut"></div>
+        </div>
+
         <!-- 十三种需求分析框架 -->
         <div id="fw-needs-analysis" class="framework-detail" style="display: none;">
             <div class="framework-header">
@@ -3454,6 +3494,27 @@
                     </ol>
                 </div>
             </div>
+        </div>
+
+        <div class="mini-demo">
+            <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · 需求探测仪</h4></div>
+            <p class="mini-demo-tip">点一个需求，看它在「身份 / 体验 / 功能 / 必买」哪一层，以及飞机杯用户是怎么表达它的。</p>
+            <div class="mini-row" id="needRow">
+                <span class="mini-chip" onclick="miniNeed('主宰',this)">主宰</span>
+                <span class="mini-chip" onclick="miniNeed('审美',this)">审美</span>
+                <span class="mini-chip" onclick="miniNeed('目的',this)">目的</span>
+                <span class="mini-chip" onclick="miniNeed('刺激',this)">刺激</span>
+                <span class="mini-chip" onclick="miniNeed('道德',this)">道德</span>
+                <span class="mini-chip" onclick="miniNeed('认可',this)">认可</span>
+                <span class="mini-chip" onclick="miniNeed('亲密',this)">亲密</span>
+                <span class="mini-chip" onclick="miniNeed('胜任',this)">胜任</span>
+                <span class="mini-chip" onclick="miniNeed('影响',this)">影响</span>
+                <span class="mini-chip" onclick="miniNeed('安全',this)">安全</span>
+                <span class="mini-chip" onclick="miniNeed('归属',this)">归属</span>
+                <span class="mini-chip" onclick="miniNeed('舒适',this)">舒适</span>
+                <span class="mini-chip" onclick="miniNeed('健康',this)">健康</span>
+            </div>
+            <div class="mini-out" id="needOut"></div>
         </div>
 
         <!-- 产品创意罗盘 -->
@@ -3606,6 +3667,18 @@
             </div>
         </div>
 
+
+        <div class="mini-demo">
+            <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · 罗盘指向仪</h4></div>
+            <p class="mini-demo-tip">点一个创新象限，看它的 5 种打法在飞机杯上怎么落地。</p>
+            <div class="mini-row" id="compassRow">
+                <span class="mini-chip" onclick="miniCompass('reform',this)">🔄 重塑法</span>
+                <span class="mini-chip" onclick="miniCompass('aggregate',this)">🧩 聚合法</span>
+                <span class="mini-chip" onclick="miniCompass('purify',this)">💎 提纯法</span>
+                <span class="mini-chip" onclick="miniCompass('transplant',this)">🌉 移植法</span>
+            </div>
+            <div class="mini-out" id="compassOut"></div>
+        </div>
 
         <!-- 极端/领先用户查找-分析 -->
         <div id="fw-extreme" class="framework-detail" style="display: none;">
@@ -3844,6 +3917,14 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="mini-demo">
+            <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · 领先用户判别器</h4></div>
+            <p class="mini-demo-tip">拖动两个滑块，模拟一个用户：时间领先性（需求是否超前）+ 收益预期（自己解决的动力）。实时判定他属于哪类领先用户。</p>
+            <div class="mini-slider-wrap"><label>时间领先性</label><input type="range" min="0" max="10" value="3" id="extLead" oninput="miniExtreme()"><span class="mini-slider-val" id="extLeadV">3</span></div>
+            <div class="mini-slider-wrap"><label>收益预期</label><input type="range" min="0" max="10" value="3" id="extBen" oninput="miniExtreme()"><span class="mini-slider-val" id="extBenV">3</span></div>
+            <div class="mini-out" id="extremeOut"></div>
         </div>
 
         <!-- Plutchik 情绪罗盘 -->
@@ -4178,6 +4259,22 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="mini-demo">
+            <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · 情绪触发探针</h4></div>
+            <p class="mini-demo-tip">点一个情绪，看什么评论会触发它、典型强度，以及它会驱动用户做什么（复购 / 差评 / 流失…）。</p>
+            <div class="mini-row" id="plutRow">
+                <span class="mini-chip" onclick="miniPlut('joy',this)">😊 喜</span>
+                <span class="mini-chip" onclick="miniPlut('trust',this)">🤝 信</span>
+                <span class="mini-chip" onclick="miniPlut('fear',this)">😨 恐</span>
+                <span class="mini-chip" onclick="miniPlut('surprise',this)">😲 惊</span>
+                <span class="mini-chip" onclick="miniPlut('sadness',this)">😢 哀</span>
+                <span class="mini-chip" onclick="miniPlut('disgust',this)">🤢 厌</span>
+                <span class="mini-chip" onclick="miniPlut('anger',this)">😡 怒</span>
+                <span class="mini-chip" onclick="miniPlut('anticipate',this)">🤔 盼</span>
+            </div>
+            <div class="mini-out" id="plutOut"></div>
         </div>
 
         <!-- 4象限用户需求 -->
@@ -4552,6 +4649,28 @@
             </div>
         </div>
 
+        <div class="mini-demo">
+            <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · 重要度×满意度定位台</h4></div>
+            <p class="mini-demo-tip">拖动蓝点，把某个需求点放进矩阵：上=重要度高，下=重要度低；左=满意度高，右=满意度低。实时告诉你在哪个区、该干什么。</p>
+            <div class="quad-board" id="ismBoard">
+                <div class="qb-x"></div><div class="qb-y"></div>
+                <div class="qb-lab" style="left:8px;top:6px;color:#16A34A;">核心优势区</div>
+                <div class="qb-lab" style="right:8px;top:6px;color:#DC2626;">重点改进区⚡</div>
+                <div class="qb-lab" style="left:8px;bottom:6px;color:#2563EB;">过度投入区</div>
+                <div class="qb-lab" style="right:8px;bottom:6px;color:#D97706;">低优先级区</div>
+                <div class="qb-dot" id="ismDot"></div>
+            </div>
+            <div class="mini-out" id="ismOut"></div>
+            <p class="mini-demo-tip" style="margin-top:18px;">或者，点一个研究视角，看该用什么研究方法、挖出什么创新机会：</p>
+            <div class="mini-row" id="rwRow">
+                <span class="mini-chip" onclick="miniRw('noncust',this)">非顾客需求</span>
+                <span class="mini-chip" onclick="miniRw('explicit',this)">显性需求</span>
+                <span class="mini-chip" onclick="miniRw('implicit',this)">隐性需求</span>
+                <span class="mini-chip" onclick="miniRw('unexpected',this)">非预期需求</span>
+            </div>
+            <div class="mini-out" id="rwOut"></div>
+        </div>
+
         <!-- TRIZ 创新方法 -->
         <div id="fw-triz" class="framework-detail" style="display: none;">
             <div class="framework-header">
@@ -4825,6 +4944,20 @@
             </div>
         </div>
 
+        <div class="mini-demo">
+            <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · 痛点→发明原理映射器</h4></div>
+            <p class="mini-demo-tip">点一个用户痛点，看 TRIZ 用哪个发明原理把它变成产品创新方案。</p>
+            <div class="mini-row" id="trizRow">
+                <span class="mini-chip" onclick="miniTriz('clean',this)">🧼 清洁麻烦</span>
+                <span class="mini-chip" onclick="miniTriz('privacy',this)">🤫 隐私尴尬</span>
+                <span class="mini-chip" onclick="miniTriz('real',this)">🌡️ 真实感不足</span>
+                <span class="mini-chip" onclick="miniTriz('single',this)">🔘 功能单一</span>
+                <span class="mini-chip" onclick="miniTriz('battery',this)">🔋 续航焦虑</span>
+                <span class="mini-chip" onclick="miniTriz('size',this)">📏 尺寸不适配</span>
+            </div>
+            <div class="mini-out" id="trizOut"></div>
+        </div>
+
         <!-- ========== 方法论技能下载板块 ========== -->
         <div id="skill-download">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
@@ -5007,12 +5140,156 @@
 <button id="back-to-top" title="回到顶部" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <script>
+    // ===== 框架迷你演示逻辑 =====
+    function _miniShow(outId, html){ const o=document.getElementById(outId); if(!o) return; o.innerHTML=html; o.classList.add('show'); }
+    function _miniActive(rowId, el){ document.querySelectorAll('#'+rowId+' .mini-chip').forEach(c=>c.classList.remove('active')); if(el) el.classList.add('active'); }
+
+    // 1. JTBD 句式生成器
+    const JTBD_DATA = {
+      release:{title:'场景：独处疲惫，想快速释放压力', sentence:'当用户【结束一天工作、独处且疲惫】时，想【快速、私密地释放性压力】，以便【缓解紧绷、恢复轻松状态】', layers:[['功能性','快速缓解性压力'],['情感性','去羞耻化：接纳自己的正常需求'],['社会性','—（本场景偏个人享受）']]},
+      real:{title:'场景：想要接近真实的体验', sentence:'当用户【期望获得满足】时，想【得到接近真实性行为的体验】，以便【获得真实感与自我宠爱】', layers:[['功能性','提升自慰真实感'],['情感性','虚拟陪伴感、自我掌控'],['社会性','向朋友推荐好产品（分享价值）']]},
+      privacy:{title:'场景：在意隐私与社交眼光', sentence:'当用户【担心被他人发现】时，想【一种安全、私密的解决方案】，以便【避免社交尴尬、安心使用】', layers:[['功能性','避免社交尴尬、易清洗存放'],['情感性','社会认同：感觉自己很正常'],['社会性','找到志同道合群体（去污名化）']]}
+    };
+    function miniJtbd(k,el){
+      _miniActive('jtbdRow',el);
+      const d=JTBD_DATA[k];
+      let ul=d.layers.map(l=>`<li><span class="mini-tag" style="background:#6366F1;">${l[0]}</span>${l[1]}</li>`).join('');
+      _miniShow('jtbdOut',`<h5>${d.title}</h5><div class="mini-sentence">${d.sentence}</div><ul>${ul}</ul>`);
+    }
+
+    // 2. 十三种需求探测仪
+    const NEED_DATA = {
+      '主宰':{layer:'身份层',color:'#6366F1',ex:'想自己掌控节奏，不被说明书束缚，按我的方式来。'},
+      '审美':{layer:'身份层',color:'#6366F1',ex:'希望产品看起来高档、有设计感，不像廉价货。'},
+      '目的':{layer:'身份层',color:'#6366F1',ex:'把它当作“对自己好一点”的仪式，赋予生活意义。'},
+      '刺激':{layer:'身份层',color:'#6366F1',ex:'想要新鲜玩法，拒绝一成不变，保持心态年轻。'},
+      '道德':{layer:'身份层',color:'#6366F1',ex:'在意品牌是否负责任、材质是否环保安全。'},
+      '认可':{layer:'体验层',color:'#10B981',ex:'用了被圈内肯定，获得“是自己人”的认可感。'},
+      '亲密':{layer:'体验层',color:'#10B981',ex:'缓解孤独，获得陪伴与联结感。'},
+      '胜任':{layer:'体验层',color:'#10B981',ex:'能驾驭好产品，获得掌控与成就感。'},
+      '影响':{layer:'体验层',color:'#10B981',ex:'影响伴侣或社群，成为意见领袖。'},
+      '安全':{layer:'功能层',color:'#F59E0B',ex:'怕被室友发现，要安全、私密、无后顾之忧。'},
+      '归属':{layer:'功能层',color:'#F59E0B',ex:'在 Reddit 社群找到同类，获得归属感。'},
+      '舒适':{layer:'功能层',color:'#F59E0B',ex:'清洗太麻烦，希望使用更舒适省心。'},
+      '健康':{layer:'必买层',color:'#DC2626',ex:'材质安全无害，关系身体健康这一刚需。'}
+    };
+    function miniNeed(k,el){
+      _miniActive('needRow',el);
+      const d=NEED_DATA[k];
+      _miniShow('needOut',`<h5><span class="mini-tag" style="background:${d.color};">${d.layer}</span>${k}</h5><p style="font-size:13px;color:#475569;line-height:1.8;margin:0;">🎯 飞机杯用户表达：“${d.ex}”</p>`);
+    }
+
+    // 3. 产品创意罗盘指向仪
+    const COMPASS_DATA = {
+      reform:{title:'🔄 重塑法 Reform · 重新定义产品形态与价值主张', items:[['价值锚点重塑','从“自慰工具”重塑为“个人亲密伴侣”'],['品类重新定义','从“飞机杯”改名为“智能亲密伴侣设备”'],['用户角色重构','从“使用者”重构为“自我关爱实践者”'],['使用场景拓展','从“卧室独处”拓展到“情侣互动道具”'],['痛点反转设计','把“清洗麻烦”反转成“自清洁功能”卖点']]},
+      aggregate:{title:'🧩 聚合法 Aggregate · 聚合多源洞察形成综合方案', items:[['跨界元素融合','融合VR技术，打造“沉浸式性体验”'],['用户旅程整合','从购买→使用→清洗→存放全流程优化'],['多需求叠加满足','一款产品同时满足“真实感+易清洗+静音”'],['生态系统能力打包','硬件+App+社群三位一体'],['数据驱动迭代','通过App收集使用数据，优化产品']]},
+      purify:{title:'💎 提纯法 Purify · 提炼核心价值，做减法聚焦', items:[['MVP最小可行方案','只保留“真实感+易清洗”两个核心功能'],['核心体验极致化','把“真实感”做到极致（材质+温度+压力）'],['去除冗余功能','去掉花哨但无用的震动/灯光功能'],['简化用户决策路径','只提供3款产品（入门/进阶/旗舰）'],['降低认知负担','包装上只写3个核心卖点']]},
+      transplant:{title:'🌉 移植法 Transplant · 跨行业/跨领域借鉴成功模式', items:[['竞品最佳实践移植','借鉴Tantaly的“真实感”设计'],['跨行业模式借鉴','借鉴Dyson的“静音技术”'],['文化符号借用','借用“日本匠心”文化符号提升品质感'],['技术能力迁移','把医疗级硅胶技术迁移到飞机杯材质'],['服务体验复制','复制“订阅制”模式（定期配送润滑剂）']]}
+    };
+    function miniCompass(k,el){
+      _miniActive('compassRow',el);
+      const d=COMPASS_DATA[k];
+      let cards=d.items.map(it=>`<div class="mini-card"><b>${it[0]}</b> — ${it[1]}</div>`).join('');
+      _miniShow('compassOut',`<h5>${d.title}</h5>${cards}`);
+    }
+
+    // 4. 极端/领先用户判别器
+    function miniExtreme(){
+      const lead=+document.getElementById('extLead').value, ben=+document.getElementById('extBen').value;
+      document.getElementById('extLeadV').textContent=lead;
+      document.getElementById('extBenV').textContent=ben;
+      let cls,desc,eg;
+      if(lead>=5&&ben>=5){cls='真正领先用户';desc='高时间领先 + 高收益预期 → 最高优先级。他的 workaround 就是未来1-2年的主流需求。';eg='如 User_023：自己加装加热套+静音棉 → 洞察：内置加热+静音是刚需。';}
+      else if(lead>=5&&ben<5){cls='趋势观察者';desc='高时间领先 + 低收益预期 → 关注未来，但自己不动手。他的话是趋势信号。';eg='如 User_087：“希望未来能自动调节紧度” → 趋势：智能化个性化。';}
+      else if(lead<5&&ben>=5){cls='重度用户';desc='低时间领先 + 高收益预期 → 需求当下存在，是核心付费人群。';eg='高复购、高忠诚，但未必引领创新。';}
+      else {cls='普通用户';desc='低时间领先 + 低收益预期 → 忽略，不投入专项研究。';eg='其余大众用户。';}
+      _miniShow('extremeOut',`<h5>判定结果：<span class="mini-tag" style="background:#DC2626;">${cls}</span></h5><p style="font-size:13px;color:#475569;line-height:1.8;margin:0 0 8px;">${desc}</p><p style="font-size:13px;color:#475569;line-height:1.8;margin:0;">💡 ${eg}</p>`);
+    }
+
+    // 5. Plutchik 情绪触发探针
+    const PLUT_DATA = {
+      joy:{ex:'“Best purchase ever!” “感觉太棒了”', act:'✅ 复购 / 推荐', strong:'高 ★★★', trig:'超出预期的好体验、真实感达标'},
+      anger:{ex:'“垃圾！”“浪费钱”“再也不会买”', act:'❌ 差评 / 投诉 / 弃牌', strong:'高 ★★★', trig:'质量翻车、售后差、承诺不符'},
+      disgust:{ex:'“材质味道很重”“清洗太恶心”', act:'❌ 致命缺陷', strong:'高 ★★★', trig:'材质气味、手感差、卫生问题'},
+      trust:{ex:'“包装很隐蔽”“品牌值得信赖”', act:'✅ 品牌忠诚', strong:'中 ★★☆', trig:'隐私设计到位、发货可靠'},
+      fear:{ex:'“怕被室友发现”“担心隐私”', act:'⚠️ 隐私需求强化', strong:'中 ★★☆', trig:'暴露风险、包裹显眼'},
+      anticipate:{ex:'“希望下一代能…”“期待加热版”', act:'💡 产品改进方向', strong:'低 ★☆☆', trig:'未被满足的期待、未来想象'},
+      sadness:{ex:'“有点失望”“没想象中好”', act:'⚠️ 流失风险', strong:'中 ★★☆', trig:'期望落差、想象vs实际'},
+      surprise:{ex:'“没想到这么小”“居然真的静音”', act:'✅ 正向惊喜→口碑', strong:'低 ★☆☆', trig:'与预期反差大的细节'}
+    };
+    function miniPlut(k,el){
+      _miniActive('plutRow',el);
+      const d=PLUT_DATA[k];
+      _miniShow('plutOut',`<h5>情绪探测结果</h5><ul><li><span class="mini-tag" style="background:#EC4899;">触发评论</span>${d.ex}</li><li><span class="mini-tag" style="background:#9333EA;">典型强度</span>${d.strong} — ${d.trig}</li><li><span class="mini-tag" style="background:#16A34A;">行为指向</span>${d.act}</li></ul>`);
+    }
+
+    // 6. 4象限用户需求（研究视角 + 重要度×满意度拖拽）
+    function miniRw(k,el){
+      _miniActive('rwRow',el);
+      const D={ noncust:{t:'非顾客需求',m:'流失原因分析、竞品替代调研',o:'品类扩展方向'}, explicit:{t:'显性需求',m:'问卷调查、访谈、焦点小组',o:'快速迭代优化'}, implicit:{t:'隐性需求',m:'深度民族志、行为观察、影子跟随',o:'差异化竞争点'}, unexpected:{t:'非预期需求',m:'极端用户研究、开放式探索、社群监听',o:'最大蓝海机会'} }[k];
+      _miniShow('rwOut',`<h5>${D.t}</h5><div class="mini-card"><b>推荐研究方法：</b>${D.m}</div><div class="mini-card" style="border-left-color:#F59E0B;"><b>创新机会：</b>${D.o}</div>`);
+    }
+    let ismReady=false;
+    function ismZoneOf(board,dot){
+      const r=board.getBoundingClientRect();
+      const x=parseFloat(dot.style.left)||r.width*0.72, y=parseFloat(dot.style.top)||r.height*0.28;
+      const hi=y<r.height/2, sat=x>r.width/2;
+      if(!hi&&!sat) return {zone:'核心优势区',col:'#16A34A',advice:'保持现有水平，作为营销卖点写入详情页。'};
+      if(!hi&&sat) return {zone:'重点改进区 ⚡',col:'#DC2626',advice:'资源优先投入！改进后满意度提升最显著（如清洗/静音/真实感）。'};
+      if(hi&&!sat) return {zone:'过度投入区',col:'#2563EB',advice:'减少研发投入，维持基本水平，资源转移到改进区。'};
+      return {zone:'低优先级区',col:'#D97706',advice:'延后处理，监控需求变化，竞品对标参考。'};
+    }
+    function ismRender(){
+      const board=document.getElementById('ismBoard'), dot=document.getElementById('ismDot');
+      if(!board||!dot) return;
+      const z=ismZoneOf(board,dot);
+      _miniShow('ismOut',`<h5>定位：<span class="mini-tag" style="background:${z.col};">${z.zone}</span></h5><p style="font-size:13px;color:#475569;line-height:1.8;margin:0;">📌 行动建议：${z.advice}</p>`);
+    }
+    function initIsm(){
+      const board=document.getElementById('ismBoard'), dot=document.getElementById('ismDot');
+      if(!board||!dot) return;
+      if(!ismReady){
+        let drag=false;
+        const set=(cx,cy)=>{ const r=board.getBoundingClientRect(); let x=Math.max(10,Math.min(r.width-10,cx-r.left)), y=Math.max(10,Math.min(r.height-10,cy-r.top)); dot.style.left=x+'px'; dot.style.top=y+'px'; ismRender(); };
+        dot.addEventListener('mousedown',()=>drag=true);
+        document.addEventListener('mousemove',e=>{ if(drag) set(e.clientX,e.clientY); });
+        document.addEventListener('mouseup',()=>drag=false);
+        dot.addEventListener('touchstart',()=>drag=true,{passive:true});
+        board.addEventListener('touchmove',e=>{ if(drag){ const t=e.touches[0]; set(t.clientX,t.clientY); } },{passive:true});
+        document.addEventListener('touchend',()=>drag=false);
+        ismReady=true;
+      }
+      const r=board.getBoundingClientRect();
+      if(r.width>0){ dot.style.left=(r.width*0.72)+'px'; dot.style.top=(r.height*0.28)+'px'; ismRender(); }
+    }
+
+    // 7. TRIZ 痛点→发明原理映射器
+    const TRIZ_DATA = {
+      clean:[['原理1 分割','模块化可换外套设计','磁吸快拆接口+标准化尺寸'],['原理15 动态化','自清洁功能反转清洗痛点','内置冲洗+烘干模块']],
+      privacy:[['原理22 变害为利','伪装成口红/日常用品','伪装设计+静音技术'],['原理28 机械系统替代','静音气动+磁悬浮震动','微型气泵+磁悬浮系统']],
+      real:[['原理17 多维化','360°柔性可弯+多电机协同','记忆金属丝+4电机'],['原理15 动态化','充气自适应内芯','微型气泵+蛇骨结构']],
+      single:[['原理13 逆向思维','AI主动引导+隐形穿戴','AI学习算法+穿戴设计'],['原理19 周期性作用','心率同步+音乐模式','PPG心率传感器+蓝牙']],
+      battery:[['原理19 周期性作用','按需间歇工作省电','智能功耗调度'],['原理28 机械系统替代','磁悬浮零摩擦降耗','磁悬浮系统']],
+      size:[['原理15 动态化','充气自适应内芯贴合体型','微型气泵+蛇骨'],['原理1 分割','可换外套多尺寸','磁吸快拆']]
+    };
+    function miniTriz(k,el){
+      _miniActive('trizRow',el);
+      const arr=TRIZ_DATA[k];
+      let cards=arr.map(p=>`<div class="mini-card"><b>${p[0]}</b> — ${p[1]}<br><span style="font-size:12px;color:#94A3B8;">🔧 ${p[2]}</span></div>`).join('');
+      _miniShow('trizOut',`<h5>痛点 → 发明原理映射</h5>${cards}`);
+    }
+
+    // 初始渲染（隐藏态下也安全）
+    if(document.getElementById('extLead')) miniExtreme();
+
     // ===== 框架切换 =====
     function showFramework(id) {
         // 隐藏所有框架
         document.querySelectorAll('.framework-detail').forEach(el => el.style.display = 'none');
         // 显示选中框架
         document.getElementById('fw-' + id).style.display = 'block';
+        // 4象限拖拽板需在面板可见后初始化
+        if(id === 'researcher'){ requestAnimationFrame(initIsm); }
         // 更新标签状态
         document.querySelectorAll('.framework-tab').forEach(tab => tab.classList.remove('active'));
         event.target.classList.add('active');
