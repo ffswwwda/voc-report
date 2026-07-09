@@ -160,6 +160,8 @@ textarea::placeholder{color:var(--muted);}
 .synth-btn:disabled{opacity:.78; cursor:default; transform:none;}
 .synth-result{display:none; margin-top:18px;}
 .synth-result.show{display:block; animation:fadeUp .5s ease;}
+.synth-preview-img{display:block; width:100%; max-width:760px; margin:18px auto 0; border-radius:14px; box-shadow:0 8px 24px rgba(15,23,42,0.12); border:1px solid var(--line); transition:transform .3s ease, box-shadow .3s ease;}
+.synth-preview-img:hover{transform:translateY(-3px); box-shadow:0 12px 32px rgba(15,23,42,0.16);}
 .synth-card{background:linear-gradient(135deg,#F5F3FF,#FDF2F8); border:1px solid #E9D5FF; border-radius:16px; padding:24px; box-shadow:var(--shadow);}
 .synth-head{font-size:18px; font-weight:800; color:#6D28D9; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
 .synth-lead{font-size:15px; line-height:1.6; color:#4C1D95; margin-bottom:18px; font-weight:600;}
@@ -173,7 +175,7 @@ textarea::placeholder{color:var(--muted);}
 .need-tag{background:#EDE9FE; color:#6D28D9; border-radius:8px; padding:5px 12px; font-size:13px; font-weight:700;}
 .synth-verdict{background:#fff; border:1px solid #FBCFE8; border-left:5px solid var(--pink); border-radius:12px; padding:16px 18px; font-size:14px; line-height:1.7; color:var(--ink);}
 .synth-verdict b{color:var(--pink);}
-@media(max-width:720px){ .synth-grid{grid-template-columns:1fr;} }
+@media(max-width:720px){ .synth-grid{grid-template-columns:1fr;} .synth-preview-img{border-radius:10px; margin-top:14px;} }
 </style>
 </head>
 <body>
@@ -255,7 +257,8 @@ textarea::placeholder{color:var(--muted);}
     </div>
     <div class="res-summary" id="resSummary"></div>
     <div class="case-card" id="caseBlock"></div>
-    <button class="synth-btn" id="synthBtn" onclick="synthComplete()">🦞 用户完全体合成</button>
+    <button class="synth-btn" id="synthBtn" onclick="synthComplete()">🦞 点击合成用户完全体</button>
+    <img class="synth-preview-img" src="assets/persona-preview.jpg" alt="用户完全体画像预览" loading="lazy">
     <div class="synth-result" id="synthResult"></div>
     <div id="resCards"></div>
     <div class="reset-wrap">
