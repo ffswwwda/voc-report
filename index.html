@@ -2760,7 +2760,7 @@
         <div class="roulette-wrap" id="brand-roulette">
             <div class="roulette-head">
                 <h3 class="roulette-title">🎲 品牌需求洞察 · 随机转盘</h3>
-                <p class="roulette-sub">从电子、消费品到奢侈品，覆盖「功能 → 体验 → 身份 → 必买」全层级品牌。随机抽取一个品牌，看它真实锚定了哪些需求（最多 4 个）；抽中后每个需求卡片直接展示品牌专属说明，无需点击。</p>
+                <p class="roulette-sub">从电子、消费品、奢侈品，到财神、蔡徐坤、龙、哪吒这类网络梗与文化图腾——覆盖「功能 → 体验 → 身份 → 必买」全层级，以及最热门的流行符号。随机抽取一个品牌或符号，看它真实锚定了哪些需求（最多 4 个）；抽中后每个需求卡片直接展示专属说明，无需点击。<b>流行符号被摇到的概率更高 🎯</b></p>
             </div>
             <button type="button" id="brandSpinBtn" class="roulette-btn" onclick="spinBrand()">🎲 抽一个品牌需求组合</button>
             <div class="brand-result" id="brandResult" style="display:none;">
@@ -5238,8 +5238,89 @@
             {key:'健康', why:'护肤线对应"身体好好的、肌肤状态好"。'},
             {key:'认可', why:'高端专柜体验让用户"被肯定、有存在感"。'},
             {key:'亲密', why:'美妆仪式成为私人陪伴与自我宠爱。'}
+        ]},
+        {name:'财神', emoji:'💰', domain:'民俗符号 · 互联网祈福梗', weight:4, needs:[
+            {key:'安全', why:'财神到=稳赚不赔的心理保险，给人"财务可预期、万事放心"的安定感。'},
+            {key:'认可', why:'"被财神眷顾"是福气与面子的双重认证，求财者感觉被肯定。'},
+            {key:'亲密', why:'迎财神、分红包是与家人朋友"一起祈愿、有人陪着"的联结仪式。'},
+            {key:'目的', why:'求财不只是钱，更是"把日子过好"的意义感，让努力有了方向。'}
+        ]},
+        {name:'蔡徐坤', emoji:'🏀', domain:'网络梗 · 流量符号', weight:4, needs:[
+            {key:'刺激', why:'"鸡你太美"洗脑旋律+篮球舞蹈，制造持续的新鲜与好玩刺激。'},
+            {key:'认可', why:'作为"梗王"被全网看见、被讨论，是流量时代"被认可"的极致样本。'},
+            {key:'审美', why:'舞台人设与少年感，满足对"看起来更好、更有活力"的追求。'},
+            {key:'亲密', why:'ikun 粉丝陪伴文化让用户"有人在意、有人陪着"，形成强情感联结。'}
+        ]},
+        {name:'刀盾', emoji:'🗡️', domain:'游戏梗 · 硬核生存流', weight:4, needs:[
+            {key:'安全', why:'盾牌格挡=把风险挡在外面，对应"一切稳定、可预期、不受伤"。'},
+            {key:'胜任', why:'刀锋输出=把难题砍翻，让用户感觉"能搞定一切、不出错"。'},
+            {key:'主宰', why:'攻防由自己掌控的战局，强调"按我的方式来、不被限制"。'},
+            {key:'刺激', why:'极限反杀与换血博弈，满足对新鲜刺激、心跳加速的追求。'}
+        ]},
+        {name:'锦鲤', emoji:'🐟', domain:'网络祈愿梗 · 好运符号', weight:4, needs:[
+            {key:'安全', why:'"转发锦鲤逢凶化吉"给人生"稳定、可预期、避坑"的心理保险。'},
+            {key:'目的', why:'转运祈愿让困境有了"会变好"的方向感与意义。'},
+            {key:'认可', why:'"欧皇"体质在抽奖圈是被人羡慕、被肯定的运气认证。'},
+            {key:'亲密', why:'集体转发锦鲤是与网友"一起求好运、有人陪着"的轻社交。'}
+        ]},
+        {name:'冰墩墩', emoji:'🐼', domain:'冬奥顶流 · 萌系符号', weight:4, needs:[
+            {key:'审美', why:'冰糖外壳+圆润萌态，是"可爱到犯规、看起来更好"的视觉符号。'},
+            {key:'亲密', why:'"全民云养墩"让陌生人因同一只熊猫产生陪伴与情感联结。'},
+            {key:'刺激', why:'"一墩难求"的稀缺与抢购，制造强烈的新鲜与惊喜刺激。'},
+            {key:'认可', why:'拥有/集齐冰墩墩周边，成为潮流圈"被认可"的身份徽章。'}
+        ]},
+        {name:'孙悟空·黑神话', emoji:'🐵', domain:'国潮IP · 文化图腾', weight:4, needs:[
+            {key:'主宰', why:'"我命由我不由天"的大圣精神，是"自己决定、不被束缚"的终极写照。'},
+            {key:'胜任', why:'七十二变+金箍棒，象征"什么难题都能搞定"的万能胜任感。'},
+            {key:'目的', why:'西天取经赋予战斗以"有意义、有方向"的使命感。'},
+            {key:'刺激', why:'天命人战斗的爽快感，满足对热血与新鲜刺激的追求。'}
+        ]},
+        {name:'打工人', emoji:'💼', domain:'职场自嘲梗 · 社畜符号', weight:4, needs:[
+            {key:'归属', why:'"同为打工人"的共鸣，让疲惫的人感觉"不是一个人、被接纳"。'},
+            {key:'安全', why:'"有班上就有收入"给人最基础的"稳定、可预期"安全感。'},
+            {key:'舒适', why:'"摸鱼""带薪如厕"是打工人对"轻松不费力"的小确幸。'},
+            {key:'认可', why:'"打工人的倔强"被看见、被玩梗，让平凡努力也有存在感。'}
+        ]},
+        {name:'显眼包', emoji:'📣', domain:'网络性格梗 · 存在感符号', weight:4, needs:[
+            {key:'认可', why:'主动成为焦点，就是为了"被看到、被肯定"的存在感。'},
+            {key:'刺激', why:'出圈言行制造持续的新鲜与好玩刺激，永不无聊。'},
+            {key:'亲密', why:'一起玩梗的伙伴因"显眼"产生陪伴与亲密联结。'},
+            {key:'目的', why:'被看见本身成为"我存在、有意义"的证明。'}
+        ]},
+        {name:'龙', emoji:'🐉', domain:'民族图腾 · 祥瑞符号', weight:4, needs:[
+            {key:'影响', why:'"龙的传人"让用户感觉自己"有影响力、被需要、被敬畏"。'},
+            {key:'认可', why:'龙族身份是文化里"被认可、有地位"的终极符号。'},
+            {key:'目的', why:'祥瑞图腾赋予祈愿以"有意义、有方向"的庄严感。'},
+            {key:'审美', why:'腾云驾雾的威严造型，满足对"看起来更有力量、更美"的追求。'}
+        ]},
+        {name:'哪吒', emoji:'🔥', domain:'国漫IP · 叛逆符号', weight:4, needs:[
+            {key:'主宰', why:'"我命由我不由天"是"按自己的方式来、不被偏见限制"的呐喊。'},
+            {key:'刺激', why:'热血反抗与逆天改命，制造强烈的新鲜与情绪刺激。'},
+            {key:'目的', why:'打破偏见、重塑自我，赋予成长以"有意义"的方向。'},
+            {key:'认可', why:'从魔童到英雄的逆袭，是被肯定、被接纳的爽文样本。'}
+        ]},
+        {name:'蜜雪冰城', emoji:'🍦', domain:'雪王IP · 洗脑神曲梗', weight:4, needs:[
+            {key:'舒适', why:'"便宜解渴"让消费"轻松无压力、不操心"。'},
+            {key:'刺激', why:'"你爱我我爱你"洗脑神曲，制造持续的听觉新鲜与好玩。'},
+            {key:'归属', why:'雪王全民梗让所有人"都有共同语言、被接纳"。'},
+            {key:'审美', why:'雪王憨态可掬的形象，满足对"看起来可爱、轻松"的追求。'}
+        ]},
+        {name:'尔滨', emoji:'❄️', domain:'文旅梗 · 宠客符号', weight:4, needs:[
+            {key:'亲密', why:'"尔滨宠你"的待客之道，制造"被在意、被照顾"的强陪伴感。'},
+            {key:'安全', why:'"安心旅游、不宰客"给人出行"稳定、可预期"的踏实。'},
+            {key:'刺激', why:'冰雪大世界与奇景，带来强烈的新鲜与感官刺激。'},
+            {key:'认可', why:'被一座城市"偏心对待"，让游客感觉被重视、有面子。'}
         ]}
     ];
+
+    // 加权随机：流行符号 / 网络梗 权重更高，被摇到的概率更大
+    function pickWeightedBrand() {
+        let total = 0;
+        for (const b of BRANDS) total += (b.weight || 1);
+        let r = Math.random() * total;
+        for (const b of BRANDS) { r -= (b.weight || 1); if (r <= 0) return b; }
+        return BRANDS[BRANDS.length - 1];
+    }
 
     function spinBrand() {
         const btn = document.getElementById('brandSpinBtn');
@@ -5256,11 +5337,11 @@
         hero.classList.remove('locked');
 
         // 抽一个品牌（看似随机，实际基于真实品牌案例库）
-        const brand = BRANDS[Math.floor(Math.random() * BRANDS.length)];
+        const brand = pickWeightedBrand();
 
         // 品牌 hero 滚动
         const heroIv = setInterval(() => {
-            const r = BRANDS[Math.floor(Math.random() * BRANDS.length)];
+            const r = pickWeightedBrand();
             document.getElementById('brandEmoji').textContent = r.emoji;
             document.getElementById('brandName').textContent = r.name;
             document.getElementById('brandDomain').textContent = r.domain;
