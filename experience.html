@@ -119,6 +119,17 @@ textarea::placeholder{color:var(--muted);}
 .reset-wrap{text-align:center; margin-top:8px;}
 .reset-btn{background:#fff; border:2px solid var(--line); border-radius:999px; padding:12px 32px; font-size:14px; font-weight:700; color:var(--slate); cursor:pointer; font-family:inherit; transition:all .2s;}
 .reset-btn:hover{border-color:var(--indigo); color:var(--indigo);}
+.reset-btn.agent-cta{background:linear-gradient(90deg,#FF7A45,#FF4D8D); color:#fff; border:none; box-shadow:0 4px 14px rgba(255,77,141,.25); padding:14px 36px;}
+.reset-btn.agent-cta:hover{transform:translateY(-2px); box-shadow:0 6px 18px rgba(255,77,141,.35);}
+.agent-cards{display:none; gap:16px; justify-content:center; margin-top:20px; flex-wrap:wrap;}
+.agent-cards.show{display:flex; animation:fadeUp .4s ease;}
+.agent-card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; min-width:240px; text-decoration:none; color:inherit; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow); transition:all .2s; text-align:left;}
+.agent-card:hover{border-color:var(--indigo); transform:translateY(-3px); box-shadow:0 8px 24px rgba(15,23,42,.1);}
+.agent-card .agent-icon{font-size:32px;}
+.agent-card .agent-name{font-weight:800; font-size:15px; color:var(--ink);}
+.agent-card .agent-desc{font-size:12px; color:var(--slate); margin-top:3px;}
+.reset-link{display:block; margin-top:18px; background:none; border:none; color:var(--muted); font-size:13px; cursor:pointer; text-decoration:underline; font-family:inherit;}
+.reset-link:hover{color:var(--indigo);}
 
 .footer{text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; border-top:1px solid var(--line); margin-top:40px;}
 
@@ -203,7 +214,24 @@ textarea::placeholder{color:var(--muted);}
     <div class="res-summary" id="resSummary"></div>
     <div id="resCards"></div>
     <div class="reset-wrap">
-        <button class="reset-btn" onclick="resetExperience()">↺ 重新体验一次</button>
+        <button class="reset-btn agent-cta" onclick="toggleAgentCards()">🦞 和类目智能体聊点真的</button>
+        <div class="agent-cards" id="agentCards">
+            <a class="agent-card" href="https://applink.feishu.cn/T97R31dGAcVE" target="_blank" rel="noopener">
+                <div class="agent-icon">🦞</div>
+                <div>
+                    <div class="agent-name">倒模类目智能体</div>
+                    <div class="agent-desc">聊真实倒模产品 · 用户评价 · 改进方向</div>
+                </div>
+            </a>
+            <a class="agent-card" href="https://applink.feishu.cn/T97R37MT0GiU" target="_blank" rel="noopener">
+                <div class="agent-icon">🦞</div>
+                <div>
+                    <div class="agent-name">飞机杯类目智能体</div>
+                    <div class="agent-desc">聊真实飞机杯产品 · 使用反馈 · 创新机会</div>
+                </div>
+            </a>
+        </div>
+        <button class="reset-link" onclick="resetExperience()">↺ 重新体验一次</button>
     </div>
 </div>
 
@@ -527,6 +555,14 @@ function buildCard(fk, p, c, desc){
 }
 
 function shorten(s){ return s.length>24 ? s.slice(0,24)+'…' : s; }
+
+function toggleAgentCards(){
+    const el = document.getElementById('agentCards');
+    el.classList.toggle('show');
+    if (el.classList.contains('show')) {
+        el.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }
+}
 
 function resetExperience(){
     state = { purpose:null, category:null };
