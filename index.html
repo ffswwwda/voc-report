@@ -1237,7 +1237,8 @@
             background: linear-gradient(to bottom right, #FEF2F2, #FFFFFF);
             animation: slotPop 0.45s ease;
         }
-        .brand-emoji { font-size: 46px; line-height: 1; }
+        .brand-emoji { font-size: 46px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+        .brand-emoji img { width: 64px; height: 64px; object-fit: contain; border-radius: 12px; }
         .brand-name { font-size: 21px; font-weight: 800; color: #0F172A; }
         .brand-domain { font-size: 12px; color: #64748B; margin-top: 4px; letter-spacing: 0.5px; }
         .brand-need-card { cursor: default; }
@@ -5270,11 +5271,11 @@
             {key:'审美', why:'舞台人设与少年感，满足对"看起来更好、更有活力"的追求。'},
             {key:'亲密', why:'ikun 粉丝陪伴文化让用户"有人在意、有人陪着"，形成强情感联结。'}
         ]},
-        {name:'刀盾狗', emoji:'🐕', domain:'萌宠梗 · 刀盾狗表情包', weight:4, needs:[
-            {key:'刺激', why:'"我的刀盾"魔性表情包+洗脑图，制造持续的新鲜与好玩刺激，一刷就停不下来。'},
-            {key:'亲密', why:'刀盾狗作为陪伴型桌面宠物与表情，成为独处时的情感寄托与"有人陪着"的联结。'},
-            {key:'审美', why:'圆润魔性的画风戳中"可爱、看起来顺眼"的审美点，表情包本身就是视觉符号。'},
-            {key:'认可', why:'用同款刀盾狗表情包=圈内人暗号，在群里发出去就被"认可、是自己人"。'}
+        {name:'我的刀盾', img:'assets/my-daodun.png', domain:'萌宠梗 · 刀盾狗表情包', weight:4, needs:[
+            {key:'安全', why:'举着盾的萌狗="把攻击挡在外面"，像表情包里的守护感，对应"稳定、可预期、不受伤"。'},
+            {key:'胜任', why:'提着刀的勇敢小狗，让人觉得"这也能扛、能搞定"，暗合胜任感。'},
+            {key:'亲密', why:'我的刀盾作为陪伴型桌面宠物与表情，成为独处时的情感寄托与"有人陪着"的联结。'},
+            {key:'认可', why:'用同款我的刀盾表情包=圈内人暗号，在群里发出去就被"认可、是自己人"。'}
         ]},
         {name:'比比拉布', emoji:'🐕', domain:'网红萌宠 · 狗子成精梗', weight:4, needs:[
             {key:'亲密', why:'"狗子成精了"的搞笑日常让人产生陪伴与情感联结，像在云养一只自家狗。'},
@@ -5359,6 +5360,15 @@
         return BRANDS[BRANDS.length - 1];
     }
 
+    function renderBrandEmoji(brand) {
+        const el = document.getElementById('brandEmoji');
+        if (brand.img) {
+            el.innerHTML = '<img src="' + brand.img + '" alt="' + brand.name + '" onerror="this.style.display=\'none\'; this.parentNode.textContent = \'' + (brand.emoji || '🎯') + '\';">';
+        } else {
+            el.textContent = brand.emoji || '🎯';
+        }
+    }
+
     function spinBrand() {
         const btn = document.getElementById('brandSpinBtn');
         const result = document.getElementById('brandResult');
@@ -5379,7 +5389,7 @@
         // 品牌 hero 滚动
         const heroIv = setInterval(() => {
             const r = pickWeightedBrand();
-            document.getElementById('brandEmoji').textContent = r.emoji;
+            renderBrandEmoji(r);
             document.getElementById('brandName').textContent = r.name;
             document.getElementById('brandDomain').textContent = r.domain;
         }, 60);
@@ -5402,7 +5412,7 @@
 
         setTimeout(() => {
             clearInterval(heroIv);
-            document.getElementById('brandEmoji').textContent = brand.emoji;
+            renderBrandEmoji(brand);
             document.getElementById('brandName').textContent = brand.name;
             document.getElementById('brandDomain').textContent = brand.domain;
             hero.classList.add('locked');
