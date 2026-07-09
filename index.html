@@ -6513,14 +6513,7 @@
 
     // ===== 一键合成用户完全体 · 碎片聚合动效 =====
     (function(){
-        var overlay = document.getElementById('personaSynthOverlay');
-        var finalImg = document.getElementById('psFinalImg');
-        var shardsBox = document.getElementById('psShards');
-        var stage = document.getElementById('psStage');
-        var statusEl = document.getElementById('psStatus');
-        var hintEl = document.getElementById('psHint');
-        var copyBtn = document.getElementById('psCopyBtn');
-        var downloadBtn = document.getElementById('psDownloadBtn');
+        var overlay, finalImg, shardsBox, stage, statusEl, hintEl, copyBtn, downloadBtn;
         var synthRunning = false;
         var IMG_SRC = 'assets/user-persona-full.jpg';
 
@@ -6626,6 +6619,16 @@
             tempImg.src = IMG_SRC;
         }
 
+        function init(){
+            overlay = document.getElementById('personaSynthOverlay');
+            finalImg = document.getElementById('psFinalImg');
+            shardsBox = document.getElementById('psShards');
+            stage = document.getElementById('psStage');
+            statusEl = document.getElementById('psStatus');
+            hintEl = document.getElementById('psHint');
+            copyBtn = document.getElementById('psCopyBtn');
+            downloadBtn = document.getElementById('psDownloadBtn');
+            if(!overlay){ console.error('[personaSynth] overlay #personaSynthOverlay not found'); return; }
         window.openPersonaSynth = function(){
             clearShards();
             overlay.classList.add('show');
@@ -6702,6 +6705,12 @@
                 closePersonaSynth();
             }
         });
+        }
+        if(document.readyState === 'loading'){
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     })();
 
 </script>
