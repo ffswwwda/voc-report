@@ -109,6 +109,25 @@
             }
         }
 
+        // ===== 网站说明板块 弹层 =====
+        function openOverviewModal() {
+            var m = document.getElementById('overviewModal');
+            if (!m) return;
+            m.classList.add('show');
+            m.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeOverviewModal() {
+            var m = document.getElementById('overviewModal');
+            if (!m) return;
+            m.classList.remove('show');
+            m.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { closeOverviewModal(); }
+        });
+
         // ===== 小龙虾浮窗按钮：可拖动 =====
         (function () {
             var btn = document.getElementById('floatBtn');
@@ -687,6 +706,94 @@
         }
         .float-overlay.show {
             display: block;
+        }
+
+        /* ===== 网站说明板块 浮窗弹层 ===== */
+        .overview-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .overview-modal.show {
+            display: flex;
+        }
+        .overview-modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(2px);
+        }
+        .overview-modal-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 900px;
+            max-height: 88vh;
+            background: #FFFFFF;
+            border-radius: 18px;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.3);
+            overflow: hidden;
+        }
+        .overview-modal-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: none;
+            background: #F1F5F9;
+            color: #475569;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 2;
+            transition: all 0.2s ease;
+        }
+        .overview-modal-close:hover {
+            background: #E2E8F0;
+            color: #0F172A;
+        }
+        .overview-modal-body {
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 36px 40px 40px;
+        }
+        .overview-modal-body .ov-flow {
+            flex-wrap: wrap;
+        }
+        .overview-modal-body .ov-step {
+            min-width: 150px;
+        }
+
+        /* ===== 浮窗内「网站说明板块」按钮 ===== */
+        .float-divider {
+            height: 1px;
+            background: #E2E8F0;
+            margin: 16px 0 14px;
+        }
+        .float-doc-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 14px;
+            background: linear-gradient(135deg, #7C3AED 0%, #2563EB 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .float-doc-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
         }
 
         /* ===== 主容器 ===== */
@@ -2319,10 +2426,10 @@
                 <div class="nav-dropdown-label">品类智能体</div>
                 <a href="https://applink.feishu.cn/T97R31dGAcVE" target="_blank"><span style="margin-right:6px;">🦞</span>倒模类目智能体</a>
                 <a href="https://applink.feishu.cn/T97R37MT0GiU" target="_blank"><span style="margin-right:6px;">🦞</span>飞机杯类目智能体</a>
+                <div class="nav-dropdown-label" style="margin-top:10px;">智能体资源</div>
+                <a href="#skill-download"><span style="margin-right:6px;">📦</span>智能体skill下载</a>
             </div>
         </div>
-        <a href="#skill-download" class="nav-item">skill下载</a>
-        <a href="#section-overview" class="nav-item">网站内容说明</a>
     </div>
 </nav>
 
@@ -2345,6 +2452,8 @@
             <div class="bot-link-text">飞机杯类目智能体</div>
             <div class="bot-link-arrow">→</div>
         </a>
+        <div class="float-divider"></div>
+        <button type="button" class="float-doc-btn" onclick="openOverviewModal()">📖 网站说明板块</button>
     </div>
 </div>
 
@@ -5315,8 +5424,12 @@
     </section>
 
 
-    <!-- ========== 整体说明板块 ========== -->
-    <section id="section-overview" class="overview-section">
+    <!-- ========== 网站说明板块（浮窗弹层） ========== -->
+    <div class="overview-modal" id="overviewModal" aria-hidden="true">
+        <div class="overview-modal-overlay" onclick="closeOverviewModal()"></div>
+        <div class="overview-modal-card" role="dialog" aria-modal="true" aria-label="网站内容说明">
+            <button type="button" class="overview-modal-close" onclick="closeOverviewModal()" aria-label="关闭">✕</button>
+            <div class="overview-modal-body">
         <div class="section-header">
             <h2 class="section-title">网站内容说明 · 这个网站怎么用</h2>
             <p class="section-desc">第一次看这个网站？下面用一张流程图讲清整条分析链路，并说明背后的智能体与可下载资源，帮你快速建立全局认知。</p>
@@ -5390,17 +5503,19 @@
                     <div class="ov-dl-icon">📝</div>
                     <div class="ov-dl-title">① 基于目的的提示词包</div>
                     <div class="ov-dl-desc">针对每个分析目的，整理好可直接喂给 AI 的提示词，包含：<b>需要的数据源</b> · <b>重点标签板块</b> · <b>推荐分析框架</b> · <b>输出结论框架</b>。点开即用。</div>
-                    <a class="ov-dl-btn" href="#section-purpose-wizard">前往分析目的向导 →</a>
+                    <a class="ov-dl-btn" href="#section-purpose-wizard" onclick="closeOverviewModal()">前往分析目的向导 →</a>
                 </div>
                 <div class="ov-dl-card">
                     <div class="ov-dl-icon">🧩</div>
                     <div class="ov-dl-title">② 理论框架 Skill 下载</div>
                     <div class="ov-dl-desc">7 套方法论 Skill（JTBD / 十三种需求 / 创意罗盘 / 4象限 / TRIZ / 极端用户 / Plutchik情绪），可一键安装到你自己的 AI（如 WorkBuddy），永久复用分析逻辑。</div>
-                    <a class="ov-dl-btn" href="#skill-download">前往 Skill 下载 →</a>
+                    <a class="ov-dl-btn" href="#skill-download" onclick="closeOverviewModal()">前往 Skill 下载 →</a>
                 </div>
             </div>
         </div>
-    </section>
+            </div>
+        </div>
+    </div>
 
 </main>
 
@@ -5619,7 +5734,7 @@
     const navLinks = document.querySelectorAll('.nav-bar .nav-inner > .nav-item[href], .nav-bar .nav-inner > .nav-item > a.nav-main-link[href]');
     window.addEventListener('scroll', () => {
         let current = '';
-        const sections = ['section-tags', 'section-needs', 'section-purpose-wizard', 'section-framework', 'section-overview'];
+        const sections = ['section-tags', 'section-needs', 'section-purpose-wizard', 'section-framework'];
         sections.forEach(id => {
             const el = document.getElementById(id);
             if (el && el.getBoundingClientRect().top <= 120) {
