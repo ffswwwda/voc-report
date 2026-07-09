@@ -174,6 +174,29 @@ textarea::placeholder{color:var(--muted);}
 .submod-tags .stag small{font-weight:700; opacity:.65; font-size:10px;}
 .submod-empty{font-size:12px; color:var(--muted);}
 
+/* user journey map */
+.journey{margin-top:18px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; box-shadow:var(--shadow);}
+.journey h3{font-size:15px; margin-bottom:6px;}
+.journey .jm-sub{font-size:12px; color:var(--muted); margin-bottom:16px;}
+.jm-track{display:flex; gap:0; overflow-x:auto; padding-bottom:6px;}
+.jm-stage{flex:1 1 0; min-width:150px; position:relative; padding:0 8px;}
+.jm-stage:not(:last-child)::after{content:''; position:absolute; top:30px; right:-2px; width:4px; height:4px; border-top:2px solid var(--line); border-right:2px solid var(--line); transform:rotate(45deg);}
+.jm-stagehead{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
+.jm-stagehead .jm-ico{width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; color:#fff;}
+.jm-stagehead .jm-name{font-weight:800; font-size:13px; color:var(--ink); line-height:1.2;}
+.jm-stagehead .jm-step{font-size:10px; color:var(--muted); font-weight:700; letter-spacing:.04em;}
+.jm-chips{display:flex; flex-wrap:wrap; gap:6px; min-height:30px;}
+.jm-chip{display:inline-flex; align-items:center; gap:4px; border-radius:7px; padding:4px 8px; font-size:11px; font-weight:700; border:1px solid transparent;}
+.jm-chip small{font-weight:600; opacity:.65; font-size:10px;}
+.jm-empty{font-size:11px; color:var(--muted); padding:6px 0;}
+
+@media(max-width:680px){
+    .jm-track{flex-direction:column;}
+    .jm-stage{min-width:0; padding:0;}
+    .jm-stage:not(:last-child)::after{display:none;}
+    .jm-stage:not(:last-child){border-bottom:1px dashed var(--line); padding-bottom:12px; margin-bottom:12px;}
+}
+
 /* analysis section */
 .analysis{margin-top:24px;}
 .analysis .an-head{text-align:center; margin-bottom:18px;}
@@ -283,6 +306,8 @@ textarea::placeholder{color:var(--muted);}
     </div>
 
     <div class="submod" id="subModBox"></div>
+
+    <div class="journey" id="journeyBox"></div>
 
     <div class="need-map">
         <h3>🧭 十三种需求映射（从 Module-09 命中推导）</h3>
@@ -728,6 +753,7 @@ function renderResults(comments, allHits){
         });
     }
     renderSubModules(allHits);
+    renderJourneyMap(allHits);
     renderAnalysis(allHits);
 }
 
@@ -735,6 +761,82 @@ function hex2rgba(hex, a){
     const h = hex.replace('#','');
     const r = parseInt(h.substring(0,2),16), g=parseInt(h.substring(2,4),16), b=parseInt(h.substring(4,6),16);
     return `rgba(${r},${g},${b},${a})`;
+}
+
+/* ===================== 用户旅程地图分类 ===================== */
+/* 6 个标准用户旅程阶段，按出现顺序串联成一条旅程线 */
+const JOURNEY = [
+    {key:'aware', name:'认知种草', icon:'👀', color:'#6366F1'},
+    {key:'eval',  name:'评估决策', icon:'🔍', color:'#0891B2'},
+    {key:'buy',   name:'购买转化', icon:'🛒', color:'#D97706'},
+    {key:'use',   name:'开箱使用', icon:'📦', color:'#2563EB'},
+    {key:'exp',   name:'日常体验', icon:'♻️', color:'#059669'},
+    {key:'adv',   name:'复购推荐', icon:'📣', color:'#DB2777'}
+];
+/* 每个标签（模块|标签名）归属到哪个旅程阶段；缺省兜底到 exp（日常体验） */
+const JOURNEY_MAP = {
+    '用户画像|新手':'aware', '用户画像|资深':'aware',
+    '用户画像|产品讨论':'aware', '用户画像|身体讨论':'aware', '用户画像|幻想投射':'aware',
+    '购买动机|解决生理需求':'buy', '购买动机|替代真人':'eval', '购买动机|提升体验':'eval',
+    '购买动机|孤独缓解':'aware', '购买动机|情感寄托':'aware', '购买动机|自我探索':'aware',
+    '购买动机|社群推荐':'aware', '购买动机|跟风购买':'aware', '购买动机|话题参与':'aware',
+    '购买动机|Body Swap':'aware', '购买动机|角色扮演':'aware', '购买动机|场景模拟':'eval',
+    '购买动机|替换损坏产品':'buy', '购买动机|升级换代':'buy', '购买动机|旧款不再满足':'buy',
+    '购买动机|品牌切换':'eval', '购买动机|折扣优惠':'buy', '购买动机|满减活动':'buy',
+    '购买动机|限时大促':'buy', '购买动机|优惠券':'buy', '购买动机|直播秒杀':'buy',
+    '购买目的|日常使用':'exp', '购买目的|训练提升':'buy', '购买目的|健康维护':'buy',
+    '购买目的|性能测试':'eval', '购买目的|收藏展示':'buy', '购买目的|陪伴慰藉':'aware',
+    '购买目的|压力释放':'aware', '购买目的|自信建立':'aware', '购买目的|分享交流':'adv',
+    '购买目的|社群认同':'aware', '购买目的|内容创作':'adv',
+    '使用场景|深夜独处':'use', '使用场景|周末放松':'use', '使用场景|出差旅行':'use',
+    '使用场景|卧室私密':'use', '使用场景|浴室':'use', '使用场景|酒店':'use', '使用场景|家中':'use',
+    '使用场景|独处放松':'use', '使用场景|伴侣互动':'use', '使用场景|内容创作':'use',
+    '使用阻碍|材质不适':'exp', '使用阻碍|尺寸问题':'exp', '使用阻碍|重量过重':'exp',
+    '使用阻碍|清洁困难':'exp', '使用阻碍|收纳不便':'exp', '使用阻碍|隐私担忧':'exp',
+    '使用阻碍|环境不便':'exp', '使用阻碍|携带困难':'exp', '使用阻碍|伴侣反对':'exp',
+    '使用阻碍|尴尬感':'exp', '使用阻碍|信任问题':'exp', '使用阻碍|羞耻感':'exp',
+    '使用阻碍|焦虑':'exp', '使用阻碍|负罪感':'exp',
+    '克服方式|选择更合适型号':'exp', '克服方式|增加配件':'exp', '克服方式|升级材质':'exp',
+    '克服方式|调整使用时间':'exp', '克服方式|改善环境布置':'exp', '克服方式|接纳自我':'exp',
+    '克服方式|降低预期':'exp', '克服方式|看评测':'eval', '克服方式|问社群':'eval', '克服方式|经验帖':'eval',
+    '用户忠诚度|多次复购':'adv', '用户忠诚度|推荐他人':'adv', '用户忠诚度|品牌偏好':'adv',
+    '用户忠诚度|主动好评':'adv', '用户忠诚度|晒单':'adv', '用户忠诚度|安利':'adv',
+    '用户忠诚度|固定复购品牌':'adv', '用户忠诚度|对比后回归':'adv',
+    '产品改进建议|外观优化':'exp', '产品改进建议|人体工学':'exp', '产品改进建议|材质升级':'exp',
+    '产品改进建议|智能加热':'exp', '产品改进建议|静音设计':'exp', '产品改进建议|APP联动':'exp',
+    '产品改进建议|开箱体验':'use', '产品改进建议|清洁便利':'exp', '产品改进建议|收纳设计':'exp',
+    '产品改进建议|售后响应':'exp', '产品改进建议|使用指导':'use', '产品改进建议|隐私保护':'exp',
+    '十三种需求|主宰 Autonomy':'eval', '十三种需求|审美 Beauty':'eval', '十三种需求|目的 Purpose':'eval',
+    '十三种需求|刺激 Stimulation':'aware', '十三种需求|道德 Morality':'eval', '十三种需求|掌控感':'exp',
+    '十三种需求|胜任感':'exp', '十三种需求|沉浸感':'exp', '十三种需求|心流':'exp',
+    '十三种需求|安全':'exp', '十三种需求|归属':'aware', '十三种需求|安稳':'exp',
+    '十三种需求|保障':'exp', '十三种需求|健康':'exp', '十三种需求|生理刚需':'buy'
+};
+function stageOf(hit){
+    return JOURNEY_MAP[hit.m + '|' + hit.t] || 'exp';
+}
+function renderJourneyMap(allHits){
+    const box = document.getElementById('journeyBox');
+    const buckets = {};
+    JOURNEY.forEach(j=>buckets[j.key]=[]);
+    allHits.flat().forEach(h=>{ buckets[stageOf(h)].push(h); });
+    let html = '<h3>🗺️ 用户旅程维度分类</h3>'+
+        '<div class="jm-sub">按用户旅程地图（认知 → 评估 → 购买 → 使用 → 体验 → 复购），把上面打出的标签归到对应阶段，看需求集中在旅程哪一段</div>'+
+        '<div class="jm-track">';
+    JOURNEY.forEach((j, i)=>{
+        const hs = buckets[j.key];
+        const tagCnt = {};
+        hs.forEach(h=>{ tagCnt[h.t] = (tagCnt[h.t]||0) + 1; });
+        const sorted = Object.entries(tagCnt).sort((a,b)=>b[1]-a[1]);
+        const chips = sorted.length
+            ? sorted.map(([t,tc])=>`<span class="jm-chip" style="background:${hex2rgba(j.color,0.1)}; color:${j.color}; border-color:${hex2rgba(j.color,0.3)};">${t}<small>x${tc}</small></span>`).join('')
+            : '<span class="jm-empty">本批评价未涉及此阶段</span>';
+        html += `<div class="jm-stage">`+
+            `<div class="jm-stagehead"><div class="jm-ico" style="background:${j.color}">${j.icon}</div><div><div class="jm-name">${j.name}</div><div class="jm-step">阶段 ${i+1}</div></div></div>`+
+            `<div class="jm-chips">${chips}</div></div>`;
+    });
+    html += '</div>';
+    box.innerHTML = html;
 }
 
 /* ===================== 小版块（维度）覆盖 ===================== */
