@@ -6706,6 +6706,17 @@
 
 </script>
 
+<!-- 需求合成弹窗 -->
+<div id="needSynthOverlay" class="ns-overlay" onclick="closeNeedModal(event)">
+    <div class="ns-modal" onclick="event.stopPropagation()">
+        <button class="ns-close" onclick="closeNeedModal()">✕</button>
+        <div class="ns-card" id="nsCardInner"></div>
+        <div class="ns-actions">
+            <button onclick="downloadNeedPNG()">📥 下载 PNG 海报</button>
+            <button onclick="copyNeedText()">📋 复制文本</button>
+        </div>
+    </div>
+</div>
 <!-- 一键合成用户完全体 · 碎片聚合动效模态框 -->
 <div id="personaSynthOverlay" class="ps-overlay" onclick="closePersonaSynth(event)">
     <div class="ps-modal" onclick="event.stopPropagation()">
