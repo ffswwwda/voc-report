@@ -128,8 +128,8 @@ textarea::placeholder{color:var(--muted);}
 .agent-card .agent-icon{font-size:32px;}
 .agent-card .agent-name{font-weight:800; font-size:15px; color:var(--ink);}
 .agent-card .agent-desc{font-size:12px; color:var(--slate); margin-top:3px;}
-.reset-link{display:block; margin-top:18px; background:none; border:none; color:var(--muted); font-size:13px; cursor:pointer; text-decoration:underline; font-family:inherit;}
-.reset-link:hover{color:var(--indigo);}
+.reset-link{display:inline-block; margin-top:16px; background:#fff; border:2px solid var(--line); border-radius:999px; padding:11px 30px; font-size:14px; font-weight:700; color:var(--slate); cursor:pointer; font-family:inherit; transition:all .2s;}
+.reset-link:hover{border-color:var(--indigo); color:var(--indigo); transform:translateY(-1px); box-shadow:0 3px 10px rgba(37,99,235,.12);}
 
 .footer{text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; border-top:1px solid var(--line); margin-top:40px;}
 
@@ -214,7 +214,7 @@ textarea::placeholder{color:var(--muted);}
     <div class="res-summary" id="resSummary"></div>
     <div id="resCards"></div>
     <div class="reset-wrap">
-        <button class="reset-btn agent-cta" onclick="toggleAgentCards()">🦞 和类目智能体聊点真的</button>
+        <button class="reset-btn agent-cta" onclick="toggleAgentCards()">🦞 找智能体聊真的</button>
         <div class="agent-cards" id="agentCards">
             <a class="agent-card" href="https://applink.feishu.cn/T97R31dGAcVE" target="_blank" rel="noopener">
                 <div class="agent-icon">🦞</div>
