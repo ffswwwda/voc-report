@@ -1357,27 +1357,81 @@
         }
         .brand-need-card.spinning .bn-why { display: none; }
 
-        /* ===== 数据源类型说明 ===== */
+        /* ===== 数据源类型说明（可折叠） ===== */
         .data-source-section {
-            margin-bottom: 60px;
+            margin-bottom: 40px;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            background: #FFFFFF;
+            overflow: hidden;
         }
         .data-source-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #0F172A;
-            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 16px 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.18s ease;
+        }
+        .data-source-title:hover {
+            background: #F8FAFC;
         }
         .data-source-title::before {
             content: '📊';
             font-size: 22px;
         }
+        .data-source-title-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        .data-source-toggle {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2563EB;
+            background: #EFF6FF;
+            border: none;
+            border-radius: 999px;
+            padding: 6px 14px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .data-source-toggle:hover {
+            background: #DBEAFE;
+        }
+        .data-source-toggle .arrow {
+            display: inline-block;
+            transition: transform 0.25s ease;
+        }
+        .data-source-section.collapsed .data-source-toggle .arrow {
+            transform: rotate(-90deg);
+        }
         .data-source-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 24px;
+            padding: 0 20px 20px;
+            max-height: 1200px;
+            opacity: 1;
+            transform: translateY(0);
+            transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.25s ease, padding 0.25s ease;
+        }
+        .data-source-section.collapsed .data-source-grid {
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(-8px);
+            padding: 0 20px;
+            pointer-events: none;
         }
         .data-source-card {
             background: #FFFFFF;
@@ -2725,10 +2779,15 @@
             </div>
             <a class="tdb-btn" href="tag-demo.html">去试 VOC 粘贴打标 →</a>
         </div>
-<!-- 数据源类型说明 -->
-        <div class="data-source-section">
-            <div class="data-source-title">数据源类型与适用分析框架</div>
-            <div class="data-source-grid">
+<!-- 数据源类型说明（可折叠） -->
+        <div class="data-source-section collapsed" id="dataSourceSection">
+            <div class="data-source-title" onclick="toggleDataSource()">
+                <span class="data-source-title-text">数据源类型与适用分析框架</span>
+                <button type="button" class="data-source-toggle" aria-label="展开" id="dataSourceToggle" onclick="event.stopPropagation(); toggleDataSource();">
+                    <span class="arrow">▾</span><span class="label">展开</span>
+                </button>
+            </div>
+            <div class="data-source-grid" id="dataSourceGrid">
 
                 <!-- 左列：用户产品评价 -->
                 <div class="data-source-card">
@@ -5499,6 +5558,17 @@
             demo.style.transition = 'box-shadow 0.35s ease';
             demo.style.boxShadow = '0 0 0 3px rgba(99,102,241,.35), 0 12px 32px rgba(99,102,241,.15)';
             setTimeout(() => { demo.style.boxShadow = ''; }, 1800);
+        }
+    }
+
+    // ===== 数据源说明折叠 =====
+    function toggleDataSource(){
+        const section = document.getElementById('dataSourceSection');
+        const btn = document.getElementById('dataSourceToggle');
+        const isCollapsed = section.classList.toggle('collapsed');
+        if(btn){
+            btn.setAttribute('aria-label', isCollapsed ? '展开' : '收起');
+            btn.querySelector('.label').textContent = isCollapsed ? '展开' : '收起';
         }
     }
 
