@@ -78,6 +78,60 @@
                 overlay.classList.toggle('show');
             }
         }
+
+        // ===== 小龙虾浮窗按钮：可拖动 =====
+        (function () {
+            var btn = document.getElementById('floatBtn');
+            if (!btn) return;
+            var dragging = false, moved = false;
+            var startX = 0, startY = 0, startL = 0, startT = 0;
+
+            function onDown(e) {
+                dragging = true;
+                moved = false;
+                var rect = btn.getBoundingClientRect();
+                // 切换为 left/top 定位（脱离 right/transform 居中）
+                btn.style.right = 'auto';
+                btn.style.left = rect.left + 'px';
+                btn.style.top = rect.top + 'px';
+                startX = e.clientX;
+                startY = e.clientY;
+                startL = rect.left;
+                startT = rect.top;
+                btn.classList.add('dragging');
+                e.preventDefault();
+            }
+            function onMove(e) {
+                if (!dragging) return;
+                var dx = e.clientX - startX;
+                var dy = e.clientY - startY;
+                if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+                var nl = startL + dx;
+                var nt = startT + dy;
+                // 限制在视窗内
+                var maxL = window.innerWidth - btn.offsetWidth;
+                var maxT = window.innerHeight - btn.offsetHeight;
+                nl = Math.max(0, Math.min(nl, maxL));
+                nt = Math.max(0, Math.min(nt, maxT));
+                btn.style.left = nl + 'px';
+                btn.style.top = nt + 'px';
+            }
+            function onUp() {
+                if (!dragging) return;
+                dragging = false;
+                btn.classList.remove('dragging');
+                // 拖动后拦截本次点击，避免误触发浮窗
+                if (moved) {
+                    var stop = function (ev) { ev.stopPropagation(); ev.preventDefault(); };
+                    btn.addEventListener('click', stop, { capture: true, once: true });
+                }
+            }
+
+            btn.addEventListener('pointerdown', onDown);
+            window.addEventListener('pointermove', onMove);
+            window.addEventListener('pointerup', onUp);
+        })();
+
         // 点击智能体链接后自动关闭浮窗
         document.addEventListener('DOMContentLoaded', function() {
             var botLinks = document.querySelectorAll('.bot-link');
@@ -442,7 +496,7 @@
             border-radius: 50%;
             background: #ffffff;
             border: 2px solid #E2E8F0;
-            cursor: pointer;
+            cursor: grab;
             z-index: 999;
             box-shadow: 0 4px 16px rgba(15,23,42,0.12);
             display: flex;
@@ -452,11 +506,20 @@
             line-height: 1;
             transition: all 0.3s ease;
             animation: floatPulse 2.5s ease-in-out infinite;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .float-btn:hover {
             transform: translateY(-50%) scale(1.1);
             box-shadow: 0 6px 24px rgba(15,23,42,0.2);
             border-color: #CBD5E1;
+        }
+        .float-btn.dragging {
+            cursor: grabbing;
+            transition: none;
+            animation: none;
+            transform: none !important;
         }
         .float-btn span {
             display: flex;
@@ -3543,7 +3606,7 @@
                 <h4 style="font-size: 15px; font-weight: 700; color: #0F172A; margin-bottom: 12px;">📥 极端/领先用户识别 · 技能文件</h4>
                 <p style="font-size: 13px; color: #64748B; margin-bottom: 16px; line-height: 1.6;">下载完整的极端用户识别技能文件（SKILL.md），包含von Hippel理论、三层筛查方法、信号检测模式等。可用于WorkBuddy技能安装。</p>
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <a href="/extreme_user_skill.md" download="极端领先用户识别_SKILL.md" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(59, 130, 246, 0.3)'">
+                    <a href="extreme_user_skill.md" download="极端领先用户识别_SKILL.md" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(59, 130, 246, 0.3)'">
                         📥 下载极端用户识别技能
                     </a>
                     <button onclick="toggleExtremeSkillPreview()" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: white; color: #3B82F6; border: 2px solid #3B82F6; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='white'">
@@ -4052,7 +4115,7 @@
                     <h4 style="font-size: 15px; font-weight: 700; color: #0F172A; margin-bottom: 12px;">📥 Plutchik 情绪罗盘 · 技能文件</h4>
                     <p style="font-size: 13px; color: #64748B; margin-bottom: 16px; line-height: 1.6;">下载完整的 Plutchik 情绪罗盘技能文件（SKILL.md），包含 8 基本情绪定义、三级强度判定规则、复合情绪混合矩阵、情绪→行为映射表、VOC 标注流程等。可用于 WorkBuddy 技能安装。</p>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-                        <a href="/plutchik_emotion_skill.md" download="Plutchik_情绪罗盘_技能文件.md" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: #EC4899; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#DB2777'" onmouseout="this.style.background='#EC4899'">
+                        <a href="plutchik_emotion_skill.md" download="Plutchik_情绪罗盘_技能文件.md" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: #EC4899; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#DB2777'" onmouseout="this.style.background='#EC4899'">
                             📥 下载 Plutchik 情绪罗盘技能文件
                         </a>
                     </div>
@@ -4084,7 +4147,7 @@
                 <h4 style="font-size: 15px; font-weight: 700; color: #0F172A; margin-bottom: 12px;">📥 4象限用户需求 · 技能文件</h4>
                 <p style="font-size: 13px; color: #64748B; margin-bottom: 16px; line-height: 1.6;">下载完整的「需求四象限分析」技能文件（SKILL.md），包含重要度-满意度矩阵计算方法、象限划分规则、优先级决策流程等。可用于WorkBuddy技能安装。</p>
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <a href="/researcher_needs_quadrant.md" download="4象限用户需求_需求四象限分析_SKILL.md" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, #16A34A 0%, #15803D 100%); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; box-shadow: 0 2px 8px rgba(22,163,74,0.3); transition: all 0.2s;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 12px rgba(22,163,74,0.4)\'" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 2px 8px rgba(22,163,74,0.3)\'">
+                    <a href="researcher_needs_quadrant.md" download="4象限用户需求_需求四象限分析_SKILL.md" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, #16A34A 0%, #15803D 100%); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; box-shadow: 0 2px 8px rgba(22,163,74,0.3); transition: all 0.2s;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 12px rgba(22,163,74,0.4)\'" onmouseout="this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 2px 8px rgba(22,163,74,0.3)\'">
                         📥 下载技能文件
                     </a>
                 </div>
@@ -4488,7 +4551,7 @@
                 <h4 style="font-size: 15px; font-weight: 700; color: #0F172A; margin-bottom: 12px;">📥 TRIZ创新方法 · 技能文件</h4>
                 <p style="font-size: 13px; color: #64748B; margin-bottom: 16px; line-height: 1.6;">下载完整的TRIZ技能文件（SKILL.md），包含40个发明原理详细定义、使用流程、输出质量标准等。可用于WorkBuddy技能安装。</p>
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <a href="/TRIZ_skill.md" download="TRIZ_创新方法_SKILL.md" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(245, 158, 11, 0.3)'">
+                    <a href="TRIZ_skill.md" download="TRIZ_创新方法_SKILL.md" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(245, 158, 11, 0.3)'">
                         📥 下载TRIZ技能文件
                     </a>
                     <button onclick="toggleSkillPreview()" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: white; color: #F59E0B; border: 2px solid #F59E0B; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#FEF3C7'" onmouseout="this.style.background='white'">
@@ -4721,7 +4784,7 @@
                             <div class="skill-dl-sub">VOC 完整分析 · 技能文件</div>
                         </div>
                     </div>
-                    <a class="skill-dl-btn" href="/JTBD_skill.md" download="JTBD_技能文件.md">📥 JTBD · 技能文件</a>
+                    <a class="skill-dl-btn" href="JTBD_skill.md" download="JTBD_技能文件.md">📥 JTBD · 技能文件</a>
                 </div>
                 <div class="skill-dl-card">
                     <div class="skill-dl-head">
@@ -4731,7 +4794,7 @@
                             <div class="skill-dl-sub">用户动机分析 · 技能文件</div>
                         </div>
                     </div>
-                    <a class="skill-dl-btn" href="/needs_analysis_skill.md" download="十三种需求_技能文件.md">📥 十三种需求 · 技能文件</a>
+                    <a class="skill-dl-btn" href="needs_analysis_skill.md" download="十三种需求_技能文件.md">📥 十三种需求 · 技能文件</a>
                 </div>
                 <div class="skill-dl-card">
                     <div class="skill-dl-head">
@@ -4741,7 +4804,7 @@
                             <div class="skill-dl-sub">产品 FABE 设计 · 技能文件</div>
                         </div>
                     </div>
-                    <a class="skill-dl-btn" href="/compass_skill.md" download="产品创意罗盘_技能文件.md">📥 产品创意罗盘 · 技能文件</a>
+                    <a class="skill-dl-btn" href="compass_skill.md" download="产品创意罗盘_技能文件.md">📥 产品创意罗盘 · 技能文件</a>
                 </div>
                 <div class="skill-dl-card">
                     <div class="skill-dl-head">
@@ -4751,7 +4814,7 @@
                             <div class="skill-dl-sub">需求四象限分析 · 技能文件</div>
                         </div>
                     </div>
-                    <a class="skill-dl-btn" href="/researcher_needs_quadrant.md" download="需求四象限_技能文件.md">📥 需求四象限 · 技能文件</a>
+                    <a class="skill-dl-btn" href="researcher_needs_quadrant.md" download="需求四象限_技能文件.md">📥 需求四象限 · 技能文件</a>
                 </div>
                 <div class="skill-dl-card">
                     <div class="skill-dl-head">
@@ -4761,7 +4824,7 @@
                             <div class="skill-dl-sub">TRIZ 创新方法 · 技能文件</div>
                         </div>
                     </div>
-                    <a class="skill-dl-btn" href="/TRIZ_skill.md" download="TRIZ_创新方法_技能文件.md">📥 TRIZ创新方法 · 技能文件</a>
+                    <a class="skill-dl-btn" href="TRIZ_skill.md" download="TRIZ_创新方法_技能文件.md">📥 TRIZ创新方法 · 技能文件</a>
                 </div>
                 <div class="skill-dl-card">
                     <div class="skill-dl-head">
@@ -4771,7 +4834,7 @@
                             <div class="skill-dl-sub">极端用户识别 · 技能文件</div>
                         </div>
                     </div>
-                    <a class="skill-dl-btn" href="/extreme_user_skill.md" download="极端用户识别_技能文件.md">📥 极端用户识别 · 技能文件</a>
+                    <a class="skill-dl-btn" href="extreme_user_skill.md" download="极端用户识别_技能文件.md">📥 极端用户识别 · 技能文件</a>
                 </div>
                 <div class="skill-dl-card">
                     <div class="skill-dl-head">
