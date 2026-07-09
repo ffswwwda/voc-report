@@ -372,7 +372,6 @@
         .nav-dropdown a {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             padding: 9px 18px;
             font-size: 13px;
             color: #475569;
@@ -385,6 +384,16 @@
             color: #2563EB;
             padding-left: 22px;
         }
+        .nav-dropdown a .nav-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            flex-shrink: 0;
+            margin-right: 6px;
+            text-align: center;
+            font-size: 14px;
+        }
         .nav-dropdown a .demo-pill {
             font-size: 11px;
             font-weight: 700;
@@ -393,7 +402,7 @@
             border: 1px solid #C7D2FE;
             border-radius: 999px;
             padding: 2px 8px;
-            margin-left: 10px;
+            margin-left: auto;
             transition: all 0.15s ease;
             flex-shrink: 0;
             cursor: pointer;
@@ -2592,10 +2601,10 @@
             <span class="nav-arrow">▼</span>
             <div class="nav-dropdown">
                 <div class="nav-dropdown-label">品类智能体</div>
-                <a href="https://applink.feishu.cn/T97R31dGAcVE" target="_blank"><span style="margin-right:6px;">🦞</span>倒模类目智能体</a>
-                <a href="https://applink.feishu.cn/T97R37MT0GiU" target="_blank"><span style="margin-right:6px;">🦞</span>飞机杯类目智能体</a>
+                <a href="https://applink.feishu.cn/T97R31dGAcVE" target="_blank"><span class="nav-icon">🦞</span>倒模类目智能体</a>
+                <a href="https://applink.feishu.cn/T97R37MT0GiU" target="_blank"><span class="nav-icon">🦞</span>飞机杯类目智能体</a>
                 <div class="nav-dropdown-label" style="margin-top:10px;">智能体资源</div>
-                <a href="#skill-download"><span style="margin-right:6px;">📦</span>智能体skill下载</a>
+                <a href="#skill-download"><span class="nav-icon">📦</span>智能体skill下载</a>
             </div>
         </div>
     </div>
