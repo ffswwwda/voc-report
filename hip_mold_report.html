@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>臀部形态倒模产品市场分析报告 · 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+  /* ========== Reset & Base ========== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "PingFang SC", "Noto Sans SC", sans-serif;
+    background: #F8FAFC; color: #0F172A; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========== Download Button ========== */
+  .download-btn {
+    position: fixed; top: 20px; right: 20px; z-index: 9999;
+    background: #2563EB; color: #fff; border: none;
+    padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+    transition: all 0.2s; letter-spacing: 0.02em;
+  }
+  .download-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
+
+  /* ========== Layout ========== */
+  .page { max-width: 1200px; margin: 0 auto; padding: 40px 32px; }
+  .section { margin-top: 72px; }
+  .section:first-of-type { margin-top: 0; }
+  .section-title { font-size: 28px; font-weight: 700; color: #0F172A; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .section-subtitle { font-size: 15px; color: #64748B; margin-bottom: 36px; }
+  .divider { width: 48px; height: 4px; background: #2563EB; border-radius: 2px; margin-bottom: 32px; }
+
+  /* ========== Hero ========== */
+  .hero {
+    background: #F8FAFC; padding: 64px 0 48px; text-align: center;
+    border-bottom: 1px solid #E2E8F0;
+  }
+  .hero-tag {
+    display: inline-block; background: #EFF6FF; color: #2563EB;
+    font-size: 12px; font-weight: 600; padding: 6px 16px; border-radius: 20px;
+    margin-bottom: 20px; letter-spacing: 0.05em;
+  }
+  .hero h1 { font-size: 40px; font-weight: 800; color: #0F172A; letter-spacing: -0.03em; line-height: 1.2; }
+  .hero p { font-size: 16px; color: #64748B; margin-top: 16px; max-width: 640px; margin-left: auto; margin-right: auto; }
+  .hero-meta { font-size: 13px; color: #94A3B8; margin-top: 12px; }
+  .hero-meta a { color: #2563EB; text-decoration: none; }
+  .hero-meta a:hover { text-decoration: underline; }
+  .hero-kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 900px; margin: 40px auto 0; }
+
+  /* ========== KPI Card ========== */
+  .kpi-card {
+    background: #fff; border: 1px solid #E2E8F0; border-radius: 16px;
+    padding: 24px 20px; text-align: center; position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: box-shadow 0.2s; overflow: hidden;
+  }
+  .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 16px 16px 0 0; }
+  .kpi-card.blue::before { background: #2563EB; }
+  .kpi-card.green::before { background: #16A34A; }
+  .kpi-card.orange::before { background: #F59E0B; }
+  .kpi-card.red::before { background: #DC2626; }
+  .kpi-label { font-size: 12px; font-weight: 500; color: #94A3B8; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .kpi-number { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+  .kpi-card.blue .kpi-number { color: #2563EB; }
+  .kpi-card.green .kpi-number { color: #16A34A; }
+  .kpi-card.orange .kpi-number { color: #F59E0B; }
+  .kpi-card.red .kpi-number { color: #DC2626; }
+  .kpi-desc { font-size: 12px; color: #94A3B8; margin-top: 10px; }
+
+  /* ========== Card ========== */
+  .card {
+    background: #fff; border: 1px solid #E2E8F0; border-radius: 16px;
+    padding: 28px; margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative; overflow: hidden;
+  }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+  .card.blue::before { background: #2563EB; }
+  .card.green::before { background: #16A34A; }
+  .card.orange::before { background: #F59E0B; }
+  .card.red::before { background: #DC2626; }
+  .card.purple::before { background: #7C3AED; }
+  .card-title { font-size: 18px; font-weight: 700; color: #0F172A; margin-bottom: 16px; padding-left: 16px; }
+  .card-body { padding-left: 16px; }
+
+  /* ========== Grid ========== */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+  /* ========== Chart Container ========== */
+  .chart-box { width: 100%; height: 320px; }
+  .chart-tall { width: 100%; height: 400px; }
+
+  /* ========== Insight Box ========== */
+  .insight-box {
+    background: #F8FAFC; border-left: 4px solid #2563EB; border-radius: 0 8px 8px 0;
+    padding: 20px 24px; margin-top: 20px;
+  }
+  .insight-title { font-size: 14px; font-weight: 700; color: #2563EB; margin-bottom: 8px; }
+  .insight-box p { font-size: 13px; color: #334155; line-height: 1.7; margin-bottom: 6px; }
+  .insight-box p:last-child { margin-bottom: 0; }
+
+  /* ========== Warning Box ========== */
+  .warning-box {
+    background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px;
+    padding: 16px 20px; margin-bottom: 20px; font-size: 13px; color: #92400E; line-height: 1.7;
+  }
+  .warning-box strong { color: #B45309; }
+  .warning-box ul { margin: 8px 0 0 18px; }
+  .warning-box ul li { margin-bottom: 4px; }
+
+  /* ========== Data Table ========== */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th {
+    background: #F8FAFC; color: #64748B; font-weight: 600; padding: 10px 14px;
+    text-align: left; font-size: 11px; border-bottom: 2px solid #E2E8F0; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .data-table td { padding: 11px 14px; border-bottom: 1px solid #F1F5F9; color: #334155; vertical-align: top; }
+  .data-table tr:hover td { background: #F8FAFC; }
+  .data-table tr:last-child td { border-bottom: none; }
+
+  /* ========== Tag ========== */
+  .tag {
+    display: inline-block; padding: 3px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
+  }
+  .tag-blue { background: #EFF6FF; color: #2563EB; }
+  .tag-green { background: #F0FDF4; color: #16A34A; }
+  .tag-orange { background: #FFFBEB; color: #F59E0B; }
+  .tag-red { background: #FEF2F2; color: #DC2626; }
+  .tag-gray { background: #F1F5F9; color: #64748B; }
+  .tag-purple { background: #F5F3FF; color: #7C3AED; }
+
+  /* ========== Evidence Strength Badge ========== */
+  .evi-strong { color: #16A34A; font-weight: 700; }
+  .evi-medium { color: #F59E0B; font-weight: 700; }
+  .evi-weak { color: #DC2626; font-weight: 700; }
+
+  /* ========== Persona Full Card ========== */
+  .persona-full {
+    background: #fff; border: 1px solid #E2E8F0; border-radius: 16px;
+    margin-bottom: 28px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .persona-full-header {
+    padding: 24px 28px 20px; position: relative; overflow: hidden;
+  }
+  .persona-full-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+  .persona-full-header.blue::before { background: #2563EB; }
+  .persona-full-header.green::before { background: #16A34A; }
+  .persona-full-header.orange::before { background: #F59E0B; }
+  .persona-full-header.red::before { background: #DC2626; }
+  .persona-full-type { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .persona-full-header.blue .persona-full-type { color: #2563EB; }
+  .persona-full-header.green .persona-full-type { color: #16A34A; }
+  .persona-full-header.orange .persona-full-type { color: #F59E0B; }
+  .persona-full-header.red .persona-full-type { color: #DC2626; }
+  .persona-full-name { font-size: 22px; font-weight: 800; color: #0F172A; }
+  .persona-full-desc { font-size: 13px; color: #64748B; margin-top: 8px; line-height: 1.6; }
+
+  /* Flow diagram inside persona */
+  .persona-flow {
+    display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+    align-items: start; gap: 0; padding: 20px 28px; background: #F8FAFC;
+    border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;
+  }
+  .pflow-step { text-align: center; padding: 0 8px; }
+  .pflow-step-label { font-size: 11px; font-weight: 700; color: #64748B; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .pflow-step-value { font-size: 13px; color: #0F172A; font-weight: 600; line-height: 1.5; }
+  .pflow-arrow { display: flex; align-items: center; justify-content: center; padding-top: 18px; color: #CBD5E1; font-size: 16px; }
+  .pflow-step-evi { font-size: 11px; margin-top: 6px; font-weight: 700; }
+  .pflow-step-evi.evi-strong { color: #16A34A; }
+  .pflow-step-evi.evi-medium { color: #F59E0B; }
+  .pflow-step-evi.evi-weak { color: #DC2626; }
+
+  /* Persona detail table */
+  .persona-detail-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .persona-detail-table th {
+    background: #F8FAFC; color: #64748B; font-weight: 600; padding: 10px 16px;
+    text-align: left; font-size: 11px; border-bottom: 1px solid #E2E8F0; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .persona-detail-table td { padding: 12px 16px; border-bottom: 1px solid #F1F5F9; color: #334155; vertical-align: top; }
+  .persona-detail-table tr:last-child td { border-bottom: none; }
+
+  /* Persona positioning */
+  .persona-positioning {
+    padding: 20px 28px; background: #FAFCFE; border-top: 1px solid #E2E8F0;
+  }
+  .pos-row { display: flex; align-items: flex-start; margin-bottom: 10px; }
+  .pos-label { font-size: 12px; font-weight: 700; color: #64748B; min-width: 100px; flex-shrink: 0; padding-top: 2px; }
+  .pos-value { font-size: 13px; color: #334155; line-height: 1.6; }
+
+  /* Persona action guide */
+  .persona-action {
+    padding: 20px 28px; background: #F8FAFC; border-top: 1px solid #E2E8F0;
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+  }
+  .action-block { }
+  .action-block-title { font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .action-block-text { font-size: 13px; color: #334155; line-height: 1.6; }
+
+  /* ========== Priority Badge ========== */
+  .priority-badge {
+    display: inline-block; padding: 4px 12px; border-radius: 12px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.03em;
+  }
+  .priority-P0 { background: #FEF2F2; color: #DC2626; }
+  .priority-P1 { background: #FFFBEB; color: #F59E0B; }
+  .priority-P2 { background: #EFF6FF; color: #2563EB; }
+  .priority-P3 { background: #F1F5F9; color: #64748B; }
+
+  /* ========== Market Strategy Cards ========== */
+  .market-card {
+    background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px;
+    position: relative; overflow: hidden;
+  }
+  .market-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+  .market-card.us::before { background: #3B82F6; }
+  .market-card.jp::before { background: #EF4444; }
+  .market-card.de::before { background: #10B981; }
+  .market-card.uk::before { background: #8B5CF6; }
+  .market-card-flag { font-size: 24px; margin-bottom: 8px; }
+  .market-card-title { font-size: 16px; font-weight: 700; color: #0F172A; margin-bottom: 4px; }
+  .market-card-subtitle { font-size: 12px; color: #94A3B8; margin-bottom: 16px; }
+  .market-card-strategy { font-size: 13px; color: #334155; line-height: 1.7; }
+  .market-card-insight {
+    background: #F8FAFC; border-radius: 8px; padding: 12px 16px;
+    margin-top: 14px; font-size: 12px; color: #475569; line-height: 1.6;
+  }
+
+  /* ========== Footer ========== */
+  .report-footer {
+    text-align: center; padding: 48px 0 64px; color: #94A3B8; font-size: 13px;
+    border-top: 1px solid #E2E8F0; margin-top: 72px;
+  }
+  .report-footer a { color: #2563EB; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- Download Button -->
+<button class="download-btn" onclick="downloadReport()">📄 导出报告图片</button>
+
+<!-- ==================== HERO ==================== -->
+<div class="hero">
+  <div class="page" style="padding-top:0;">
+    <div class="hero-tag">基于真实数据分析版 · 2026年6月</div>
+    <h1>臀部形态倒模产品<br>四市场分析报告</h1>
+    <p>基于亚马逊日本/美国/德国/英国四大市场真实电商数据，针对「臀部形态倒模产品」建立独立分析体系，排除飞机杯、名器等品类干扰</p>
+    <div class="hero-meta">
+      数据截止 2026年6月 ·
+      <a href="https://codebuddy.work/agents/share/2J1vfCuO0kFSDN-Mn-Hu2iwi6v6josjhW-TlgjeMhaa0mdz73GF8s5_kNFij6dWy?platform=workbuddy" target="_blank">各数据源洞察报告（8个数据源）↗</a>
+    </div>
+    <div style="margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="https://my.feishu.cn/wiki/JUbGwMc6Aia4dwk3JkzcN73wn9F" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#0F172A;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;box-shadow:0 4px 12px rgba(15,23,42,0.2);transition:all 0.2s;">📝 报告原文文字版本（飞书 Wiki）↗</a>
+    </div>
+    <div class="hero-kpi">
+      <div class="kpi-card blue">
+        <div class="kpi-label">倒模产品 ASIN</div>
+        <div class="kpi-number">933</div>
+        <div class="kpi-desc">四大市场清洗后</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label">1-3星差评数</div>
+        <div class="kpi-number">9,696</div>
+        <div class="kpi-desc">全市场合计</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label">核心痛点数</div>
+        <div class="kpi-number">11</div>
+        <div class="kpi-desc">三大维度分类</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">四市场正评率</div>
+        <div class="kpi-number">~81%</div>
+        <div class="kpi-desc">日/德市场一致</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ==================== SECTION 1: 研究背景 ==================== -->
+<div class="section">
+  <div class="section-title">一、研究背景 & 目标</div>
+  <div class="divider"></div>
+
+  <div class="grid-2">
+    <div class="card blue" style="border-left:none;">
+      <div class="card-title">研究背景</div>
+      <div class="card-body" style="padding-left:0;">
+        <ul style="font-size:13px;color:#334155;line-height:2;padding-left:18px;">
+          <li>目前成人用品用户研究多停留在功能层面，缺乏对「臀部形态倒模产品」的专项用户洞察</li>
+          <li>现有数据中大量产品属于「飞机杯/名器」品类，与「倒模」在<strong>体积、重量、使用场景</strong>上差异显著，混合分析会严重扭曲结论</li>
+          <li>本报告建立「<strong>倒模产品专属分析体系</strong>」，打通「社区趋势→搜索行为→实际使用→销售反馈」全链路数据</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card green" style="border-left:none;">
+      <div class="card-title">核心输出目标</div>
+      <div class="card-body" style="padding-left:0;">
+        <ul style="font-size:13px;color:#334155;line-height:2;padding-left:18px;">
+          <li>✅ <strong>指导IP人设打造</strong>：找到用户情感共鸣点，打造贴合用户心理预期的品牌人设</li>
+          <li>✅ <strong>指导产品优化</strong>：按优先级明确产品改进方向，解决用户真实痛点</li>
+          <li>✅ <strong>指导营销策略</strong>：提炼用户最关心的卖点，匹配用户搜索习惯和内容偏好</li>
+          <li>✅ <strong>指导服务优化</strong>：定位服务类问题，优化售后、隐私保护等流程</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 2: 数据来源 ==================== -->
+<div class="section">
+  <div class="section-title">二、数据来源与产品过滤规则</div>
+  <div class="divider"></div>
+
+  <!-- 数据质量警告 -->
+  <div class="warning-box">
+    <strong>⚠️ 数据质量说明（重要）</strong>
+    <ul>
+      <li><strong>日亚触感标签覆盖率低</strong>：日亚1-3星评价中，「触感材质」字段约70-80%为"未标注"，实际触感抱怨可能被低估</li>
+      <li><strong>日亚内容翻译质量差</strong>：大量内容被AI标记为"低俗无法翻译"，翻译覆盖率约60-70%，但不影响语义理解字段准确性</li>
+      <li><strong>语义理解字段可靠</strong>：经抽样验证，1-3星「语义理解」字段质量良好，可直接引用</li>
+      <li><strong>美亚4-5星表无维度标签</strong>：无法进行好评结构化分析，本报告仅分析美亚1-3星数据</li>
+      <li><strong>P站数据为通用成人视频分类</strong>：仅作为人设方向参考，非直接数据</li>
+    </ul>
+  </div>
+
+  <!-- 数据来源明细 -->
+  <div class="card blue" style="border-left:none;">
+    <div class="card-title">数据来源明细 <span style="font-size:12px;font-weight:400;color:#94A3B8;margin-left:8px;">各数据源洞察报告（8个数据源）→ <a href="https://codebuddy.work/agents/share/2J1vfCuO0kFSDN-Mn-Hu2iwi6v6josjhW-TlgjeMhaa0mdz73GF8s5_kNFij6dWy?platform=workbuddy" target="_blank" style="color:#2563EB;">查看详情 ↗</a></span></div>
+    <div class="card-body" style="padding-left:0;">
+      <table class="data-table">
+        <thead><tr><th>数据源</th><th>内容</th><th>规模</th><th>可靠性</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag tag-blue">1号</span> 商品评价</td><td>美亚/德亚/英亚/日亚用户评价（已打标签）</td><td>倒模产品约10,000+条</td><td>✅ 1-3星标签可靠；触感标签覆盖率约20-30%</td></tr>
+          <tr><td><span class="tag tag-green">2号</span> 销售数据</td><td>四大市场产品信息与销售快照</td><td>倒模产品933个ASIN</td><td>✅ 卖点标签完整</td></tr>
+          <tr><td><span class="tag tag-orange">3号</span> P站报告</td><td>社区趋势与用户行为</td><td>116个category + 1,018条搜索词</td><td>⚠️ 通用分类，非倒模专项</td></tr>
+          <tr><td><span class="tag tag-blue">4号</span> 关键词数据</td><td>亚马逊搜索量与竞争度</td><td>1,831个关键词</td><td>待验证</td></tr>
+          <tr><td><span class="tag tag-green">5号</span> 测评数据</td><td>Bedbible + YouTube专业测评</td><td>43篇 + 258条</td><td>待验证</td></tr>
+          <tr><td><span class="tag tag-purple">7号</span> 竞品数据</td><td>品牌搜索量与KOL</td><td>6品牌 + 746条KOL数据</td><td>待验证</td></tr>
+          <tr><td><span class="tag tag-gray">8号</span> 用户反馈</td><td>全渠道用户反馈</td><td>86条情报 + 815条原子化事实</td><td>待验证</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 语义理解验证 -->
+  <div class="card green" style="border-left:none;margin-top:20px;">
+    <div class="card-title">语义理解字段验证（日亚1-3星评价抽样）</div>
+    <div class="card-body" style="padding-left:0;">
+      <table class="data-table">
+        <thead><tr><th>原文核心内容</th><th>语义理解字段</th><th>评估</th></tr></thead>
+        <tbody>
+          <tr><td>「只用了2次内部就裂开了，前后都连通了……也联系不上客服」</td><td>这个产品仅使用2次内部就裂开且无法售后</td><td><span style="color:#16A34A;font-weight:700;">✅ 准确</span></td></tr>
+          <tr><td>「写着是等身大，结果却小得离谱」</td><td>产品尺寸远小于描述且价格不合理</td><td><span style="color:#16A34A;font-weight:700;">✅ 准确</span></td></tr>
+          <tr><td>「两个孔的内部都有变薄的地方……耐久性似乎很低」</td><td>内部变薄耐久性低易破损</td><td><span style="color:#16A34A;font-weight:700;">✅ 准确</span></td></tr>
+          <tr><td>「到货时已经损坏，无法使用。购买记录上显示不可退货」</td><td>到货已损坏无法使用</td><td><span style="color:#16A34A;font-weight:700;">✅ 准确</span></td></tr>
+          <tr><td>「附赠类似泳衣的东西，触感等摸起来非常像人的皮肤」</td><td>虽小巧不够满足但做工好自由度高</td><td><span style="color:#16A34A;font-weight:700;">✅ 准确</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- P站数据与人设 -->
+  <div class="card orange" style="border-left:none;margin-top:20px;">
+    <div class="card-title">P站数据与人设参考（非专项数据，供参考）</div>
+    <div class="card-body" style="padding-left:0;">
+      <table class="data-table">
+        <thead><tr><th>人设类型</th><th>相关搜索词数量</th><th>典型搜索词</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><strong>成熟女性(MILF)</strong></td><td>101条</td><td>brunette milf, blonde stepmom, big ass mom</td><td>全球<span style="color:#DC2626;font-weight:700;">第二大搜索词</span>（仅次于hentai），也是最大的人设类搜索集合</td></tr>
+          <tr><td>人种/国籍</td><td>140条</td><td>japanese, korean, chinese, latina, ebony</td><td>亚洲女性搜索量高</td></tr>
+          <tr><td>发色/外貌</td><td>29条</td><td>blonde, brunette, redhead</td><td>金发/棕发/红发是主流外貌标签</td></tr>
+          <tr><td>体型/丰腴</td><td>27条</td><td>bbw, curvy, chubby, thick, petite</td><td>大码和娇小型各占一定比例</td></tr>
+          <tr><td>明星/名人</td><td>22条</td><td>pornstar korean, pornstar chinese, celebrity</td><td>明星复刻类搜索稳定</td></tr>
+          <tr><td><strong>职业/角色扮演</strong></td><td>6条</td><td>role play, nurse, student</td><td><span style="color:#F59E0B;font-weight:700;">角色扮演类需求增长98%，是高速增长的潜力赛道</span></td></tr>
+          <tr><td>幻想类</td><td>3条</td><td>fantasy, step fantasy, magical</td><td>幻想类属于小众赛道</td></tr>
+          <tr><td>Cosplay</td><td>4条</td><td>anime, hentai, cosplay</td><td>与二次元/动漫结合</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:11px;color:#92400E;margin-top:12px;background:#FFFBEB;padding:10px 14px;border-radius:8px;">
+        ⚠️ 注意：P站人设类数据均为通用成人内容分类，与倒模产品无直接对应关系。上述数据仅作为人设方向（外观/性格/职业标签）的参考，不应作为市场规模或用户偏好的直接证据。
+      </div>
+    </div>
+  </div>
+
+  <!-- 过滤规则 -->
+  <div class="card purple" style="border-left:none;margin-top:20px;">
+    <div class="card-title">倒模产品识别规则（书维确认版 v2）</div>
+    <div class="card-body" style="padding-left:0;">
+      <p style="font-size:13px;color:#334155;margin-bottom:16px;">数据清洗目标：从四大市场总表2,506个ASIN中，排除飞机杯、名器类产品，保留纯正倒模产品。</p>
+
+      <h4 style="font-size:13px;color:#7C3AED;margin-bottom:10px;font-weight:700;">第一阶段：重量字段硬过滤</h4>
+      <table class="data-table" style="margin-bottom:16px;">
+        <thead><tr><th>市场</th><th>保留（≥1.5kg）</th><th>排除（&lt;1.5kg）</th></tr></thead>
+        <tbody>
+          <tr><td>美亚</td><td>大型(&gt;500g)：271条</td><td>中型(100-500g)：27条</td></tr>
+          <tr><td>日亚</td><td>重量级：327条</td><td>迷你轻量+中等：437条</td></tr>
+          <tr><td>英亚</td><td>重量级：1条</td><td>迷你轻量+中等：57条</td></tr>
+          <tr><td>德亚</td><td>重量级：1条</td><td>迷你轻量+中等：135条</td></tr>
+        </tbody>
+      </table>
+
+      <h4 style="font-size:13px;color:#7C3AED;margin-bottom:10px;font-weight:700;">第二阶段：标题关键词辅助</h4>
+      <table class="data-table" style="margin-bottom:16px;">
+        <thead><tr><th>条件</th><th>判定</th></tr></thead>
+        <tbody>
+          <tr><td>标题含 臀/屁股/躯干/真人大小/胸/乳房</td><td><span style="color:#16A34A;font-weight:700;">✅ 保留（倒模）</span></td></tr>
+          <tr><td>标题含 飞机杯/名器/口袋/套筒/TENGA</td><td><span style="color:#DC2626;font-weight:700;">❌ 排除</span></td></tr>
+          <tr><td>以上都有</td><td><span style="color:#16A34A;font-weight:700;">✅ 保留</span>（以倒模特征为准）</td></tr>
+          <tr><td>两者都无</td><td>匹配月度表实际重量，≥1.5kg保留，&lt;1.5kg排除</td></tr>
+        </tbody>
+      </table>
+
+      <h4 style="font-size:13px;color:#7C3AED;margin-bottom:10px;font-weight:700;">过滤结果</h4>
+      <table class="data-table">
+        <thead><tr><th>市场</th><th>原始ASIN数</th><th>保留（倒模产品）</th><th>排除（飞机杯/名器）</th></tr></thead>
+        <tbody>
+          <tr><td>美亚</td><td>583</td><td><strong>454 (77.9%)</strong></td><td>129</td></tr>
+          <tr><td>日亚</td><td>1,294</td><td><strong>401 (31.0%)</strong></td><td>893</td></tr>
+          <tr><td>英亚</td><td>190</td><td><strong>32 (16.8%)</strong></td><td>158</td></tr>
+          <tr><td>德亚</td><td>439</td><td><strong>46 (10.5%)</strong></td><td>393</td></tr>
+          <tr style="background:#F8FAFC;"><td><strong>合计</strong></td><td><strong>2,506</strong></td><td><strong>933</strong></td><td><strong>1,573</strong></td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:12px;color:#64748B;margin-top:12px;background:#F8FAFC;padding:10px 14px;border-radius:8px;">
+        📌 重要发现：日亚和德亚市场的「飞机杯/名器」占比极高（69%和89%），倒模产品是小众赛道。英德市场大量产品标注为「迷你轻量」，不符合倒模重量标准。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 3: 市场概况 ==================== -->
+<div class="section">
+  <div class="section-title">三、市场概况：倒模产品四市场结构</div>
+  <div class="divider"></div>
+
+  <div class="grid-2" style="margin-bottom:24px;">
+    <div class="card blue" style="border-left:none;">
+      <div class="card-title">各市场评价规模</div>
+      <div class="card-body" style="padding-left:0;">
+        <div id="chart-market-review" class="chart-box"></div>
+      </div>
+    </div>
+    <div class="card orange" style="border-left:none;">
+      <div class="card-title">正评率对比</div>
+      <div class="card-body" style="padding-left:0;">
+        <div id="chart-positive-rate" class="chart-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 四市场卖点结构 -->
+  <div class="card blue" style="border-left:none;">
+    <div class="card-title">四市场倒模产品卖点结构（2号数据源，已按倒模过滤）</div>
+    <div class="card-body" style="padding-left:0;">
+      <table class="data-table">
+        <thead><tr><th style="min-width:90px;">维度</th><th>美亚 (454 ASIN)</th><th>日亚 (401 ASIN)</th><th>英国 (32 ASIN)</th><th>德国 (46 ASIN)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>材质主流</strong></td><td>TPE (70%)</td><td>其他材质 (68%)</td><td>TPE+硅胶各半</td><td>TPE=硅胶各半</td></tr>
+          <tr><td><strong>触感主流</strong></td><td>柔软 (98%)</td><td>柔软+弹性+厚实</td><td>柔软+弹性</td><td>柔软+弹性</td></tr>
+          <tr><td><strong>通道主流</strong></td><td>双通道 (54%)</td><td>不确定 (66%)</td><td>双通道 (43%)</td><td>双通道 (24%)</td></tr>
+          <tr><td><strong>独特功能</strong></td><td>便携 (45%)</td><td>吸力/负压 (14%)</td><td>防水 (38%)</td><td>震动+加热</td></tr>
+          <tr><td><strong>尺寸主流</strong></td><td>大型&gt;500g (91%)</td><td>重量级 (25%)</td><td>迷你轻量 (22%)</td><td>迷你轻量 (27%)</td></tr>
+          <tr><td><strong>仿真度</strong></td><td>仿真肌肤 (50%)</td><td>一般仿真 (53%)</td><td>各半</td><td>仿真肌肤 (80%)</td></tr>
+          <tr><td><strong>私密性</strong></td><td>97%</td><td>99%</td><td>93%</td><td>83%</td></tr>
+          <tr><td><strong>电动功能</strong></td><td>震动10%/加温4%</td><td>电动6.5%</td><td><span style="color:#7C3AED;font-weight:700;">震动25%</span></td><td>震动6%/加热5%</td></tr>
+          <tr><td><strong>特殊赛道</strong></td><td>—</td><td><span style="color:#F59E0B;font-weight:700;">动漫角色 (8.6%)</span></td><td>—</td><td>—</td></tr>
+          <tr><td><strong>伴侣场景</strong></td><td>情侣19%</td><td>不限87%</td><td><span style="color:#7C3AED;font-weight:700;">情侣22%</span></td><td>情侣5%</td></tr>
+          <tr><td><strong>安全认证</strong></td><td>未标注</td><td>亲肤89%</td><td>未标注</td><td><span style="color:#16A34A;font-weight:700;">亲肤31%</span></td></tr>
+          <tr><td><strong>旅行场景</strong></td><td>—</td><td>—</td><td>—</td><td><span style="color:#16A34A;font-weight:700;">旅行35%</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 4: 核心痛点 ==================== -->
+<div class="section">
+  <div class="section-title">四、核心研究发现：用户实际使用痛点</div>
+  <div class="divider"></div>
+
+  <div class="warning-box">
+    <strong>⚠️ 重要修正</strong>：原报告称「清洁保养」出现频率~70%为第一痛点，实际数据表明第一痛点是「<strong>使用体验差</strong>」，四国一致占比最高。
+  </div>
+
+  <div class="grid-2" style="margin-bottom:24px;">
+    <div class="card red" style="border-left:none;">
+      <div class="card-title">全市场核心痛点排行（雷达图）</div>
+      <div class="card-body" style="padding-left:0;">
+        <div id="chart-pain-radar" class="chart-box"></div>
+      </div>
+    </div>
+    <div class="card orange" style="border-left:none;">
+      <div class="card-title">各市场第一痛点：使用体验差</div>
+      <div class="card-body" style="padding-left:0;">
+        <div id="chart-pain-bar" class="chart-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 核心痛点详细表格 -->
+  <div class="card red" style="border-left:none;">
+    <div class="card-title">全市场通用核心痛点排行（按出现频率排序）</div>
+    <div class="card-body" style="padding-left:0;">
+      <table class="data-table">
+        <thead><tr><th>痛点维度</th><th>日亚 (1,415条)</th><th>德国 (452条)</th><th>英国 (287条)</th><th>美亚 (7,542条)</th></tr></thead>
+        <tbody>
+          <tr style="background:#FEF2F2;"><td>📦 1.使用体验差</td><td><strong>998条 (70.6%)</strong></td><td><strong>395条 (87.4%)</strong></td><td><strong>231条 (80.5%)</strong></td><td>2,346条 (31.1%)</td></tr>
+          <tr><td>📦 2.质量/耐用性差</td><td>343条 (24.2%)</td><td>98条 (21.7%)</td><td>63条 (21.9%)</td><td>459条 (6.1%)</td></tr>
+          <tr><td>📦 3.触感材质问题</td><td>283条 (20.0%)</td><td>—</td><td>—</td><td>155条 (2.1%)</td></tr>
+          <tr><td>📦 4.尺寸大小问题</td><td>237条 (16.7%)</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td>📦 5.通道/功能设计差</td><td>—</td><td>102条 (22.6%)</td><td>36条 (12.5%)</td><td>538条 (7.1%)</td></tr>
+          <tr><td>📦 6.清洁保养难</td><td>139条 (9.8%)</td><td>80条 (17.7%)</td><td>27条 (9.4%)</td><td>214条 (2.8%)</td></tr>
+          <tr><td>📦 7.气味问题</td><td>71条 (5.0%)</td><td>38条 (8.4%)</td><td>6条 (2.1%)</td><td>161条 (2.1%)</td></tr>
+          <tr><td>📦 8.外观设计差</td><td>—</td><td>75条 (13.9%)</td><td>52条 (18.1%)</td><td>382条 (5.1%)</td></tr>
+          <tr><td>🛎️ 9.售后服务差</td><td>—</td><td>—</td><td>—</td><td>160条 (2.1%)</td></tr>
+          <tr><td>😔 10.价格性价比低</td><td>—</td><td>71条 (15.7%)</td><td><strong>69条 (24.0%)</strong></td><td>502条 (6.7%)</td></tr>
+          <tr><td>😔 11.真实感差</td><td>—</td><td>33条 (7.3%)</td><td>—</td><td>181条 (2.4%)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 市场差异化痛点 -->
+  <div class="grid-2">
+    <div class="card red" style="border-left:none;">
+      <div class="card-title">🇺🇸 美国市场洞察（7,542条）</div>
+      <div class="card-body" style="padding-left:0;">
+        <p style="font-size:13px;color:#334155;line-height:1.8;"><strong>📦 产品使用：</strong>通道设计差(232)、紧致度过强(169)、耐久性差(378)</p>
+        <p style="font-size:13px;color:#334155;line-height:1.8;margin-top:8px;"><strong>🛎️ 服务：</strong>无法退款(149)、客服不回应(9)</p>
+        <p style="font-size:13px;color:#334155;line-height:1.8;margin-top:8px;"><strong>😔 感受：</strong>设计与实物不符(224)、不值这个价(420)</p>
+        <div class="insight-box" style="margin-top:16px;border-color:#DC2626;">
+          <div class="insight-title">💡 美亚洞察</div>
+          <p>「不值这个价」的抱怨与「真实感差」(181条)高度相关——用户支付高价但未获得真实体验，失望感最强。</p>
+        </div>
+      </div>
+    </div>
+    <div class="card orange" style="border-left:none;">
+      <div class="card-title">🇯🇵 日本市场洞察（1,415条）</div>
+      <div class="card-body" style="padding-left:0;">
+        <p style="font-size:13px;color:#334155;line-height:1.8;"><strong>📦 产品使用：</strong>触感偏软(113)、尺寸过小(141)、耐久性差(251)</p>
+        <p style="font-size:13px;color:#334155;line-height:1.8;margin-top:8px;"><strong>😔 感受：</strong>真实感不足、预期不符</p>
+        <p style="font-size:13px;color:#334155;line-height:1.8;margin-top:8px;"><strong>🛎️ 服务：</strong>包装隐私（高度敏感，99%强调保密发货）</p>
+        <div class="insight-box" style="margin-top:16px;border-color:#F59E0B;">
+          <div class="insight-title">💡 日亚洞察</div>
+          <p>触感偏软是日亚独有痛点。触感字段覆盖率约20-30%，实际触感抱怨可能被低估，但日亚用户对硬度和尺寸的敏感度是客观存在的。</p>
+        </div>
+      </div>
+    </div>
+    <div class="card green" style="border-left:none;">
+      <div class="card-title">🇩🇪 德国市场洞察（452条）</div>
+      <div class="card-body" style="padding-left:0;">
+        <p style="font-size:13px;color:#334155;line-height:1.8;"><strong>📦 产品使用：</strong>通道设计差(54)、清洁困难(63)、气味(38)</p>
+        <p style="font-size:13px;color:#334155;line-height:1.8;margin-top:8px;"><strong>😔 感受：</strong>不值这个价(52)、真实感差(33)</p>
+        <p style="font-size:13px;color:#334155;line-height:1.8;margin-top:8px;"><strong>🛎️ 服务：</strong>亲肤安全认证（强烈需求，31%产品标注）</p>
+        <div class="insight-box" style="margin-top:16px;border-color:#16A34A;">
+          <div class="insight-title">💡 德国洞察</div>
+          <p>德国用户是四国市场中最注重「功能实用性」的群体。通道设计(22.6%)、清洁难度(17.7%)是高频投诉，远超其他市场。</p>
+        </div>
+      </div>
+    </div>
+    <div class="card purple" style="border-left:none;">
+      <div class="card-title">🇬🇧 英国市场洞察（287条）</div>
+      <div class="card-body" style="padding-left:0;">
+        <p style="font-size:13px;color:#334155;line-height:1.8;"><strong>😔 感受：</strong>不值这个价(56)、设计与实物不符(25)</p>
+        <p style="font-size:13px;color:#334155;line-height:1.8;margin-top:8px;"><strong>📦 产品使用：</strong>耐久性差(34)、易撕裂(15)</p>
+        <p style="font-size:13px;color:#334155;line-height:1.8;margin-top:8px;"><strong>🛎️ 服务：</strong>整体服务抱怨低于美亚</p>
+        <div class="insight-box" style="margin-top:16px;border-color:#7C3AED;">
+          <div class="insight-title">💡 英国洞察</div>
+          <p>英国用户「不值这个价」抱怨率(24%)四国最高，追求「小而精、高性价比」的产品。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 产品阶段与满意度 -->
+  <div class="card orange" style="border-left:none;margin-top:20px;">
+    <div class="card-title">用户满意度与产品阶段对应关系</div>
+    <div class="card-body" style="padding-left:0;">
+      <table class="data-table">
+        <thead><tr><th>产品阶段</th><th>价格区间</th><th>主要痛点</th><th>情感状态</th></tr></thead>
+        <tbody>
+          <tr><td><strong>低价</strong></td><td>&lt;$30</td><td>质量差/易损坏/气味大</td><td>预期低，抱怨相对克制</td></tr>
+          <tr style="background:#FFFBEB;"><td><strong>中端</strong></td><td>$30-80</td><td>体验不符预期/清洁难/不值</td><td><span style="color:#F59E0B;font-weight:700;">预期落差最大，情感抱怨最强烈</span></td></tr>
+          <tr><td><strong>高端</strong></td><td>&gt;$80</td><td>真实感不足/细节失望/耐久性不符</td><td>失望感最强，伤害品牌信任</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 5: 用户人设 ==================== -->
+<div class="section">
+  <div class="section-title">五、核心研究发现：用户情感/心理需求</div>
+  <div class="divider"></div>
+  <p style="font-size:14px;color:#64748B;margin-bottom:8px;font-weight:600;">研究逻辑链：人群 → 场景 → 任务 → 动机 → 人设定位 → P站热度支撑 → 落地指引</p>
+  <p style="font-size:13px;color:#94A3B8;margin-bottom:24px;">✅强 = 有直接数据支撑 | ⚠️中 = 有间接数据支撑 | ❌弱 = 基于推断，无直接数据</p>
+
+  <!-- ========== Persona 1: 情感陪伴型 ========== -->
+  <div class="persona-full">
+    <div class="persona-full-header blue">
+      <div class="persona-full-type">类型一</div>
+      <div class="persona-full-name">情感陪伴型</div>
+      <div class="persona-full-desc">单身独居男性，长期无亲密伴侣，对真实感有强烈需求，希望产品能提供情感陪伴感</div>
+    </div>
+    <!-- Flow Diagram -->
+    <div class="persona-flow">
+      <div class="pflow-step">
+        <div class="pflow-step-label">👤 人群</div>
+        <div class="pflow-step-value">单身独居男性<br>长期无亲密伴侣</div>
+        <div class="pflow-step-evi evi-strong">✅ 强</div>
+      </div>
+      <div class="pflow-arrow">→</div>
+      <div class="pflow-step">
+        <div class="pflow-step-label">📍 场景</div>
+        <div class="pflow-step-value">深夜独处<br>异地分居期间</div>
+        <div class="pflow-step-evi evi-medium">⚠️ 中</div>
+      </div>
+      <div class="pflow-arrow">→</div>
+      <div class="pflow-step">
+        <div class="pflow-step-label">🎯 任务</div>
+        <div class="pflow-step-value">获得情感陪伴<br>生理满足</div>
+        <div class="pflow-step-evi evi-strong">✅ 强</div>
+      </div>
+      <div class="pflow-arrow">→</div>
+      <div class="pflow-step">
+        <div class="pflow-step-label">💓 动机</div>
+        <div class="pflow-step-value">排解孤独感<br>缓解情感失落</div>
+        <div class="pflow-step-evi evi-medium">⚠️ 中</div>
+      </div>
+    </div>
+    <!-- Data Source Table -->
+    <div style="padding:0 28px 20px;">
+      <table class="persona-detail-table">
+        <thead><tr><th>层级</th><th>内容</th><th>数据来源</th><th>支撑强度</th></tr></thead>
+        <tbody>
+          <tr><td><strong>人群</strong></td><td>单身独居男性，长期无亲密伴侣，对真实感有强烈需求</td><td>P站 MILF(55)/Asian(22)/Japanese(19)</td><td><span class="evi-strong">✅ 强</span></td></tr>
+          <tr><td><strong>场景</strong></td><td>深夜独处（凌晨，情绪敏感）；异地分居期间</td><td>评价表使用场景标签：独处使用（高频）</td><td><span class="evi-medium">⚠️ 中</span></td></tr>
+          <tr><td><strong>任务</strong></td><td>获得情感陪伴感 + 生理满足</td><td>「真实感差」投诉181条（美亚），四国共同痛点</td><td><span class="evi-strong">✅ 强</span></td></tr>
+          <tr><td><strong>动机</strong></td><td>排解孤独感 → 缓解「与真人差距大」的情感失落</td><td>8号用户访谈：「情绪压力释放」「身体与心理连接」</td><td><span class="evi-medium">⚠️ 中</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Positioning -->
+    <div class="persona-positioning">
+      <div class="pos-row"><div class="pos-label">具体人设定位</div><div class="pos-value">亚洲温柔型（韩/日系）：黑长直发、柔和面部线条、偏瘦体型、居家穿着、安静气质</div></div>
+      <div class="pos-row"><div class="pos-label">P站热度</div><div class="pos-value">Asian(22条) + Japanese(19条) + Asian POV(高频) + massage japanese(13条)</div></div>
+      <div class="pos-row"><div class="pos-label">竞争烈度</div><div class="pos-value"><span style="color:#F59E0B;font-weight:600;">中等</span> — 亚洲人设在P站热度高但非最高，适合品牌差异化切入</div></div>
+    </div>
+    <!-- Action Guide -->
+    <div class="persona-action">
+      <div class="action-block"><div class="action-block-title">📦 产品方向</div><div class="action-block-text">肤色自然黄/白、肌肤纹理细腻，体重偏轻（适合独居场景）</div></div>
+      <div class="action-block"><div class="action-block-title">📝 详情页文案</div><div class="action-block-text">配深夜室内场景图，文案「今晚，有她陪你」</div></div>
+      <div class="action-block"><div class="action-block-title">📦 包装方向</div><div class="action-block-text">简约温馨风格，弱化成人属性</div></div>
+    </div>
+  </div>
+
+  <!-- ========== Persona 2: 刚需替代型 ========== -->
+  <div class="persona-full">
+    <div class="persona-full-header green">
+      <div class="persona-full-type">类型二</div>
+      <div class="persona-full-name">刚需替代型</div>
+      <div class="persona-full-desc">长期出差/分居/高频使用者，对产品可靠性要求极高，希望产品是「靠谱的日常伙伴」</div>
+    </div>
+    <div class="persona-flow">
+      <div class="pflow-step">
+        <div class="pflow-step-label">👤 人群</div>
+        <div class="pflow-step-value">长期出差/分居<br>高频使用者</div>
+        <div class="pflow-step-evi evi-strong">✅ 强</div>
+      </div>
+      <div class="pflow-arrow">→</div>
+      <div class="pflow-step">
+        <div class="pflow-step-label">📍 场景</div>
+        <div class="pflow-step-value">日常高频使用<br>出差/旅行携带</div>
+        <div class="pflow-step-evi evi-medium">⚠️ 中</div>
+      </div>
+      <div class="pflow-arrow">→</div>
+      <div class="pflow-step">
+        <div class="pflow-step-label">🎯 任务</div>
+        <div class="pflow-step-value">稳定可靠的工具<br>不麻烦、不出问题</div>
+        <div class="pflow-step-evi evi-strong">✅ 强</div>
+      </div>
+      <div class="pflow-arrow">→</div>
+      <div class="pflow-step">
+        <div class="pflow-step-label">💓 动机</div>
+        <div class="pflow-step-value">避免频繁更换成本<br>降低使用门槛</div>
+        <div class="pflow-step-evi evi-medium">⚠️ 中</div>
+      </div>
+    </div>
+    <div style="padding:0 28px 20px;">
+      <table class="persona-detail-table">
+        <thead><tr><th>层级</th><th>内容</th><th>数据来源</th><th>支撑强度</th></tr></thead>
+        <tbody>
+          <tr><td><strong>人群</strong></td><td>长期出差/分居/高频使用者，对产品可靠性要求极高</td><td>评价表使用频率：频繁使用；英德旅行场景152条</td><td><span class="evi-strong">✅ 强</span></td></tr>
+          <tr><td><strong>场景</strong></td><td>日常高频使用；出差/旅行携带；浴室使用</td><td>防水功能英国25% vs 美亚10%；德亚旅行场景35%</td><td><span class="evi-medium">⚠️ 中</span></td></tr>
+          <tr><td><strong>任务</strong></td><td>稳定可靠的工具，不麻烦、不出问题</td><td>耐久性差投诉四国均有(21-24%)；清洁困难(9-18%)</td><td><span class="evi-strong">✅ 强</span></td></tr>
+          <tr><td><strong>动机</strong></td><td>避免频繁更换成本 → 降低使用门槛 → 工具靠谱不烦心</td><td>8号用户访谈：「清洁困难是TOP1痛点」「存储占地大」</td><td><span class="evi-medium">⚠️ 中</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="persona-positioning">
+      <div class="pos-row"><div class="pos-label">具体人设定位</div><div class="pos-value">功能性/工具型：无人设属性，主打可靠、实用；可命名产品系列如「T系列」</div></div>
+      <div class="pos-row"><div class="pos-label">P站热度</div><div class="pos-value"><span style="color:#94A3B8;">非人设赛道，P站无直接热度对应</span></div></div>
+      <div class="pos-row"><div class="pos-label">竞争烈度</div><div class="pos-value"><span style="color:#94A3B8;">不适用</span> — 用户不关心这类人设，产品力是核心</div></div>
+    </div>
+    <div class="persona-action">
+      <div class="action-block"><div class="action-block-title">📦 产品方向</div><div class="action-block-text">轻量化(≤3kg)+防水+易清洁+耐用材质，可拆卸通道</div></div>
+      <div class="action-block"><div class="action-block-title">📝 详情页文案</div><div class="action-block-text">不讲故事，讲参数；防水等级/清洁方式/使用寿命承诺</div></div>
+      <div class="action-block"><div class="action-block-title">📦 包装方向</div><div class="action-block-text">务实简洁，重点在隐私保护</div></div>
+    </div>
+  </div>
+
+  <!-- ========== Persona 3: 情侣探索型 ========== -->
+  <div class="persona-full">
+    <div class="persona-full-header orange">
+      <div class="persona-full-type">类型三</div>
+      <div class="persona-full-name">情侣探索型</div>
+      <div class="persona-full-desc">情侣/伴侣关系，追求新鲜体验，希望产品能增添情趣、成为共同探索的纽带</div>
+    </div>
+    <div class="persona-flow">
+      <div class="pflow-step">
+        <div class="pflow-step-label">👤 人群</div>
+        <div class="pflow-step-value">情侣/伴侣关系<br>追求新鲜体验</div>
+        <div class="pflow-step-evi evi-medium">⚠️ 中</div>
+      </div>
+      <div class="pflow-arrow">→</div>
+      <div class="pflow-step">
+        <div class="pflow-step-label">📍 场景</div>
+        <div class="pflow-step-value">周末/度假共同探索<br>居家隐蔽场景</div>
+        <div class="pflow-step-evi evi-medium">⚠️ 中</div>
+      </div>
+      <div class="pflow-arrow">→</div>
+      <div class="pflow-step">
+        <div class="pflow-step-label">🎯 任务</div>
+        <div class="pflow-step-value">增添情趣<br>共同探索</div>
+        <div class="pflow-step-evi evi-medium">⚠️ 中</div>
+      </div>
+      <div class="pflow-arrow">→</div>
+      <div class="pflow-step">
+        <div class="pflow-step-label">💓 动机</div>
+        <div class="pflow-step-value">关系新鲜感<br>对方接纳的安心感</div>
+        <div class="pflow-step-evi evi-weak">❌ 弱</div>
+      </div>
+    </div>
+    <div style="padding:0 28px 20px;">
+      <table class="persona-detail-table">
+        <thead><tr><th>层级</th><th>内容</th><th>数据来源</th><th>支撑强度</th></tr></thead>
+        <tbody>
+          <tr><td><strong>人群</strong></td><td>情侣/伴侣关系，追求新鲜体验</td><td>评价表：情侣/多人使用；P站Couple(11条)</td><td><span class="evi-medium">⚠️ 中</span></td></tr>
+          <tr><td><strong>场景</strong></td><td>周末/度假共同探索；居家隐蔽场景</td><td>P站Romantic Hot Passionate Sex；massage japanese(13条)</td><td><span class="evi-medium">⚠️ 中</span></td></tr>
+          <tr><td><strong>任务</strong></td><td>增添情趣、共同探索；给对方惊喜</td><td>P站女性用户38%且增长，Romantic+209%；Party+385%</td><td><span class="evi-medium">⚠️ 中</span></td></tr>
+          <tr><td><strong>动机</strong></td><td>关系新鲜感 → 对方接纳的安心感</td><td>基于数据推断，无直接数据支撑</td><td><span class="evi-weak">❌ 弱</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="persona-positioning">
+      <div class="pos-row"><div class="pos-label">具体人设定位</div><div class="pos-value">拉丁热情型：健康肤色、丰满身材、鲜艳穿着、自信气质；或日式浪漫型：白皙皮肤、柔和气质、SPA场景感</div></div>
+      <div class="pos-row"><div class="pos-label">P站热度</div><div class="pos-value">Latina(22条) + Couple(11条) + massage oil/nuru(13条) + Romantic Hot(高热)</div></div>
+      <div class="pos-row"><div class="pos-label">竞争烈度</div><div class="pos-value"><span style="color:#16A34A;font-weight:600;">较低</span> — 情侣场景竞品少，欧洲市场更明显</div></div>
+    </div>
+    <div class="persona-action">
+      <div class="action-block"><div class="action-block-title">📦 产品方向</div><div class="action-block-text">防水+快干+精美礼盒；可情侣共用设计</div></div>
+      <div class="action-block"><div class="action-block-title">📝 详情页文案</div><div class="action-block-text">双人场景图，文案「两个人的小秘密」</div></div>
+      <div class="action-block"><div class="action-block-title">📦 包装方向</div><div class="action-block-text">可作礼品的高端礼盒包装</div></div>
+    </div>
+    <!-- Data Warning -->
+    <div style="margin:0 28px 20px;font-size:11px;color:#92400E;background:#FFFBEB;padding:10px 14px;border-radius:8px;">
+      ⚠️ 数据说明：类型三的动机层缺乏直接数据支撑，属于「基于数据推断」。
+    </div>
+  </div>
+
+  <!-- ========== Persona 4: 品质升级型 ========== -->
+  <div class="persona-full">
+    <div class="persona-full-header red">
+      <div class="persona-full-type">类型四</div>
+      <div class="persona-full-name">品质升级型</div>
+      <div class="persona-full-desc">有经济基础的成熟用户，只买高端，对品质要求极高，希望产品是「极致真实感」的载体</div>
+    </div>
+    <div class="persona-flow">
+      <div class="pflow-step">
+        <div class="pflow-step-label">👤 人群</div>
+        <div class="pflow-step-value">有经济基础的<br>成熟用户</div>
+        <div class="pflow-step-evi evi-medium">⚠️ 中</div>
+      </div>
+      <div class="pflow-arrow">→</div>
+      <div class="pflow-step">
+        <div class="pflow-step-label">📍 场景</div>
+        <div class="pflow-step-value">替代真人亲密接触<br>作为高端礼品</div>
+        <div class="pflow-step-evi evi-medium">⚠️ 中</div>
+      </div>
+      <div class="pflow-arrow">→</div>
+      <div class="pflow-step">
+        <div class="pflow-step-label">🎯 任务</div>
+        <div class="pflow-step-value">极致真实感<br>细节完美</div>
+        <div class="pflow-step-evi evi-medium">⚠️ 中</div>
+      </div>
+      <div class="pflow-arrow">→</div>
+      <div class="pflow-step">
+        <div class="pflow-step-label">💓 动机</div>
+        <div class="pflow-step-value">幻想具象化<br>身份认同</div>
+        <div class="pflow-step-evi evi-weak">❌ 弱</div>
+      </div>
+    </div>
+    <div style="padding:0 28px 20px;">
+      <table class="persona-detail-table">
+        <thead><tr><th>层级</th><th>内容</th><th>数据来源</th><th>支撑强度</th></tr></thead>
+        <tbody>
+          <tr><td><strong>人群</strong></td><td>有经济基础的成熟用户，只买高端，对品质要求极高</td><td>P站Mature(20条)/MILF(55)；美亚$80+价格段评价</td><td><span class="evi-medium">⚠️ 中</span></td></tr>
+          <tr><td><strong>场景</strong></td><td>替代真人亲密接触（对真实感要求极高）；作为高端礼品</td><td>Bedbible测评Irontech $3,000产品；真实感差(181条)</td><td><span class="evi-medium">⚠️ 中</span></td></tr>
+          <tr><td><strong>任务</strong></td><td>极致真实感；追求细节完美；材质/外观/功能全方位高端</td><td>Bedbible：Irontech Drake Von 4.8分，用户原话"a work of art"</td><td><span class="evi-medium">⚠️ 中</span></td></tr>
+          <tr><td><strong>动机</strong></td><td>幻想具象化 → 身份认同</td><td>无直接数据支撑，基于推断</td><td><span class="evi-weak">❌ 弱</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="persona-positioning">
+      <div class="pos-row"><div class="pos-label">具体人设定位</div><div class="pos-value">明星复刻型：参考P站pornstar标签，主打「明星同款」；或写实完美型：无特定脸/名，但极致真实感（温度/肤色/纹理）</div></div>
+      <div class="pos-row"><div class="pos-label">P站热度</div><div class="pos-value">pornstar korean(15条) + pornstar chinese(14条) + Realistic(高热) + Mature(20条)</div></div>
+      <div class="pos-row"><div class="pos-label">竞争烈度</div><div class="pos-value"><span style="color:#DC2626;font-weight:600;">高</span> — 明星复刻赛道已有竞品，高端市场竞争激烈</div></div>
+    </div>
+    <div class="persona-action">
+      <div class="action-block"><div class="action-block-title">📦 产品方向</div><div class="action-block-text">硅胶+加热功能+拟真外观+品牌故事；定价$80+</div></div>
+      <div class="action-block"><div class="action-block-title">📝 详情页文案</div><div class="action-block-text">细节特写+温度感文案+品牌故事背书</div></div>
+      <div class="action-block"><div class="action-block-title">📦 包装方向</div><div class="action-block-text">高端礼盒，强化收藏价值感</div></div>
+    </div>
+    <!-- Data Warning -->
+    <div style="margin:0 28px 20px;font-size:11px;color:#92400E;background:#FFFBEB;padding:10px 14px;border-radius:8px;">
+      ⚠️ 数据说明：类型四的动机层缺乏直接数据支撑，属于「基于数据推断」。
+    </div>
+  </div>
+
+  <!-- 5.2 P站人设体系 -->
+  <div class="card purple" style="border-left:none;margin-top:28px;">
+    <div class="card-title">P站人设标签热度（1,018条搜索词分析）</div>
+    <div class="card-body" style="padding-left:0;">
+      <table class="data-table">
+        <thead><tr><th>标签类型</th><th>高热标签（&gt;15条）</th><th>中热标签（5-15条）</th><th>低热标签（&lt;5条）</th></tr></thead>
+        <tbody>
+          <tr><td><strong>成熟度</strong></td><td><span style="color:#DC2626;font-weight:700;">MILF(55) 全球第二大搜索词</span>、Mature(20)</td><td>—</td><td>Cougar</td></tr>
+          <tr><td><strong>行为/场景</strong></td><td>后庭Anal(60)、内射Creampie(33)、POV(32)</td><td>情侣Couple(11)</td><td>角色扮演</td></tr>
+          <tr><td><strong>人种/国籍</strong></td><td>Asian(22)、Latina(22)、Japanese(19)、Ebony(17)</td><td>Korean(15)、Indian(14)</td><td>泰国、中国</td></tr>
+          <tr><td><strong>发色特征</strong></td><td>Blonde(16)</td><td>Brunette(13)</td><td>红发</td></tr>
+          <tr><td><strong>体型特征</strong></td><td>BBW大码(15)</td><td>Chubby(4)、Petite(3)</td><td>纤瘦、高挑</td></tr>
+          <tr><td><strong>职业/角色</strong></td><td>Cosplay(13)、Massage(13)</td><td>护士、学生、OL</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:11px;color:#6D28D9;margin-top:12px;background:#F5F3FF;padding:10px 14px;border-radius:8px;">
+        📌 角色扮演类需求增长98%，是高速增长的潜力赛道
+      </div>
+    </div>
+  </div>
+
+  <!-- 5.2.4 人设设计优先级 -->
+  <div class="card blue" style="border-left:none;margin-top:20px;">
+    <div class="card-title">产品人设设计优先级建议</div>
+    <div class="card-body" style="padding-left:0;">
+      <table class="data-table">
+        <thead><tr><th>优先级</th><th>人设方向</th><th>P站热度</th><th>文化适配</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr style="background:#FEF2F2;"><td><span class="priority-badge priority-P0">P0</span></td><td>亚洲×成熟女性（韩/日）</td><td>高热</td><td>✅ 高</td><td>日韩审美对中国市场接受度高</td></tr>
+          <tr style="background:#FEF2F2;"><td><span class="priority-badge priority-P0">P0</span></td><td>拉丁裔×丰臀</td><td>高热</td><td>✅ 高</td><td>拉丁审美接受度高，臀部视觉冲击大</td></tr>
+          <tr style="background:#FFFBEB;"><td><span class="priority-badge priority-P1">P1</span></td><td>金发×微胖×熟女</td><td>高热</td><td>✅ 高</td><td>经典搭配，接受度高</td></tr>
+          <tr style="background:#FFFBEB;"><td><span class="priority-badge priority-P1">P1</span></td><td>黑人×大臀</td><td>中热</td><td>⚠️ 中</td><td>需市场测试</td></tr>
+          <tr><td><span class="priority-badge priority-P2">P2</span></td><td>Cosplay×亚洲</td><td>中热</td><td>✅ 高</td><td>二次元+真人结合热门</td></tr>
+          <tr><td><span class="priority-badge priority-P2">P2</span></td><td>按摩/SPA×日式</td><td>中热</td><td>✅ 高</td><td>SPA场景可与产品功能（防水、加热）结合</td></tr>
+          <tr><td><span class="priority-badge priority-P3">P3</span></td><td>高挑×成熟</td><td>低热</td><td>⚠️ 中</td><td>需配合具体产品定位</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 用户情感需求未被满足点 -->
+  <div class="card green" style="border-left:none;margin-top:20px;">
+    <div class="card-title">用户情感需求的未被满足点</div>
+    <div class="card-body" style="padding-left:0;">
+      <ul style="font-size:13px;color:#334155;line-height:2.2;padding-left:18px;">
+        <li><strong>身份认同需求</strong>：用户希望产品能体现审美品味，而非「Low」的成人用品——现有大量产品包装简陋，缺乏设计感</li>
+        <li><strong>安全感需求</strong>：购买→使用→收纳全流程的隐私保护——德国31%产品有亲肤认证，但整体材质安全标注率仍然偏低</li>
+        <li><strong>陪伴感需求</strong>：高频用户希望产品有「温度」，而非冰冷的工具——这是「情感陪伴型」用户的核心诉求，也是高端产品差异化的核心机会</li>
+        <li><strong>真实感需求</strong>：真实感不足是四国市场共同的核心痛点——这是倒模产品最本质的竞争维度</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 6: 好评差评错开分析 ==================== -->
+<div class="section">
+  <div class="section-title">六、好评与差评：维度错开分析</div>
+  <div class="divider"></div>
+  <p style="font-size:13px;color:#64748B;margin-bottom:20px;">本节基于日亚(7,597条)、德国(2,417条)、英国(1,712条)评价数据。美亚4-5星表缺少维度标签字段，无法进行结构化分析。</p>
+
+  <div class="card blue" style="border-left:none;">
+    <div class="card-title">核心发现：好评与差评的维度完全错开</div>
+    <div class="card-body" style="padding-left:0;">
+      <table class="data-table">
+        <thead><tr><th>维度</th><th>4-5星好评</th><th>1-3星差评</th><th>关系判定</th></tr></thead>
+        <tbody>
+          <tr><td><strong>多功能/双人使用</strong></td><td>✅ 高频</td><td>❌ 几乎不提</td><td><span style="color:#F59E0B;">完全错开</span></td></tr>
+          <tr><td><strong>隐私包装</strong></td><td>✅ 高频</td><td>❌ 几乎不提</td><td><span style="color:#F59E0B;">完全错开</span></td></tr>
+          <tr><td><strong>质量耐用性</strong></td><td>❌ 几乎不提</td><td>✅ 高频投诉</td><td><span style="color:#F59E0B;">完全错开</span></td></tr>
+          <tr><td><strong>化学气味</strong></td><td>❌ 几乎不提</td><td>✅ 高频投诉</td><td><span style="color:#F59E0B;">完全错开</span></td></tr>
+          <tr><td><strong>售后服务</strong></td><td>❌ 几乎不提</td><td>✅ 高频投诉</td><td><span style="color:#F59E0B;">完全错开</span></td></tr>
+          <tr><td><strong>尺寸如实描述</strong></td><td>⚠️ 弱化（略小但接受）</td><td>✅ 高频投诉</td><td><span style="color:#F59E0B;">错开且弱化</span></td></tr>
+          <tr><td><strong>材质触感</strong></td><td>✅ 常提（正面）</td><td>⚠️ 差评方向相反</td><td>同一维度相反</td></tr>
+          <tr><td><strong>真实感</strong></td><td>✅ 常提（正面）</td><td>⚠️ 差评方向相反</td><td>同一维度相反</td></tr>
+          <tr><td><strong>性价比</strong></td><td>✅ 常提（正面）</td><td>⚠️ 差评方向相反</td><td>同一维度相反</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="insight-box" style="margin-top:20px;">
+    <div class="insight-title">💡 关键洞察：卖家系统性回避弱点</div>
+    <p>好评高频维度（多功能/隐私/关节灵活）恰好是差评里几乎不涉及的维度——说明这些是「竞品也差不多、无法形成差异化」的维度。</p>
+    <p>差评高频维度（质量/气味/售后/尺寸不符）恰好是好评里完全回避的维度——说明卖家清楚知道产品弱点，选择不主动提及。</p>
+  </div>
+
+  <div class="card orange" style="border-left:none;margin-top:20px;">
+    <div class="card-title">对产品策略的启示</div>
+    <div class="card-body" style="padding-left:0;">
+      <ul style="font-size:13px;color:#334155;line-height:2;padding-left:18px;">
+        <li>主动在产品页说明「差评高频但好评回避」的维度：材质防粘处理+气味控制+材质耐久性说明+质检报告</li>
+        <li>真正差异化的机会在于「竞品不敢说的」：材质稳定性承诺、气味控制承诺、耐用性保证</li>
+        <li>好评里高频的维度（多功能、隐私包装）无法形成差异化，但需要作为基础标配</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 7: 结论与落地优先级 ==================== -->
+<div class="section">
+  <div class="section-title">七、结论与落地优先级</div>
+  <div class="divider"></div>
+
+  <!-- 痛点责任归属 -->
+  <div class="card red" style="border-left:none;">
+    <div class="card-title">痛点责任归属 & 落地优先级</div>
+    <div class="card-body" style="padding-left:0;">
+      <table class="data-table">
+        <thead><tr><th>优先级</th><th>痛点维度</th><th>市场</th><th>负责部门</th><th>落地方向</th></tr></thead>
+        <tbody>
+          <tr style="background:#FEF2F2;"><td><span class="priority-badge priority-P0">P0</span></td><td>📦 使用体验差/通道设计差</td><td>德国(22.6%)、美亚</td><td>产品部/研发</td><td>优化通道结构、提升整体使用手感</td></tr>
+          <tr style="background:#FEF2F2;"><td><span class="priority-badge priority-P0">P0</span></td><td>📦 质量耐用性（撕裂/破损）</td><td>全部市场</td><td>供应链</td><td>材质升级、接缝加固</td></tr>
+          <tr style="background:#FFFBEB;"><td><span class="priority-badge priority-P1">P1</span></td><td>📦 触感材质（偏软/过硬）</td><td>日亚独有</td><td>研发</td><td>⚠️触感标签覆盖率低，需结合供应商数据验证</td></tr>
+          <tr style="background:#FFFBEB;"><td><span class="priority-badge priority-P1">P1</span></td><td>📦 尺寸规格（日亚偏小）</td><td>日亚独有(10%)</td><td>产品部</td><td>提供日亚专线大尺寸规格</td></tr>
+          <tr style="background:#FFFBEB;"><td><span class="priority-badge priority-P1">P1</span></td><td>😔 性价比不匹配</td><td>英(24%)/德(15.7%)</td><td>产品部/定价</td><td>提升产品力支撑中高端定价</td></tr>
+          <tr><td><span class="priority-badge priority-P2">P2</span></td><td>📦 清洁保养难</td><td>德(17.7%)/日(9.8%)</td><td>研发</td><td>可拆卸结构、防水材质</td></tr>
+          <tr><td><span class="priority-badge priority-P2">P2</span></td><td>📦 气味问题</td><td>德国(8.4%)</td><td>供应链</td><td>TPE配方改良、材质认证可视化</td></tr>
+          <tr><td><span class="priority-badge priority-P3">P3</span></td><td>🛎️ 售后服务（无法退款）</td><td>美亚独有</td><td>运营</td><td>隐私售后通道、48小时响应</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 各市场策略 -->
+  <div class="grid-2" style="margin-top:24px;">
+    <div class="market-card us">
+      <div class="market-card-flag">🇺🇸</div>
+      <div class="market-card-title">美亚市场策略</div>
+      <div class="market-card-subtitle">主打：真实感 + 性价比</div>
+      <div class="market-card-strategy">
+        真实感是核心卖点，但需控制在<strong>$30-80价格段</strong>提升产品力，避免「不值这个价」的大规模投诉。售后服务是额外差异化点。
+      </div>
+      <div class="market-card-insight">💡 美亚用户支付高价但未获得真实体验，失望感最强。真实感差(181条)与「不值这个价」(420条)高度相关。</div>
+    </div>
+    <div class="market-card jp">
+      <div class="market-card-flag">🇯🇵</div>
+      <div class="market-card-title">日本市场策略</div>
+      <div class="market-card-subtitle">主打：触感规格 + 大尺寸 + 动漫IP</div>
+      <div class="market-card-strategy">
+        提供专供日亚的<strong>「偏硬材质+大尺寸」</strong>产品线；动漫角色赛道（现有8.6%）是日亚独特差异化机会，可叠加人设（亚洲女性/金发/明星复刻）。
+      </div>
+      <div class="market-card-insight">💡 日亚触感偏软(113条)和尺寸过小(141条)的投诉是真实存在的，建议提供日亚专线。</div>
+    </div>
+    <div class="market-card de">
+      <div class="market-card-flag">🇩🇪</div>
+      <div class="market-card-title">德国市场策略</div>
+      <div class="market-card-subtitle">主打：功能实用性 + 材质安全</div>
+      <div class="market-card-strategy">
+        通道设计(22.6%)是核心痛点也是差异化机会；31%产品已标注<strong>亲肤安全认证</strong>，需进一步将认证可视化作为核心卖点；加热功能(5%)是德国独特功能方向。
+      </div>
+      <div class="market-card-insight">💡 德国用户是四国中最注重「功能实用性」的群体，通道设计是高频投诉。</div>
+    </div>
+    <div class="market-card uk">
+      <div class="market-card-flag">🇬🇧</div>
+      <div class="market-card-title">英国市场策略</div>
+      <div class="market-card-subtitle">主打：轻量高颜值 + 情侣场景</div>
+      <div class="market-card-strategy">
+        英国用户偏好<strong>迷你轻量(22%)</strong>和情侣使用(22%)，产品设计应向轻便、多功能组合方向发展；高震动功能比例(25%)意味着电动化是重要功能赛道。
+      </div>
+      <div class="market-card-insight">💡 英国用户「不值这个价」抱怨率(24%)四国最高，追求「小而精、高性价比」。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 8: 研究局限 ==================== -->
+<div class="section">
+  <div class="section-title">八、研究局限</div>
+  <div class="divider"></div>
+  <div class="warning-box" style="margin-bottom:0;">
+    <ul>
+      <li>⚠️ 日亚触感标签覆盖率低：触感材质字段约70-80%为"未标注"，触感偏软抱怨比例可能被低估</li>
+      <li>⚠️ 美亚4-5星评价表缺少维度标签字段，无法进行好评结构化分析</li>
+      <li>⚠️ P站数据为通用成人视频分类，人设方向建议仅供参考，不应作为市场规模依据</li>
+      <li>⚠️ 倒模产品过滤基于标题关键词+重量字段，部分混合型产品可能存在归类误差</li>
+      <li>⚠️ 英国/德国倒模产品ASIN数量较少（32/46个），结论代表性和统计显著性有限</li>
+      <li>数据截止2026年6月</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- end .page -->
+
+<!-- Footer -->
+<div class="report-footer">
+  <p>数据来源：1号数据源（商品评价）、2号数据源（销售数据）</p>
+  <p style="margin-top:6px;">
+    <a href="https://codebuddy.work/agents/share/2J1vfCuO0kFSDN-Mn-Hu2iwi6v6josjhW-TlgjeMhaa0mdz73GF8s5_kNFij6dWy?platform=workbuddy" target="_blank">各数据源洞察报告（8个数据源）↗</a> ·
+    分析工具：飞书多维表格 API ·
+    数据规模：倒模产品933个ASIN + 1-3星评价约10,000条
+  </p>
+  <p style="margin-top:12px;font-size:11px;">© 2026 臀部形态倒模产品市场分析报告 · 基于真实数据分析版</p>
+</div>
+
+<!-- ==================== ECharts Scripts ==================== -->
+<script>
+// ---------- Chart 1: 各市场评价规模 ----------
+var chart1 = echarts.init(document.getElementById('chart-market-review'));
+chart1.setOption({
+  tooltip: { trigger:'axis', backgroundColor:'#fff',borderColor:'#E2E8F0',textStyle:{color:'#334155',fontSize:12} },
+  legend: { data:['总评价数','1-3星差评数'], bottom:0, textStyle:{color:'#64748B',fontSize:11} },
+  grid: { top:20, right:30, bottom:40, left:50 },
+  xAxis: { type:'category', data:['日亚','德国','英国','美亚'], axisLabel:{color:'#64748B',fontSize:11} },
+  yAxis: { type:'value', axisLabel:{color:'#64748B',fontSize:11}, splitLine:{lineStyle:{color:'#F1F5F9'}} },
+  series:[
+    { name:'总评价数', type:'bar', data:[7597,2417,1712,7542], barWidth:'28%', itemStyle:{color:'#2563EB',borderRadius:[4,4,0,0]} },
+    { name:'1-3星差评数', type:'bar', data:[1415,452,287,7542], barWidth:'28%', itemStyle:{color:'#DC2626',borderRadius:[4,4,0,0]} }
+  ]
+});
+
+// ---------- Chart 2: 正评率 ----------
+var chart2 = echarts.init(document.getElementById('chart-positive-rate'));
+chart2.setOption({
+  tooltip: { trigger:'item', backgroundColor:'#fff',borderColor:'#E2E8F0',textStyle:{color:'#334155',fontSize:12} },
+  legend: { bottom:0, textStyle:{color:'#64748B',fontSize:11} },
+  series:[{
+    type:'pie', radius:['45%','70%'],
+    label:{ formatter:'{b}\n{d}%', fontSize:11, color:'#334155' },
+    data:[
+      {value:81, name:'日亚正评', itemStyle:{color:'#16A34A'}},
+      {value:19, name:'日亚差评', itemStyle:{color:'#FCA5A5'}},
+      {value:81, name:'德国正评', itemStyle:{color:'#2563EB'}},
+      {value:19, name:'德国差评', itemStyle:{color:'#93C5FD'}},
+      {value:83, name:'英国正评', itemStyle:{color:'#7C3AED'}},
+      {value:17, name:'英国差评', itemStyle:{color:'#C4B5FD'}}
+    ]
+  }]
+});
+
+// ---------- Chart 3: 核心痛点雷达图 ----------
+var chart3 = echarts.init(document.getElementById('chart-pain-radar'));
+chart3.setOption({
+  tooltip:{},
+  legend: { data:['日亚','德国','英国','美亚'], bottom:0, textStyle:{color:'#64748B',fontSize:11} },
+  radar:{
+    indicator:[
+      {name:'使用体验差',max:100}, {name:'质量耐用性差',max:30},
+      {name:'触感材质问题',max:25}, {name:'尺寸大小问题',max:20},
+      {name:'通道设计差',max:25}, {name:'清洁保养难',max:20},
+      {name:'气味问题',max:10}, {name:'外观设计差',max:20}
+    ],
+    shape:'polygon', splitArea:{areaStyle:{color:['#F8FAFC','#fff']}},
+    axisName:{color:'#334155',fontSize:10}
+  },
+  series:[{
+    type:'radar',
+    data:[
+      {value:[70.6,24.2,20.0,16.7,0,9.8,5.0,0], name:'日亚', lineStyle:{color:'#DC2626'},areaStyle:{color:'rgba(220,38,38,0.08)'},itemStyle:{color:'#DC2626'}},
+      {value:[87.4,21.7,0,0,22.6,17.7,8.4,13.9], name:'德国', lineStyle:{color:'#16A34A'},areaStyle:{color:'rgba(22,163,74,0.08)'},itemStyle:{color:'#16A34A'}},
+      {value:[80.5,21.9,0,0,12.5,9.4,2.1,18.1], name:'英国', lineStyle:{color:'#7C3AED'},areaStyle:{color:'rgba(124,58,237,0.08)'},itemStyle:{color:'#7C3AED'}},
+      {value:[31.1,6.1,2.1,0,7.1,2.8,2.1,5.1], name:'美亚', lineStyle:{color:'#2563EB'},areaStyle:{color:'rgba(37,99,235,0.08)'},itemStyle:{color:'#2563EB'}}
+    ]
+  }]
+});
+
+// ---------- Chart 4: 使用体验差横向对比 ----------
+var chart4 = echarts.init(document.getElementById('chart-pain-bar'));
+chart4.setOption({
+  tooltip: { trigger:'axis', backgroundColor:'#fff',borderColor:'#E2E8F0',textStyle:{color:'#334155',fontSize:12} },
+  grid: { top:20, right:30, bottom:30, left:120 },
+  xAxis: { type:'value', max:100, axisLabel:{color:'#64748B',fontSize:11}, splitLine:{lineStyle:{color:'#F1F5F9'}} },
+  yAxis: { type:'category', data:['美亚','英国','德国','日亚'], axisLabel:{color:'#334155',fontSize:12,fontWeight:600} },
+  series:[{
+    type:'bar', barWidth:'50%',
+    data:[
+      {value:31.1, itemStyle:{color:'#93C5FD',borderRadius:[0,4,4,0]}},
+      {value:80.5, itemStyle:{color:'#C4B5FD',borderRadius:[0,4,4,0]}},
+      {value:87.4, itemStyle:{color:'#86EFAC',borderRadius:[0,4,4,0]}},
+      {value:70.6, itemStyle:{color:'#FCA5A5',borderRadius:[0,4,4,0]}}
+    ],
+    label:{ show:true, position:'right', formatter:'{c}%', fontSize:12, fontWeight:700, color:'#334155' }
+  }]
+});
+
+// Responsive
+window.addEventListener('resize', function(){
+  chart1.resize(); chart2.resize(); chart3.resize(); chart4.resize();
+});
+
+// Download function
+function downloadReport(){
+  html2canvas(document.body, { scale:2, useCORS:true, backgroundColor:'#F8FAFC' }).then(canvas => {
+    var link = document.createElement('a');
+    link.download = '臀部倒模产品市场分析报告_2026.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+</script>
+
+</body>
+</html>
