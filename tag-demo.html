@@ -168,6 +168,10 @@ textarea::placeholder{color:var(--muted);}
 .submod-row .strack{flex:1; height:12px; background:var(--line); border-radius:999px; overflow:hidden;}
 .submod-row .sfill{height:100%; border-radius:999px;}
 .submod-row .scnt{width:28px; font-weight:700; color:var(--ink); text-align:left;}
+.submod-block{margin-bottom:10px;}
+.submod-tags{display:flex; flex-wrap:wrap; gap:6px; margin-left:106px; margin-bottom:4px; padding-top:2px;}
+.submod-tags .stag{display:inline-flex; align-items:center; gap:4px; background:var(--line); color:var(--slate); border:1px solid rgba(0,0,0,.04); border-radius:6px; padding:3px 8px; font-size:11px; font-weight:600;}
+.submod-tags .stag small{font-weight:700; opacity:.65; font-size:10px;}
 .submod-empty{font-size:12px; color:var(--muted);}
 
 /* analysis section */
@@ -739,21 +743,27 @@ function renderSubModules(allHits){
     const data = {};
     allHits.flat().forEach(h=>{
         if(!data[h.m]) data[h.m]={};
-        data[h.m][h.d]=(data[h.m][h.d]||0)+1;
+        if(!data[h.m][h.d]) data[h.m][h.d]={count:0, tags:{}};
+        data[h.m][h.d].count += 1;
+        data[h.m][h.d].tags[h.t] = (data[h.m][h.d].tags[h.t] || 0) + 1;
     });
     if(Object.keys(data).length===0){
         box.innerHTML = '<h3>🧩 小版块覆盖（维度命中数）</h3><div class="submod-empty">暂无命中，无法展示细分维度分布。</div>';
         return;
     }
-    let html = '<h3>🧩 小版块覆盖（维度命中数）</h3><div class="sm-sub">大板块之下的细分维度（如「用户画像 → 使用经验 / 社群归属」），看需求具体落在哪个细分上</div>';
+    let html = '<h3>🧩 小版块覆盖（维度命中数）</h3><div class="sm-sub">大板块之下的细分维度（如「用户画像 → 使用经验 / 社群归属」），看需求具体落在哪个细分标签上</div>';
     MODULE_ORDER.forEach(m=>{
         if(!data[m]) return;
         const color = MODULE_META[m].color;
         const dmap = data[m];
-        const maxd = Math.max(...Object.values(dmap));
+        const maxd = Math.max(...Object.values(dmap).map(v=>v.count));
         html += `<div class="submod-group"><div class="submod-ghead"><span class="gdot" style="background:${color}"></span>${m}</div>`;
-        Object.entries(dmap).sort((a,b)=>b[1]-a[1]).forEach(([d,c])=>{
-            html += `<div class="submod-row"><span class="snm">${d}</span><span class="strack"><span class="sfill" style="width:${Math.max(8,c/maxd*100)}%; background:${color}"></span></span><span class="scnt">${c}</span></div>`;
+        Object.entries(dmap).sort((a,b)=>b[1].count-a[1].count).forEach(([d,info])=>{
+            const c = info.count;
+            const tagEls = Object.entries(info.tags).sort((a,b)=>b[1]-a[1]).map(([t,tc])=>
+                `<span class="stag" title="命中 ${tc} 次">${t}<small>x${tc}</small></span>`
+            ).join('');
+            html += `<div class="submod-block"><div class="submod-row"><span class="snm">${d}</span><span class="strack"><span class="sfill" style="width:${Math.max(8,c/maxd*100)}%; background:${color}"></span></span><span class="scnt">${c}</span></div><div class="submod-tags">${tagEls}</div></div>`;
         });
         html += '</div>';
     });
