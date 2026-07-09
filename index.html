@@ -256,6 +256,24 @@
             border-bottom: 2px solid #2563EB;
             margin-bottom: -1px;
         }
+        /* 高亮 CTA：盲盒转盘 + 一条龙体验，引导点击 */
+        .nav-item.nav-cta {
+            color: #fff;
+            background: linear-gradient(135deg, #FF7A45 0%, #FF4D8D 100%);
+            border-radius: 999px;
+            padding: 8px 16px;
+            margin: 0 4px;
+            box-shadow: 0 2px 10px rgba(255,77,141,0.35);
+        }
+        .nav-item.nav-cta:hover,
+        .nav-item.nav-cta.active {
+            color: #fff;
+            background: linear-gradient(135deg, #FF8C5A 0%, #FF5C9D 100%);
+            border-bottom: none;
+            margin-bottom: 0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(255,77,141,0.45);
+        }
         .nav-arrow {
             font-size: 10px;
             transition: transform 0.2s ease;
@@ -1954,7 +1972,8 @@
                 <a href="#module-9">十三种需求</a>
             </div>
         </div>
-        <a href="#brand-roulette" class="nav-item">需求盲盒转盘</a>
+        <a href="#brand-roulette" class="nav-item nav-cta">🎲 需求盲盒转盘</a>
+        <a href="experience.html" class="nav-item nav-cta">🚀 VOC一条龙体验</a>
         <div class="nav-item">
             分析目的
             <span class="nav-arrow">▼</span>
@@ -5251,11 +5270,29 @@
             {key:'审美', why:'舞台人设与少年感，满足对"看起来更好、更有活力"的追求。'},
             {key:'亲密', why:'ikun 粉丝陪伴文化让用户"有人在意、有人陪着"，形成强情感联结。'}
         ]},
-        {name:'刀盾', emoji:'🗡️', domain:'游戏梗 · 硬核生存流', weight:4, needs:[
-            {key:'安全', why:'盾牌格挡=把风险挡在外面，对应"一切稳定、可预期、不受伤"。'},
-            {key:'胜任', why:'刀锋输出=把难题砍翻，让用户感觉"能搞定一切、不出错"。'},
-            {key:'主宰', why:'攻防由自己掌控的战局，强调"按我的方式来、不被限制"。'},
-            {key:'刺激', why:'极限反杀与换血博弈，满足对新鲜刺激、心跳加速的追求。'}
+        {name:'刀盾狗', emoji:'🐕', domain:'萌宠梗 · 刀盾狗表情包', weight:4, needs:[
+            {key:'刺激', why:'"我的刀盾"魔性表情包+洗脑图，制造持续的新鲜与好玩刺激，一刷就停不下来。'},
+            {key:'亲密', why:'刀盾狗作为陪伴型桌面宠物与表情，成为独处时的情感寄托与"有人陪着"的联结。'},
+            {key:'审美', why:'圆润魔性的画风戳中"可爱、看起来顺眼"的审美点，表情包本身就是视觉符号。'},
+            {key:'认可', why:'用同款刀盾狗表情包=圈内人暗号，在群里发出去就被"认可、是自己人"。'}
+        ]},
+        {name:'比比拉布', emoji:'🐕', domain:'网红萌宠 · 狗子成精梗', weight:4, needs:[
+            {key:'亲密', why:'"狗子成精了"的搞笑日常让人产生陪伴与情感联结，像在云养一只自家狗。'},
+            {key:'刺激', why:'滑步、迷惑行为等反转剧情，制造强烈的新鲜与好玩刺激。'},
+            {key:'舒适', why:'刷萌宠解压下饭，是"轻松不费力、毫无压力"的情绪按摩。'},
+            {key:'认可', why:'转发比比拉布=分享快乐，"懂这个梗"在同好圈里被认可。'}
+        ]},
+        {name:'巴巴博一', emoji:'🐱', domain:'猫meme · 狸花猫呼噜空耳', weight:4, needs:[
+            {key:'亲密', why:'小猫Luna的呼噜声被空耳成"巴巴博一"，软萌声音成为私人陪伴与情感寄托。'},
+            {key:'刺激', why:'魔性空耳音效+猫meme二创，制造洗脑的新鲜与好玩刺激。'},
+            {key:'舒适', why:'撸猫解压，巴巴博一作为下饭背景音，是"轻松不费力"的情绪抚慰。'},
+            {key:'认可', why:'"巴巴博一上菜"等二创梗在圈内是共同语言，发出去就被认可。'}
+        ]},
+        {name:'八个雅鹿', emoji:'🦌', domain:'猫meme · 八嘎呀路空耳', weight:4, needs:[
+            {key:'刺激', why:'"八嘎呀路"魔性空耳+猫meme反转，制造持续的新鲜与好玩刺激。'},
+            {key:'亲密', why:'猫主子一本正经说"雅鹿"的反差萌，成为云吸猫的陪伴与情感联结。'},
+            {key:'舒适', why:'无脑搞笑下饭，是"轻松不费力、解压"的情绪按摩。'},
+            {key:'认可', why:'用八个雅鹿梗接话=圈内暗号，在同好中被认可、是自己人。'}
         ]},
         {name:'锦鲤', emoji:'🐟', domain:'网络祈愿梗 · 好运符号', weight:4, needs:[
             {key:'安全', why:'"转发锦鲤逢凶化吉"给人生"稳定、可预期、避坑"的心理保险。'},
