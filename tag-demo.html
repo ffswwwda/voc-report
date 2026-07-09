@@ -148,6 +148,51 @@ textarea::placeholder{color:var(--muted);}
     .hero h1{font-size:30px;}
     .pipe-nodes{flex-direction:column;}
 }
+
+/* split mode selector */
+.split-mode{display:flex; align-items:center; gap:10px; margin-top:14px; font-size:13px; color:var(--slate); flex-wrap:wrap;}
+.split-mode select{font-family:inherit; font-size:13px; padding:6px 10px; border:2px solid var(--line); border-radius:8px; color:var(--ink); background:#fff; cursor:pointer;}
+.split-mode select:focus{outline:none; border-color:var(--indigo);}
+.split-mode .sm-hint{color:var(--muted); font-size:12px;}
+
+/* sub-module coverage */
+.submod{margin-top:18px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; box-shadow:var(--shadow);}
+.submod h3{font-size:15px; margin-bottom:6px;}
+.submod .sm-sub{font-size:12px; color:var(--muted); margin-bottom:14px;}
+.submod-group{margin-bottom:16px;}
+.submod-group:last-child{margin-bottom:0;}
+.submod-ghead{display:flex; align-items:center; gap:8px; font-weight:700; font-size:13px; margin-bottom:8px;}
+.submod-ghead .gdot{width:10px; height:10px; border-radius:3px;}
+.submod-row{display:flex; align-items:center; gap:10px; font-size:12px; margin-bottom:6px;}
+.submod-row .snm{width:96px; flex-shrink:0; color:var(--slate); text-align:right;}
+.submod-row .strack{flex:1; height:12px; background:var(--line); border-radius:999px; overflow:hidden;}
+.submod-row .sfill{height:100%; border-radius:999px;}
+.submod-row .scnt{width:28px; font-weight:700; color:var(--ink); text-align:left;}
+.submod-empty{font-size:12px; color:var(--muted);}
+
+/* analysis section */
+.analysis{margin-top:24px;}
+.analysis .an-head{text-align:center; margin-bottom:18px;}
+.analysis .an-head h3{font-size:20px;}
+.analysis .an-head .sub{color:var(--slate); font-size:13px; margin-top:4px;}
+.an-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+.an-box{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; box-shadow:var(--shadow);}
+.an-box.full{grid-column:1 / -1;}
+.an-box h4{font-size:14px; margin-bottom:4px; display:flex; align-items:center; gap:8px;}
+.an-box .an-desc{font-size:12px; color:var(--muted); margin-bottom:12px;}
+.an-legend{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; justify-content:center;}
+.an-legend .lg{display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--slate);}
+.an-legend .lg .ld{width:9px; height:9px; border-radius:50%;}
+.motbar{display:flex; align-items:center; gap:10px; font-size:12px; margin-bottom:8px;}
+.motbar .mnm{width:90px; flex-shrink:0; color:var(--slate); font-weight:600; text-align:right;}
+.motbar .mtrack{flex:1; height:14px; background:var(--line); border-radius:999px; overflow:hidden;}
+.motbar .mfill{height:100%; border-radius:999px;}
+.motbar .mcnt{width:28px; font-weight:700; text-align:left;}
+.an-empty{font-size:12px; color:var(--muted); padding:10px 0;}
+
+@media(max-width:680px){
+    .an-grid{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
@@ -162,9 +207,10 @@ textarea::placeholder{color:var(--muted);}
     <h1>VOC <span class="grad">粘贴即打标</span></h1>
     <p>把你的用户评价贴进来，看它如何被自动拆成结构化标签。每条命中都附「判断依据」，规则完全对齐主站的九大标签模块。</p>
     <div class="steps-hint">
-        <span class="sh"><b>①</b> 粘贴评价</span>
+        <span class="sh"><b>①</b> 粘贴评价（智能切分多条）</span>
         <span class="sh"><b>②</b> 自动打标</span>
-        <span class="sh"><b>③</b> 看标签云 & 需求映射</span>
+        <span class="sh"><b>③</b> 标签云 & 需求映射</span>
+        <span class="sh"><b>④</b> 分析逻辑演练</span>
     </div>
 </div>
 
@@ -173,6 +219,15 @@ textarea::placeholder{color:var(--muted);}
         <div class="cfg-block">
             <div class="cfg-label"><span class="num">1</span>粘贴用户评价<span class="sample-link" onclick="loadSample()">载入示例评价 ↺</span></div>
             <textarea id="vocInput" placeholder="把商品评价、社区讨论、社媒评论贴进来（多条评价用空行分隔）。例如：&#10;&#10;第一次买这种东西，看博主种草推荐的，刚好赶上双11折扣就下单了，深夜一个人用在卧室里还挺放松的。&#10;&#10;材质有点硬不舒服，合租怕室友听到挺尴尬的，希望能出更软的医用硅胶款，加个静音模式就更好了。"></textarea>
+            <div class="split-mode">
+                <span>切分方式：</span>
+                <select id="splitMode">
+                    <option value="smart" selected>智能识别多条</option>
+                    <option value="blank">按空行分段</option>
+                    <option value="line">每行一条</option>
+                </select>
+                <span class="sm-hint">复制多条评价时，智能模式自动识别分隔（空行 / 序号 1. / 星级 ★ / 多行短评）</span>
+            </div>
         </div>
         <div class="cfg-block">
             <div class="cfg-label"><span class="num">2</span>重点打标模块<span class="hint">（默认全选，点击可屏蔽某模块）</span></div>
@@ -223,9 +278,36 @@ textarea::placeholder{color:var(--muted);}
         </div>
     </div>
 
+    <div class="submod" id="subModBox"></div>
+
     <div class="need-map">
         <h3>🧭 十三种需求映射（从 Module-09 命中推导）</h3>
         <div class="need-pills" id="needPills"><span class="cmt-empty">本次评价未直接命中十三种需求维度。</span></div>
+    </div>
+
+    <div class="analysis">
+        <div class="an-head">
+            <h3>🧪 分析逻辑演练</h3>
+            <div class="sub">把上面打出的标签喂进不同分析框架，看看能长出什么洞察（演示推导，深度结论找智能体）</div>
+        </div>
+        <div class="an-grid">
+            <div class="an-box">
+                <h4>🧭 情绪罗盘</h4>
+                <div class="an-desc">从购买动机 / 目的 / 阻碍 / 需求中映射 Plutchik 八情绪，扇区越大代表该情绪信号越强</div>
+                <div id="emotionCompass"></div>
+                <div class="an-legend" id="emotionLegend"></div>
+            </div>
+            <div class="an-box">
+                <h4>🎯 用户需求四象限</h4>
+                <div class="an-desc">重要度（来自需求层级）× 满意度（由阻碍/好评反推），气泡大小＝命中次数</div>
+                <div id="needQuad"></div>
+            </div>
+            <div class="an-box full">
+                <h4>🚦 购买动机构成</h4>
+                <div class="an-desc">Module-02 各驱动类型占比（功能 / 情感 / 社交 / 幻想 / 替代升级 / 促销）</div>
+                <div id="motMix"></div>
+            </div>
+        </div>
     </div>
 
     <div class="reset-wrap">
@@ -455,10 +537,39 @@ function tagComment(text){
     }
     return hits;
 }
-function splitComments(text){
-    const blocks = text.split(/\n\s*\n|(?:\r?\n)\s*-{3,}\s*(?:\r?\n)/);
-    const arr = blocks.map(b=>b.replace(/\r/g,'').trim()).filter(b=>b.length>0);
-    return arr.length ? arr : [text.trim()].filter(Boolean);
+/* 智能切分：多信号识别多条评价
+   mode: 'smart' 自动识别 | 'blank' 按空行分段 | 'line' 每行一条 */
+function smartSplit(text, mode){
+    const clean = text.replace(/\r/g,'');
+    if(mode==='line'){
+        return clean.split(/\n/).map(b=>b.trim()).filter(b=>b.length>0);
+    }
+    if(mode==='blank'){
+        const arr = clean.split(/\n\s*\n+|\n\s*[-=*]{3,}\s*\n/).map(b=>b.trim()).filter(b=>b.length>0);
+        return arr.length ? arr : [clean.trim()].filter(Boolean);
+    }
+    // 智能模式
+    // 1) 空行 或 分隔线 ---/***/===
+    let blocks = clean.split(/\n\s*\n+|\n\s*[-=*]{3,}\s*\n/).map(b=>b.trim()).filter(b=>b.length>0);
+    if(blocks.length>=2) return blocks;
+    // 2) 序号前缀：1. 2、 3) ① 等
+    if(/^\s*\d+[.、)]\s+/m.test(clean) || /^[①②③④⑤⑥⑦⑧⑨⑩]\s*/m.test(clean)){
+        blocks = clean.split(/^\s*(?:\d+[.、)]\s*|[①②③④⑤⑥⑦⑧⑨⑩]\s*)/m).map(b=>b.trim()).filter(b=>b.length>0);
+        if(blocks.length>=2) return blocks;
+    }
+    // 3) 星级行：★★★★★
+    if(/^[★☆]+\s*/m.test(clean)){
+        blocks = clean.split(/^[★☆]+\s*/m).map(b=>b.trim()).filter(b=>b.length>0);
+        if(blocks.length>=2) return blocks;
+    }
+    // 4) 启发式：多条短评价按换行分开（避免拆断单条长段落）
+    const lines = clean.split(/\n/).map(l=>l.trim()).filter(l=>l.length>0);
+    if(lines.length>=2){
+        const avg = lines.reduce((s,l)=>s+l.length,0)/lines.length;
+        const endPunct = lines.filter(l=>/[。！？.!?]$/.test(l) || l.length<42).length;
+        if(avg < 60 && endPunct >= lines.length*0.6) return lines;
+    }
+    return [clean.trim()].filter(Boolean);
 }
 
 /* ===================== 主流程 ===================== */
@@ -474,7 +585,8 @@ function runTagging(){
     ['pn1','pn2','pn3'].forEach(id=>document.getElementById(id).className='pnode');
     document.getElementById('pipeBar').style.width = '0%';
 
-    const comments = splitComments(raw);
+    const mode = document.getElementById('splitMode').value;
+    const comments = smartSplit(raw, mode);
 
     setTimeout(()=>{
         document.getElementById('pn1').className='pnode active';
@@ -611,12 +723,186 @@ function renderResults(comments, allHits){
             needPills.appendChild(el);
         });
     }
+    renderSubModules(allHits);
+    renderAnalysis(allHits);
 }
 
 function hex2rgba(hex, a){
     const h = hex.replace('#','');
     const r = parseInt(h.substring(0,2),16), g=parseInt(h.substring(2,4),16), b=parseInt(h.substring(4,6),16);
     return `rgba(${r},${g},${b},${a})`;
+}
+
+/* ===================== 小版块（维度）覆盖 ===================== */
+function renderSubModules(allHits){
+    const box = document.getElementById('subModBox');
+    const data = {};
+    allHits.flat().forEach(h=>{
+        if(!data[h.m]) data[h.m]={};
+        data[h.m][h.d]=(data[h.m][h.d]||0)+1;
+    });
+    if(Object.keys(data).length===0){
+        box.innerHTML = '<h3>🧩 小版块覆盖（维度命中数）</h3><div class="submod-empty">暂无命中，无法展示细分维度分布。</div>';
+        return;
+    }
+    let html = '<h3>🧩 小版块覆盖（维度命中数）</h3><div class="sm-sub">大板块之下的细分维度（如「用户画像 → 使用经验 / 社群归属」），看需求具体落在哪个细分上</div>';
+    MODULE_ORDER.forEach(m=>{
+        if(!data[m]) return;
+        const color = MODULE_META[m].color;
+        const dmap = data[m];
+        const maxd = Math.max(...Object.values(dmap));
+        html += `<div class="submod-group"><div class="submod-ghead"><span class="gdot" style="background:${color}"></span>${m}</div>`;
+        Object.entries(dmap).sort((a,b)=>b[1]-a[1]).forEach(([d,c])=>{
+            html += `<div class="submod-row"><span class="snm">${d}</span><span class="strack"><span class="sfill" style="width:${Math.max(8,c/maxd*100)}%; background:${color}"></span></span><span class="scnt">${c}</span></div>`;
+        });
+        html += '</div>';
+    });
+    box.innerHTML = html;
+}
+
+/* ===================== 分析逻辑演练 ===================== */
+const EMOTIONS = [
+    {key:'joy', name:'喜悦', color:'#F59E0B'},
+    {key:'trust', name:'信任', color:'#10B981'},
+    {key:'fear', name:'恐惧', color:'#6366F1'},
+    {key:'surprise', name:'惊讶', color:'#EC4899'},
+    {key:'sadness', name:'悲伤', color:'#3B82F6'},
+    {key:'disgust', name:'厌恶', color:'#8B5CF6'},
+    {key:'anger', name:'愤怒', color:'#EF4444'},
+    {key:'anticipation', name:'期待', color:'#14B8A6'}
+];
+const EMOTION_MAP = {
+    '解决生理需求':['anticipation'], '替代真人':['anticipation','sadness'], '提升体验':['joy'],
+    '孤独缓解':['sadness'], '情感寄托':['trust','sadness'], '自我探索':['trust','surprise'],
+    '社群推荐':['anticipation'], '跟风购买':['anticipation'], '话题参与':['joy'],
+    'Body Swap':['surprise'], '角色扮演':['joy','surprise'], '场景模拟':['anticipation'],
+    '替换损坏产品':['anticipation'], '升级换代':['anticipation','joy'], '旧款不再满足':['disgust'],
+    '品牌切换':['anticipation'], '折扣优惠':['joy'], '满减活动':['joy'], '限时大促':['joy','anticipation'],
+    '优惠券':['joy'], '直播秒杀':['surprise','joy'],
+    '日常使用':['trust'], '训练提升':['anticipation'], '健康维护':['trust'], '性能测试':['anticipation'],
+    '收藏展示':['joy'], '陪伴慰藉':['trust','sadness'], '压力释放':['joy'], '自信建立':['trust'],
+    '分享交流':['joy'], '社群认同':['trust'], '内容创作':['joy'],
+    '材质不适':['disgust'], '尺寸问题':['disgust'], '重量过重':['disgust'], '清洁困难':['disgust'],
+    '收纳不便':['disgust'], '隐私担忧':['fear'], '环境不便':['disgust'], '携带困难':['disgust'],
+    '伴侣反对':['anger','sadness'], '尴尬感':['disgust'], '信任问题':['anger'],
+    '羞耻感':['disgust','sadness'], '焦虑':['fear'], '负罪感':['sadness','disgust'],
+    '主宰 Autonomy':['trust'], '审美 Beauty':['joy','trust'], '目的 Purpose':['anticipation'],
+    '刺激 Stimulation':['surprise','anticipation'], '道德 Morality':['trust'],
+    '掌控感':['trust'], '胜任感':['trust'], '沉浸感':['joy'], '心流':['joy'],
+    '安全':['trust'], '归属':['trust'], '安稳':['trust'], '保障':['trust'],
+    '健康':['trust'], '生理刚需':['anticipation']
+};
+const NEED_IMPORTANCE = {
+    '主宰 Autonomy':0.70, '审美 Beauty':0.60, '目的 Purpose':0.75, '刺激 Stimulation':0.55, '道德 Morality':0.50,
+    '掌控感':0.60, '胜任感':0.65, '沉浸感':0.55, '心流':0.60,
+    '安全':0.85, '归属':0.70, '安稳':0.80, '保障':0.82, '健康':0.95, '生理刚需':0.95
+};
+const MOT_COLORS = ['#2563EB','#7C3AED','#DB2777','#0891B2','#D97706','#DC2626'];
+
+function renderAnalysis(allHits){
+    renderEmotionCompass(allHits);
+    renderNeedQuad(allHits);
+    renderMotMix(allHits);
+}
+
+function renderEmotionCompass(allHits){
+    const box = document.getElementById('emotionCompass');
+    const legend = document.getElementById('emotionLegend');
+    const counts = {};
+    EMOTIONS.forEach(e=>counts[e.key]=0);
+    allHits.flat().forEach(h=>{
+        const arr = EMOTION_MAP[h.t];
+        if(arr) arr.forEach(k=>counts[k]++);
+    });
+    const total = EMOTIONS.reduce((s,e)=>s+counts[e.key],0);
+    if(total===0){
+        box.innerHTML = '<div class="an-empty">当前标签未映射到明显情绪信号（可补充情感类评价，或找智能体做情感分析）。</div>';
+        legend.innerHTML='';
+        return;
+    }
+    const cx=140, cy=140, R=108, maxC=Math.max(...EMOTIONS.map(e=>counts[e.key]));
+    let svg = `<svg viewBox="0 0 280 280" width="100%" style="max-width:280px;display:block;margin:0 auto;">`;
+    svg += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>`;
+    EMOTIONS.forEach((e,i)=>{
+        const c = counts[e.key];
+        if(c===0) return;
+        const a0 = (i*45 - 90) * Math.PI/180;
+        const a1 = ((i+1)*45 - 90) * Math.PI/180;
+        const r = 24 + (c/maxC)*(R-24);
+        const x0 = cx + Math.cos(a0)*r, y0 = cy + Math.sin(a0)*r;
+        const x1 = cx + Math.cos(a1)*r, y1 = cy + Math.sin(a1)*r;
+        svg += `<path d="M ${cx} ${cy} L ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r.toFixed(1)} ${r.toFixed(1)} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="${e.color}" fill-opacity="0.8" stroke="#fff" stroke-width="1.5"/>`;
+        const la = ((i+0.5)*45 - 90)*Math.PI/180;
+        const lx = cx + Math.cos(la)*(R+16), ly = cy + Math.sin(la)*(R+16);
+        svg += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="11.5" font-weight="700" fill="${e.color}">${e.name} ${c}</text>`;
+    });
+    svg += `<circle cx="${cx}" cy="${cy}" r="6" fill="#CBD5E1"/>`;
+    svg += `</svg>`;
+    box.innerHTML = svg;
+    legend.innerHTML = EMOTIONS.map(e=>`<span class="lg"><span class="ld" style="background:${e.color}"></span>${e.name} ${counts[e.key]}</span>`).join('');
+}
+
+function renderNeedQuad(allHits){
+    const box = document.getElementById('needQuad');
+    const hits = allHits.flat().filter(h=>h.m==='十三种需求');
+    if(hits.length===0){
+        box.innerHTML = '<div class="an-empty">未命中十三种需求标签，无法绘制四象限（可在评价中补充需求/价值相关表述）。</div>';
+        return;
+    }
+    const hasBlock = allHits.flat().some(h=>h.m==='使用阻碍');
+    const hasLoyal = allHits.flat().some(h=>h.m==='用户忠诚度');
+    const hasImprove = allHits.flat().some(h=>h.m==='产品改进建议');
+    const tally = {};
+    hits.forEach(h=>{ tally[h.t]=(tally[h.t]||0)+1; });
+    const items = Object.keys(tally).map(t=>{
+        const imp = NEED_IMPORTANCE[t]!==undefined ? NEED_IMPORTANCE[t] : 0.6;
+        let sat = 0.55;
+        if(hasBlock) sat -= 0.22;
+        if(hasLoyal) sat += 0.16;
+        if(hasImprove) sat -= 0.10;
+        sat = Math.max(0.12, Math.min(0.95, sat));
+        return {t, imp, sat, n:tally[t]};
+    });
+    const m=34, pw=232, ph=200;
+    const qx = m + pw*0.5, qy = m + ph*0.5;
+    let svg = `<svg viewBox="0 0 ${pw+2*m} ${ph+2*m}" width="100%" style="max-width:300px;display:block;margin:0 auto;">`;
+    svg += `<rect x="${m}" y="${m}" width="${pw*0.5}" height="${ph*0.5}" fill="#ECFDF5"/>`;
+    svg += `<rect x="${qx}" y="${m}" width="${pw*0.5}" height="${ph*0.5}" fill="#FEF2F2"/>`;
+    svg += `<rect x="${m}" y="${qy}" width="${pw*0.5}" height="${ph*0.5}" fill="#F8FAFC"/>`;
+    svg += `<rect x="${qx}" y="${qy}" width="${pw*0.5}" height="${ph*0.5}" fill="#FEFCE8"/>`;
+    svg += `<line x1="${qx}" y1="${m}" x2="${qx}" y2="${m+ph}" stroke="#CBD5E1" stroke-width="1"/>`;
+    svg += `<line x1="${m}" y1="${qy}" x2="${m+pw}" y2="${qy}" stroke="#CBD5E1" stroke-width="1"/>`;
+    svg += `<text x="${m}" y="${m-10}" font-size="10" fill="#94A3B8">低重要</text>`;
+    svg += `<text x="${m+pw}" y="${m-10}" text-anchor="end" font-size="10" fill="#94A3B8">高重要 →</text>`;
+    svg += `<text x="${m-6}" y="${m+8}" font-size="10" fill="#94A3B8" text-anchor="end">高满意</text>`;
+    svg += `<text x="${m-6}" y="${m+ph}" font-size="10" fill="#94A3B8" text-anchor="end">→ 低满意</text>`;
+    items.forEach(it=>{
+        const x = m + it.imp*pw;
+        const y = m + (1-it.sat)*ph;
+        const rad = 7 + Math.min(10, it.n*3);
+        svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rad.toFixed(1)}" fill="#7C3AED" fill-opacity="0.72" stroke="#fff" stroke-width="1.5"><title>${it.t}｜重要度 ${it.imp}｜满意度 ${it.sat.toFixed(2)}｜命中 ${it.n}</title></circle>`;
+        svg += `<text x="${x.toFixed(1)}" y="${(y+rad+10).toFixed(1)}" text-anchor="middle" font-size="9.5" fill="#4C1D95">${it.t}</text>`;
+    });
+    svg += `</svg>`;
+    box.innerHTML = svg;
+}
+
+function renderMotMix(allHits){
+    const box = document.getElementById('motMix');
+    const cnt = {};
+    allHits.flat().forEach(h=>{ if(h.m==='购买动机') cnt[h.d]=(cnt[h.d]||0)+1; });
+    const keys = Object.keys(cnt);
+    if(keys.length===0){
+        box.innerHTML = '<div class="an-empty">未命中购买动机标签，无法绘制动机构成。</div>';
+        return;
+    }
+    const maxC = Math.max(...keys.map(k=>cnt[k]));
+    let html='';
+    keys.sort((a,b)=>cnt[b]-cnt[a]).forEach((k,i)=>{
+        const color = MOT_COLORS[i % MOT_COLORS.length];
+        html += `<div class="motbar"><span class="mnm">${k}</span><span class="mtrack"><span class="mfill" style="width:${Math.max(8,cnt[k]/maxC*100)}%; background:${color}"></span></span><span class="mcnt">${cnt[k]}</span></div>`;
+    });
+    box.innerHTML = html;
 }
 
 /* ===================== 重置 / 智能体 ===================== */
