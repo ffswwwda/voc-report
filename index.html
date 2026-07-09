@@ -225,6 +225,17 @@
             }
             if (allBtn) allBtn.textContent = open ? '收起全部说明 ▴' : '展开全部说明 ▾';
         }
+
+        // ===== 标签体系顶部说明折叠 =====
+        function toggleTagIntro() {
+            var btn = document.getElementById('tagIntroToggle');
+            var panel = document.getElementById('tagIntroPanel');
+            if (!btn || !panel) return;
+            var open = panel.style.display === 'none';
+            panel.style.display = open ? 'block' : 'none';
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            btn.textContent = open ? '收起说明 ▴' : '点开说明 ▾';
+        }
     </script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
@@ -812,7 +823,7 @@
             font-size: 32px;
             font-weight: 700;
             color: #0F172A;
-            margin-bottom: 12px;
+            margin-bottom: 0;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -826,10 +837,45 @@
             border-radius: 2px;
         }
 
+        .section-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .tag-intro-toggle {
+            flex-shrink: 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2563EB;
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            border-radius: 999px;
+            padding: 6px 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .tag-intro-toggle:hover {
+            background: #DBEAFE;
+        }
+        .tag-intro-toggle[aria-expanded="true"] {
+            background: #2563EB;
+            color: #fff;
+            border-color: #2563EB;
+        }
+
+        .tag-intro-panel {
+            animation: fadeIn 0.25s ease;
+        }
+
         .section-desc {
             font-size: 15px;
             color: #64748B;
             line-height: 1.7;
+            margin-bottom: 12px;
         }
 
         /* ===== 标签体系说明卡 ===== */
@@ -912,53 +958,58 @@
         }
         .module-grid-with-demo {
             display: grid;
-            grid-template-columns: 220px 1fr;
-            gap: 24px;
+            grid-template-columns: 170px 1fr;
+            gap: 22px;
             align-items: start;
             margin-bottom: 80px;
         }
-        .module-demo-card {
+        .module-demo-sidebar {
             position: sticky;
             top: 88px;
             display: flex;
             flex-direction: column;
+            gap: 10px;
+        }
+        .module-demo-card {
+            display: flex;
+            flex-direction: column;
             align-items: flex-start;
-            gap: 12px;
+            gap: 10px;
             background: linear-gradient(160deg, #EEF2FF 0%, #FDF2F8 100%);
             border: 1px solid #E0E7FF;
-            border-radius: 18px;
-            padding: 24px 20px;
+            border-radius: 16px;
+            padding: 18px 14px;
             text-decoration: none;
-            box-shadow: 0 8px 28px rgba(79,70,229,.10);
+            box-shadow: 0 6px 20px rgba(79,70,229,.10);
             transition: all 0.2s ease;
-            min-height: 180px;
+            min-height: 152px;
         }
         .module-demo-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 14px 36px rgba(79,70,229,.18);
+            box-shadow: 0 12px 28px rgba(79,70,229,.16);
             border-color: #C7D2FE;
         }
         .module-demo-card .mdc-icon {
-            width: 44px; height: 44px; border-radius: 12px;
+            width: 38px; height: 38px; border-radius: 10px;
             background: linear-gradient(135deg, #6366F1, #EC4899);
             display: flex; align-items: center; justify-content: center;
-            font-size: 22px; margin-bottom: 4px;
-            box-shadow: 0 4px 12px rgba(99,102,241,.25);
+            font-size: 20px; margin-bottom: 2px;
+            box-shadow: 0 4px 10px rgba(99,102,241,.22);
         }
         .module-demo-card .mdc-title {
-            font-size: 17px; font-weight: 800; color: #312E81; line-height: 1.35;
+            font-size: 15px; font-weight: 800; color: #312E81; line-height: 1.35;
         }
         .module-demo-card .mdc-desc {
-            font-size: 13px; color: #475569; line-height: 1.6;
+            font-size: 12px; color: #475569; line-height: 1.55;
         }
         .module-demo-card .mdc-arrow {
             margin-top: auto;
-            font-size: 14px; font-weight: 700; color: #4F46E5;
-            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 700; color: #4F46E5;
+            display: flex; align-items: center; gap: 5px;
             transition: gap 0.2s ease;
         }
         .module-demo-card:hover .mdc-arrow {
-            gap: 10px;
+            gap: 9px;
             color: #DB2777;
         }
 
@@ -1157,6 +1208,22 @@
             display: flex;
             justify-content: flex-end;
             margin-bottom: 16px;
+        }
+        .module-toolbar.sidebar-toolbar {
+            justify-content: flex-start;
+            margin-bottom: 0;
+        }
+        .module-toolbar.sidebar-toolbar button {
+            width: 100%;
+            text-align: center;
+            background: #fff;
+            border-color: #E0E7FF;
+            color: #4F46E5;
+            box-shadow: 0 2px 8px rgba(79,70,229,.06);
+        }
+        .module-toolbar.sidebar-toolbar button:hover {
+            background: #F5F3FF;
+            border-color: #C7D2FE;
         }
         .module-toolbar button {
             font-size: 12.5px;
@@ -2107,13 +2174,26 @@
             .module-grid-with-demo {
                 grid-template-columns: 1fr;
             }
+            .module-demo-sidebar {
+                position: static;
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
+            }
             .module-demo-card {
+                flex: 1;
                 position: static;
                 flex-direction: row;
                 align-items: center;
                 min-height: auto;
                 padding: 16px 22px;
                 gap: 14px;
+            }
+            .module-toolbar.sidebar-toolbar {
+                width: auto;
+            }
+            .module-toolbar.sidebar-toolbar button {
+                width: auto;
             }
             .module-demo-card .mdc-icon {
                 width: 40px; height: 40px;
@@ -2551,22 +2631,27 @@
     <!-- ========== 板块一：标签体系 ========== -->
     <section id="section-tags">
         <div class="section-header">
-            <h2 class="section-title">标签体系</h2>
-            <p class="section-desc">标签体系并非固定模板，而是根据分析目的（如产品开发、营销建议、产品创新、用户洞察、竞品分析、市场趋势等），选择对应的分析框架，划分出适配的标签板块，再结合具体VOC数据打上精细标签，形成可复用的分析基础设施。</p>
-            <div class="tag-intro">
-                <p class="tag-intro-lead">它是整条分析链路的<b>数据底座</b>：把海量、非结构化的用户声音，转化成可量化、可对比的结构化结论。运作方式分三步——</p>
-                <div class="tag-intro-flow">
-                    <div class="tag-intro-step">
-                        <div class="t-title"><span class="t-num">1</span>汇集海量用户声音</div>
-                        <div class="t-desc">从商品评价、社区讨论、社媒互动等渠道，汇集大量用户原始发言——既有产品功能、质量、价格等 <b>产品相关</b> 讨论，也有生活场景、情绪、身份认同等 <b>非产品</b> 讨论，全部纳入分析池。</div>
-                    </div>
-                    <div class="tag-intro-step">
-                        <div class="t-title"><span class="t-num">2</span>对原文逐条打标签</div>
-                        <div class="t-desc">由品类智能体按统一的标签维度，对每一条评价原文进行标注，把"一段话"映射成一组结构化标签（如场景、诉求、情绪、需求层级），让文本变得可被机器读取。</div>
-                    </div>
-                    <div class="tag-intro-step">
-                        <div class="t-title"><span class="t-num">3</span>跨用户量化统计</div>
-                        <div class="t-desc">当数以万计的评价都带上了标签，就能跨用户汇总分布、对比差异——把"大家都在说什么"，变成"多少人、在哪些维度、持什么态度"的清晰结论，支撑后续所有分析框架。</div>
+            <div class="section-title-row">
+                <h2 class="section-title">标签体系</h2>
+                <button type="button" class="tag-intro-toggle" id="tagIntroToggle" onclick="toggleTagIntro()" aria-expanded="false">点开说明 ▾</button>
+            </div>
+            <div class="tag-intro-panel" id="tagIntroPanel" style="display:none;">
+                <p class="section-desc">标签体系并非固定模板，而是根据分析目的（如产品开发、营销建议、产品创新、用户洞察、竞品分析、市场趋势等），选择对应的分析框架，划分出适配的标签板块，再结合具体VOC数据打上精细标签，形成可复用的分析基础设施。</p>
+                <div class="tag-intro">
+                    <p class="tag-intro-lead">它是整条分析链路的<b>数据底座</b>：把海量、非结构化的用户声音，转化成可量化、可对比的结构化结论。运作方式分三步——</p>
+                    <div class="tag-intro-flow">
+                        <div class="tag-intro-step">
+                            <div class="t-title"><span class="t-num">1</span>汇集海量用户声音</div>
+                            <div class="t-desc">从商品评价、社区讨论、社媒互动等渠道，汇集大量用户原始发言——既有产品功能、质量、价格等 <b>产品相关</b> 讨论，也有生活场景、情绪、身份认同等 <b>非产品</b> 讨论，全部纳入分析池。</div>
+                        </div>
+                        <div class="tag-intro-step">
+                            <div class="t-title"><span class="t-num">2</span>对原文逐条打标签</div>
+                            <div class="t-desc">由品类智能体按统一的标签维度，对每一条评价原文进行标注，把"一段话"映射成一组结构化标签（如场景、诉求、情绪、需求层级），让文本变得可被机器读取。</div>
+                        </div>
+                        <div class="tag-intro-step">
+                            <div class="t-title"><span class="t-num">3</span>跨用户量化统计</div>
+                            <div class="t-desc">当数以万计的评价都带上了标签，就能跨用户汇总分布、对比差异——把"大家都在说什么"，变成"多少人、在哪些维度、持什么态度"的清晰结论，支撑后续所有分析框架。</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2576,17 +2661,18 @@
 
                         <!-- 9大模块网格 -->
         <div class="module-grid-with-demo">
-            <a href="tag-demo.html" class="module-demo-card">
-                <div class="mdc-icon">🏷️</div>
-                <div class="mdc-title">去试试 VOC 粘贴即打标</div>
-                <div class="mdc-desc">粘贴一条用户评价，实时看九大模块标签怎么被打出来。</div>
-                <div class="mdc-arrow">立即体验 →</div>
-            </a>
-            <div>
-                <div class="module-toolbar">
+            <div class="module-demo-sidebar">
+                <a href="tag-demo.html" class="module-demo-card">
+                    <div class="mdc-icon">🏷️</div>
+                    <div class="mdc-title">去试试 VOC 粘贴即打标</div>
+                    <div class="mdc-desc">粘贴一条用户评价，实时看九大模块标签怎么被打出来。</div>
+                    <div class="mdc-arrow">立即体验 →</div>
+                </a>
+                <div class="module-toolbar sidebar-toolbar">
                     <button type="button" id="moduleAllBtn" onclick="toggleAllModules()">展开全部说明 ▾</button>
                 </div>
-                <div class="module-grid">
+            </div>
+            <div class="module-grid">
                     <div class="module-card m1" id="module-1">
                 <div class="module-card-header">
                     <span class="module-number">01</span>
@@ -2994,7 +3080,6 @@
                     </div>
                 </div>
             </div>
-        </div>
         </div>
         </div>
 
