@@ -754,6 +754,34 @@
             margin-bottom: 80px;
         }
 
+        /* 标签体系 -> 打标 Demo 入口横幅 */
+        .tag-demo-banner {
+            display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+            background: linear-gradient(100deg, #EEF2FF 0%, #FDF2F8 100%);
+            border: 1px solid #E0E7FF;
+            border-radius: 18px;
+            padding: 26px 30px;
+            margin: -36px 0 88px;
+            box-shadow: 0 8px 30px rgba(79,70,229,.10);
+        }
+        .tag-demo-banner .tdb-text { flex: 1; min-width: 240px; }
+        .tag-demo-banner .tdb-title {
+            font-size: 19px; font-weight: 800; color: #312E81; margin-bottom: 6px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .tag-demo-banner .tdb-sub { font-size: 14px; color: #475569; line-height: 1.5; }
+        .tag-demo-banner .tdb-btn {
+            flex-shrink: 0;
+            background: linear-gradient(90deg, #4F46E5, #DB2777);
+            color: #fff; text-decoration: none;
+            font-size: 15px; font-weight: 700;
+            padding: 14px 30px; border-radius: 999px;
+            box-shadow: 0 8px 22px rgba(79,70,229,.32);
+            transition: transform .15s, box-shadow .15s;
+            white-space: nowrap;
+        }
+        .tag-demo-banner .tdb-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(79,70,229,.42); }
+
         .module-card {
             background: #FFFFFF;
             border-radius: 16px;
@@ -2489,6 +2517,15 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- 标签体系 -> 打标 Demo 入口 -->
+        <div class="tag-demo-banner">
+            <div class="tdb-text">
+                <div class="tdb-title">🏷️ 想看这套标签体系怎么「干活」？</div>
+                <div class="tdb-sub">粘贴你的用户评价，实时看它被打成结构化标签——每条命中都附「判断依据」，准确率看得见。规则完全对齐上方九大模块。</div>
+            </div>
+            <a class="tdb-btn" href="tag-demo.html">去试 VOC 粘贴打标 →</a>
         </div>
 <!-- 数据源类型说明 -->
         <div class="data-source-section">

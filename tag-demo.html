@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='white'/><text x='32' y='48' text-anchor='middle' font-size='40'>🦞</text></svg>">
+<title>VOC 粘贴即打标 Demo</title>
+<style>
+:root{
+    --indigo:#4F46E5; --indigo-d:#4338CA; --blue:#2563EB; --blue-l:#EFF6FF;
+    --ink:#0F172A; --slate:#475569; --muted:#94A3B8; --line:#E2E8F0;
+    --green:#059669; --pink:#DB2777; --amber:#D97706; --cyan:#0891B2; --purple:#7C3AED;
+    --bg:#F8FAFC; --card:#FFFFFF; --radius:16px; --shadow:0 4px 20px rgba(15,23,42,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.6; -webkit-font-smoothing:antialiased;}
+.topbar{position:sticky; top:0; z-index:50; background:rgba(255,255,255,.85); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line); padding:10px 20px; display:flex; align-items:center; gap:12px;}
+.topbar a{color:var(--slate); text-decoration:none; font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px;}
+.topbar a:hover{color:var(--indigo);}
+.topbar .brand{margin-left:auto; font-weight:700; color:var(--indigo); display:flex; align-items:center; gap:6px;}
+
+/* Hero */
+.hero{max-width:920px; margin:0 auto; padding:52px 24px 24px; text-align:center;}
+.hero .eyebrow{display:inline-block; background:var(--blue-l); color:var(--blue); font-weight:700;
+    font-size:13px; padding:5px 14px; border-radius:999px; margin-bottom:18px;}
+.hero h1{font-size:38px; line-height:1.2; letter-spacing:-.5px; margin-bottom:14px;}
+.hero h1 .grad{background:linear-gradient(90deg,var(--indigo),var(--pink)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.hero p{font-size:16px; color:var(--slate); max-width:640px; margin:0 auto;}
+.hero .steps-hint{display:flex; gap:10px; justify-content:center; margin-top:24px; flex-wrap:wrap;}
+.hero .steps-hint .sh{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px 14px; font-size:13px; color:var(--slate); font-weight:600; box-shadow:var(--shadow);}
+.hero .steps-hint .sh b{color:var(--indigo);}
+
+/* Panel */
+.panel{max-width:920px; margin:16px auto 0; padding:0 24px 40px;}
+.cfg{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:30px; box-shadow:var(--shadow);}
+.cfg-block{margin-bottom:26px;}
+.cfg-block:last-child{margin-bottom:0;}
+.cfg-label{font-size:14px; font-weight:700; color:var(--ink); margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+.cfg-label .num{width:22px; height:22px; border-radius:50%; background:var(--indigo); color:#fff; font-size:12px; display:flex; align-items:center; justify-content:center; font-weight:700;}
+.cfg-label .hint{font-size:12px; color:var(--muted); font-weight:500; margin-left:6px;}
+
+textarea{width:100%; min-height:150px; border:2px solid var(--line); border-radius:12px; padding:14px 16px; font-family:inherit; font-size:14px; color:var(--ink); resize:vertical; transition:border-color .2s; line-height:1.7;}
+textarea:focus{outline:none; border-color:var(--indigo);}
+textarea::placeholder{color:var(--muted);}
+.sample-link{font-size:12px; color:var(--blue); cursor:pointer; font-weight:600; margin-left:auto; user-select:none;}
+.sample-link:hover{text-decoration:underline;}
+
+/* module multi-select chips */
+.mod-row{display:flex; gap:10px; flex-wrap:wrap;}
+.mod-chip{border:2px solid var(--line); border-radius:999px; padding:8px 16px; cursor:pointer; transition:all .2s; background:#fff; font-family:inherit; font-size:13px; font-weight:600; color:var(--slate); display:flex; align-items:center; gap:7px;}
+.mod-chip .dot{width:9px; height:9px; border-radius:50%; background:var(--mc,#999);}
+.mod-chip:hover{border-color:#C7D2FE;}
+.mod-chip.active{border-color:var(--mc); background:color-mix(in srgb, var(--mc) 10%, #fff); color:var(--ink);}
+.mod-chip.off{opacity:.45; border-style:dashed;}
+
+/* generate btn */
+.gen-wrap{text-align:center; margin-top:4px;}
+.gen-btn{background:linear-gradient(90deg,var(--indigo),var(--pink)); color:#fff; border:none; border-radius:999px;
+    padding:15px 44px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; box-shadow:0 8px 24px rgba(79,70,229,.32); transition:transform .15s, box-shadow .15s;}
+.gen-btn:hover{transform:translateY(-2px); box-shadow:0 12px 30px rgba(79,70,229,.42);}
+.gen-btn:disabled{opacity:.6; cursor:not-allowed; transform:none;}
+.gen-hint{font-size:12px; color:var(--muted); margin-top:10px;}
+
+/* Pipeline */
+.pipeline-wrap{max-width:920px; margin:10px auto 0; padding:0 24px; display:none;}
+.pipeline-wrap.show{display:block; animation:fadeUp .5s ease;}
+@keyframes fadeUp{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:none;}}
+.pipe-progress{height:8px; background:var(--line); border-radius:999px; overflow:hidden; margin-bottom:26px;}
+.pipe-progress .bar{height:100%; width:0; background:linear-gradient(90deg,var(--indigo),var(--pink)); border-radius:999px; transition:width .6s ease;}
+.pipe-nodes{display:flex; gap:14px; position:relative;}
+.pnode{flex:1; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; position:relative; opacity:.45; transition:opacity .4s, border-color .4s, box-shadow .4s;}
+.pnode.active{opacity:1; border-color:#C7D2FE; box-shadow:var(--shadow);}
+.pnode.done{opacity:1; border-color:#A7F3D0;}
+.pnode .ph{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+.pnode .pcircle{width:30px; height:30px; border-radius:50%; background:var(--line); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; transition:background .4s;}
+.pnode.active .pcircle, .pnode.done .pcircle{background:var(--indigo);}
+.pnode.done .pcircle{background:var(--green);}
+.pnode .ptitle{font-weight:700; font-size:15px;}
+.pnode .pcontent{min-height:54px; font-size:13px; color:var(--slate);}
+
+/* Results */
+.results{max-width:920px; margin:30px auto 0; padding:0 24px 60px; display:none;}
+.results.show{display:block; animation:fadeUp .5s ease;}
+.res-head{text-align:center; margin-bottom:22px;}
+.res-head h2{font-size:26px;}
+.res-head .sub{color:var(--slate); font-size:14px; margin-top:6px;}
+.res-meta{display:inline-flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:12px;}
+.res-meta .m{background:#EEF2FF; color:var(--indigo); border-radius:999px; padding:4px 12px; font-size:12px; font-weight:700;}
+.res-summary{background:linear-gradient(135deg,#EEF2FF,#FDF2F8); border:1px solid #E0E7FF; border-radius:14px; padding:18px 22px; margin-bottom:24px; font-size:15px; color:#312E81;}
+.res-summary b{color:var(--indigo-d);}
+
+/* per-comment card */
+.cmt-card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px 22px; margin-bottom:16px; box-shadow:var(--shadow);}
+.cmt-head{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+.cmt-idx{width:26px; height:26px; border-radius:50%; background:var(--indigo); color:#fff; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.cmt-quote{font-size:14px; color:var(--ink); font-weight:600; line-height:1.5;}
+.cmt-quote .more{color:var(--blue); cursor:pointer; font-size:12px; font-weight:600;}
+.cmt-tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
+.tchip{display:inline-flex; align-items:center; gap:6px; border-radius:9px; padding:6px 11px; font-size:12px; font-weight:600; cursor:default; border:1px solid transparent;}
+.tchip .td{font-size:10px; opacity:.75; padding:1px 5px; border-radius:4px; background:rgba(0,0,0,.07);}
+.conf{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+.conf.high{background:var(--green);}
+.conf.mid{background:var(--amber);}
+.conf.low{background:var(--muted);}
+.cmt-empty{font-size:13px; color:var(--muted); padding:6px 0;}
+
+/* aggregate */
+.agg-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:6px;}
+.agg-box{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; box-shadow:var(--shadow);}
+.agg-box h3{font-size:15px; margin-bottom:14px; display:flex; align-items:center; gap:8px;}
+.cloud{display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
+.cloud .ct{display:inline-flex; align-items:center; gap:5px; border-radius:8px; padding:5px 10px; font-weight:700; line-height:1; border:1px solid;}
+.cloud .ct small{font-weight:600; opacity:.7;}
+.modbars{display:flex; flex-direction:column; gap:9px;}
+.modbar{display:flex; align-items:center; gap:10px; font-size:12px;}
+.modbar .nm{width:88px; flex-shrink:0; color:var(--slate); font-weight:600; text-align:right;}
+.modbar .track{flex:1; height:14px; background:var(--line); border-radius:999px; overflow:hidden;}
+.modbar .fill{height:100%; border-radius:999px; transition:width .6s ease;}
+.modbar .cnt{width:30px; flex-shrink:0; font-weight:700; color:var(--ink); text-align:left;}
+
+.need-map{margin-top:18px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; box-shadow:var(--shadow);}
+.need-map h3{font-size:15px; margin-bottom:14px;}
+.need-pills{display:flex; flex-wrap:wrap; gap:8px;}
+.need-pill{background:#F5F3FF; color:var(--purple); border-radius:999px; padding:6px 13px; font-size:13px; font-weight:700; border:1px solid #E9D5FF;}
+
+/* agent cta */
+.reset-wrap{text-align:center; margin-top:8px;}
+.reset-btn{background:#fff; border:2px solid var(--line); border-radius:999px; padding:12px 32px; font-size:14px; font-weight:700; color:var(--slate); cursor:pointer; font-family:inherit; transition:all .2s;}
+.reset-btn:hover{border-color:var(--indigo); color:var(--indigo);}
+.reset-btn.agent-cta{background:linear-gradient(90deg,#FF7A45,#FF4D8D); color:#fff; border:none; box-shadow:0 4px 14px rgba(255,77,141,.25); padding:14px 36px;}
+.reset-btn.agent-cta:hover{transform:translateY(-2px); box-shadow:0 6px 18px rgba(255,77,141,.35);}
+.agent-cards{display:none; gap:16px; justify-content:center; margin-top:20px; flex-wrap:wrap;}
+.agent-cards.show{display:flex; animation:fadeUp .4s ease;}
+.agent-card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; min-width:240px; text-decoration:none; color:inherit; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow); transition:all .2s; text-align:left;}
+.agent-card:hover{border-color:var(--indigo); transform:translateY(-3px); box-shadow:0 8px 24px rgba(15,23,42,.1);}
+.agent-card .agent-icon{font-size:32px;}
+.agent-card .agent-name{font-weight:800; font-size:15px; color:var(--ink);}
+.agent-card .agent-desc{font-size:12px; color:var(--slate); margin-top:3px;}
+.reset-link{display:inline-block; margin-top:16px; background:#fff; border:2px solid var(--line); border-radius:999px; padding:11px 30px; font-size:14px; font-weight:700; color:var(--slate); cursor:pointer; font-family:inherit; transition:all .2s;}
+.reset-link:hover{border-color:var(--indigo); color:var(--indigo); transform:translateY(-1px); box-shadow:0 3px 10px rgba(37,99,235,.12);}
+
+.footer{text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; border-top:1px solid var(--line); margin-top:40px;}
+
+@media(max-width:680px){
+    .agg-grid{grid-template-columns:1fr;}
+    .hero h1{font-size:30px;}
+    .pipe-nodes{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <a href="index.html">← 返回主网页</a>
+    <span class="brand">🦞 VOC 标签体系 Demo</span>
+</div>
+
+<div class="hero">
+    <span class="eyebrow">标签体系 · 可交互 Demo</span>
+    <h1>VOC <span class="grad">粘贴即打标</span></h1>
+    <p>把你的用户评价贴进来，看它如何被自动拆成结构化标签。每条命中都附「判断依据」，规则完全对齐主站的九大标签模块。</p>
+    <div class="steps-hint">
+        <span class="sh"><b>①</b> 粘贴评价</span>
+        <span class="sh"><b>②</b> 自动打标</span>
+        <span class="sh"><b>③</b> 看标签云 & 需求映射</span>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="cfg">
+        <div class="cfg-block">
+            <div class="cfg-label"><span class="num">1</span>粘贴用户评价<span class="sample-link" onclick="loadSample()">载入示例评价 ↺</span></div>
+            <textarea id="vocInput" placeholder="把商品评价、社区讨论、社媒评论贴进来（多条评价用空行分隔）。例如：&#10;&#10;第一次买这种东西，看博主种草推荐的，刚好赶上双11折扣就下单了，深夜一个人用在卧室里还挺放松的。&#10;&#10;材质有点硬不舒服，合租怕室友听到挺尴尬的，希望能出更软的医用硅胶款，加个静音模式就更好了。"></textarea>
+        </div>
+        <div class="cfg-block">
+            <div class="cfg-label"><span class="num">2</span>重点打标模块<span class="hint">（默认全选，点击可屏蔽某模块）</span></div>
+            <div class="mod-row" id="modRow"></div>
+        </div>
+        <div class="gen-wrap">
+            <button class="gen-btn" id="genBtn" onclick="runTagging()">🏷️ 开始打标</button>
+            <div class="gen-hint">本地规则引擎实时匹配 · 不上传任何数据 · 复杂语义可找智能体深聊</div>
+        </div>
+    </div>
+</div>
+
+<div class="pipeline-wrap" id="pipelineWrap">
+    <div class="pipe-progress"><div class="bar" id="pipeBar"></div></div>
+    <div class="pipe-nodes">
+        <div class="pnode" id="pn1">
+            <div class="ph"><div class="pcircle">1</div><div class="ptitle">文本切分与清洗</div></div>
+            <div class="pcontent" id="pc1"><span class="waiting">等待中…</span></div>
+        </div>
+        <div class="pnode" id="pn2">
+            <div class="ph"><div class="pcircle">2</div><div class="ptitle">关键词 / 语义规则匹配</div></div>
+            <div class="pcontent" id="pc2"><span class="waiting">等待中…</span></div>
+        </div>
+        <div class="pnode" id="pn3">
+            <div class="ph"><div class="pcircle">3</div><div class="ptitle">标签聚合与需求映射</div></div>
+            <div class="pcontent" id="pc3"><span class="waiting">等待中…</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="results" id="results">
+    <div class="res-head">
+        <h2>打标结果</h2>
+        <div class="sub">每条评价逐条拆解，标签附带命中的判断依据与置信度</div>
+        <div class="res-meta" id="resMeta"></div>
+    </div>
+    <div class="res-summary" id="resSummary"></div>
+    <div id="cmtCards"></div>
+
+    <div class="agg-grid">
+        <div class="agg-box">
+            <h3>🏷️ 标签云（按命中频次）</h3>
+            <div class="cloud" id="tagCloud"></div>
+        </div>
+        <div class="agg-box">
+            <h3>📊 模块覆盖（命中标签数）</h3>
+            <div class="modbars" id="modBars"></div>
+        </div>
+    </div>
+
+    <div class="need-map">
+        <h3>🧭 十三种需求映射（从 Module-09 命中推导）</h3>
+        <div class="need-pills" id="needPills"><span class="cmt-empty">本次评价未直接命中十三种需求维度。</span></div>
+    </div>
+
+    <div class="reset-wrap">
+        <button class="reset-btn agent-cta" onclick="toggleAgentCards()">🦞 找智能体聊真的</button>
+        <div class="agent-cards" id="agentCards">
+            <a class="agent-card" href="https://applink.feishu.cn/T97R31dGAcVE" target="_blank" rel="noopener">
+                <div class="agent-icon">🦞</div>
+                <div>
+                    <div class="agent-name">倒模类目智能体</div>
+                    <div class="agent-desc">聊真实倒模产品 · 用户评价 · 改进方向</div>
+                </div>
+            </a>
+            <a class="agent-card" href="https://applink.feishu.cn/T97R37MT0GiU" target="_blank" rel="noopener">
+                <div class="agent-icon">🦞</div>
+                <div>
+                    <div class="agent-name">飞机杯类目智能体</div>
+                    <div class="agent-desc">聊真实飞机杯产品 · 使用反馈 · 创新机会</div>
+                </div>
+            </a>
+        </div>
+        <button class="reset-link" onclick="resetDemo()">↺ 重新打标</button>
+    </div>
+</div>
+
+<footer class="footer">
+    VOC 完整分析体系 · 标签体系打标 Demo · 规则对齐九大模块<br>
+    本地规则引擎仅作演示，深度语义标注请找类目智能体
+</footer>
+
+<script>
+/* ===================== 模块元信息（颜色 + 顺序） ===================== */
+const MODULE_META = {
+    '用户画像':     {color:'#2563EB'},
+    '购买动机':     {color:'#7C3AED'},
+    '购买目的':     {color:'#DB2777'},
+    '使用场景':     {color:'#0891B2'},
+    '使用阻碍':     {color:'#DC2626'},
+    '克服方式':     {color:'#D97706'},
+    '用户忠诚度':   {color:'#059669'},
+    '产品改进建议': {color:'#4F46E5'},
+    '十三种需求':   {color:'#9333EA'}
+};
+const MODULE_ORDER = Object.keys(MODULE_META);
+let activeModules = new Set(MODULE_ORDER);
+
+/* ===================== 打标规则（对齐主站九大模块真实标签） ===================== */
+/* conf: high 强关键词命中 / mid 同义或上下文 / low 弱信号 */
+const RULES = [
+    /* ---- Module 01 用户画像 ---- */
+    {m:'用户画像', d:'使用经验', t:'新手', kw:['第一次','刚入手','刚买','新手','不太会用','刚开始'], conf:'high'},
+    {m:'用户画像', d:'使用经验', t:'资深', kw:['老用户','玩了很久','资深','用过很多','老粉','一直用'], conf:'high'},
+    {m:'用户画像', d:'社群归属', t:'产品讨论', kw:['社群','贴吧','论坛','群里','讨论区'], conf:'mid'},
+    {m:'用户画像', d:'社群归属', t:'身体讨论', kw:['身体讨论','健身群','悦己'], conf:'mid'},
+    {m:'用户画像', d:'社群归属', t:'幻想投射', kw:['幻想','角色扮演','代入'], conf:'mid'},
+
+    /* ---- Module 02 购买动机 ---- */
+    {m:'购买动机', d:'功能驱动', t:'解决生理需求', kw:['生理需求','解决需求','刚需','缓解'], conf:'mid'},
+    {m:'购买动机', d:'功能驱动', t:'替代真人', kw:['替代真人','代替真人'], conf:'high'},
+    {m:'购买动机', d:'功能驱动', t:'提升体验', kw:['提升体验','体验更好'], conf:'mid'},
+    {m:'购买动机', d:'情感驱动', t:'孤独缓解', kw:['孤独','一个人','寂寞','独居'], conf:'high'},
+    {m:'购买动机', d:'情感驱动', t:'情感寄托', kw:['寄托','陪伴','慰藉'], conf:'mid'},
+    {m:'购买动机', d:'情感驱动', t:'自我探索', kw:['自我探索','了解自己','探索自己'], conf:'high'},
+    {m:'购买动机', d:'社交驱动', t:'社群推荐', kw:['博主','种草','推荐','朋友说','安利','达人'], conf:'high'},
+    {m:'购买动机', d:'社交驱动', t:'跟风购买', kw:['跟风','大家都','热门','爆款'], conf:'mid'},
+    {m:'购买动机', d:'社交驱动', t:'话题参与', kw:['话题','打卡','挑战'], conf:'mid'},
+    {m:'购买动机', d:'幻想驱动', t:'Body Swap', kw:['body swap','身体互换','互换'], conf:'high'},
+    {m:'购买动机', d:'幻想驱动', t:'角色扮演', kw:['角色扮演','扮演','cos'], conf:'high'},
+    {m:'购买动机', d:'幻想驱动', t:'场景模拟', kw:['场景模拟','模拟场景'], conf:'mid'},
+    {m:'购买动机', d:'替代/升级驱动', t:'替换损坏产品', kw:['坏了','坏掉','坏了换','不能用'], conf:'high'},
+    {m:'购买动机', d:'替代/升级驱动', t:'升级换代', kw:['升级','换代','换更好的','换新'], conf:'high'},
+    {m:'购买动机', d:'替代/升级驱动', t:'旧款不再满足', kw:['旧款','老款','以前那个不行'], conf:'mid'},
+    {m:'购买动机', d:'替代/升级驱动', t:'品牌切换', kw:['换牌子','换个品牌','试试别的牌'], conf:'mid'},
+    {m:'购买动机', d:'促销刺激', t:'折扣优惠', kw:['折扣','优惠','打折','降价','打折季'], conf:'high'},
+    {m:'购买动机', d:'促销刺激', t:'满减活动', kw:['满减','凑单','满赠'], conf:'high'},
+    {m:'购买动机', d:'促销刺激', t:'限时大促', kw:['限时','大促','双11','双十一','618','活动价'], conf:'high'},
+    {m:'购买动机', d:'促销刺激', t:'优惠券', kw:['优惠券','券','抵用'], conf:'high'},
+    {m:'购买动机', d:'促销刺激', t:'直播秒杀', kw:['直播','秒杀','直播间'], conf:'high'},
+
+    /* ---- Module 03 购买目的 ---- */
+    {m:'购买目的', d:'功能性目的', t:'日常使用', kw:['日常','每天','平时用'], conf:'mid'},
+    {m:'购买目的', d:'功能性目的', t:'训练提升', kw:['训练','提升','锻炼'], conf:'high'},
+    {m:'购买目的', d:'功能性目的', t:'健康维护', kw:['健康','保养','卫生'], conf:'high'},
+    {m:'购买目的', d:'功能性目的', t:'性能测试', kw:['测试','试试看','测一下'], conf:'mid'},
+    {m:'购买目的', d:'功能性目的', t:'收藏展示', kw:['收藏','展示','摆着'], conf:'high'},
+    {m:'购买目的', d:'情感性目的', t:'陪伴慰藉', kw:['陪伴','慰藉','不孤单'], conf:'high'},
+    {m:'购买目的', d:'情感性目的', t:'压力释放', kw:['压力','解压','放松一下','释放'], conf:'high'},
+    {m:'购买目的', d:'情感性目的', t:'自信建立', kw:['自信','喜欢自己','接纳自己'], conf:'high'},
+    {m:'购买目的', d:'社交性目的', t:'分享交流', kw:['分享','发给','聊给'], conf:'mid'},
+    {m:'购买目的', d:'社交性目的', t:'社群认同', kw:['认同','圈子','融入'], conf:'mid'},
+    {m:'购买目的', d:'社交性目的', t:'内容创作', kw:['拍','vlog','创作','记录'], conf:'mid'},
+
+    /* ---- Module 04 使用场景 ---- */
+    {m:'使用场景', d:'时间场景', t:'深夜独处', kw:['深夜','半夜','晚上','凌晨'], conf:'high'},
+    {m:'使用场景', d:'时间场景', t:'周末放松', kw:['周末'], conf:'mid'},
+    {m:'使用场景', d:'时间场景', t:'出差旅行', kw:['出差','旅行','旅游','度假'], conf:'high'},
+    {m:'使用场景', d:'空间场景', t:'卧室私密', kw:['卧室'], conf:'high'},
+    {m:'使用场景', d:'空间场景', t:'浴室', kw:['浴室','洗澡','泡澡'], conf:'high'},
+    {m:'使用场景', d:'空间场景', t:'酒店', kw:['酒店','宾馆','住店'], conf:'high'},
+    {m:'使用场景', d:'空间场景', t:'家中', kw:['家里','在家','家里人'], conf:'mid'},
+    {m:'使用场景', d:'情境场景', t:'独处放松', kw:['独处','一个人','放松','自己待着'], conf:'high'},
+    {m:'使用场景', d:'情境场景', t:'伴侣互动', kw:['伴侣','对象','老公','老婆','男朋友','女朋友','两个人','一起'], conf:'high'},
+    {m:'使用场景', d:'情境场景', t:'内容创作', kw:['拍','记录','发朋友圈'], conf:'mid'},
+
+    /* ---- Module 05 使用阻碍（带否定保护，neg:true） ---- */
+    {m:'使用阻碍', d:'产品本身', t:'材质不适', kw:['硬','不舒服','不软','塑料感','异味','刺激皮肤','材质差'], conf:'high', neg:true},
+    {m:'使用阻碍', d:'产品本身', t:'尺寸问题', kw:['太大','太小','尺寸','太粗','太长','太短','不合'], conf:'high', neg:true},
+    {m:'使用阻碍', d:'产品本身', t:'重量过重', kw:['太重','沉','坠','压'], conf:'mid', neg:true},
+    {m:'使用阻碍', d:'产品本身', t:'清洁困难', kw:['难洗','不好洗','洗不','清洁麻烦'], conf:'high', neg:true},
+    {m:'使用阻碍', d:'产品本身', t:'收纳不便', kw:['收纳不便','占地方','不好放','放不下'], conf:'mid', neg:true},
+    {m:'使用阻碍', d:'使用场景', t:'隐私担忧', kw:['怕被发现','害怕被发现','隐私','偷偷','合租','室友','被发现'], conf:'high', neg:true},
+    {m:'使用阻碍', d:'使用场景', t:'环境不便', kw:['环境不便','地方小','条件有限'], conf:'mid', neg:true},
+    {m:'使用阻碍', d:'使用场景', t:'携带困难', kw:['携带','不方便带','太大带','难带'], conf:'mid', neg:true},
+    {m:'使用阻碍', d:'伴侣关系', t:'伴侣反对', kw:['对象反对','不让','老婆不让','老公不让','家里反对'], conf:'high', neg:true},
+    {m:'使用阻碍', d:'伴侣关系', t:'尴尬感', kw:['尴尬','不好意思','难为情'], conf:'high', neg:true},
+    {m:'使用阻碍', d:'伴侣关系', t:'信任问题', kw:['信任','怀疑','查岗'], conf:'mid', neg:true},
+    {m:'使用阻碍', d:'心理状态', t:'羞耻感', kw:['羞耻','丢人','见不得人'], conf:'high', neg:true},
+    {m:'使用阻碍', d:'心理状态', t:'焦虑', kw:['焦虑','担心','怕出问题'], conf:'mid', neg:true},
+    {m:'使用阻碍', d:'心理状态', t:'负罪感', kw:['负罪','愧疚','罪恶','不应该'], conf:'high', neg:true},
+
+    /* ---- Module 06 克服方式 ---- */
+    {m:'克服方式', d:'产品改进', t:'选择更合适型号', kw:['换型号','选合适','换个','型号','换大','换小'], conf:'high'},
+    {m:'克服方式', d:'产品改进', t:'增加配件', kw:['配件','加个','加一个','配个'], conf:'high'},
+    {m:'克服方式', d:'产品改进', t:'升级材质', kw:['升级材质','换硅胶','医用硅胶','换个材质','软一点'], conf:'high'},
+    {m:'克服方式', d:'环境调整', t:'调整使用时间', kw:['改时间','半夜用','趁没人'], conf:'mid'},
+    {m:'克服方式', d:'环境调整', t:'改善环境布置', kw:['布置','藏起来','收纳盒','遮'], conf:'mid'},
+    {m:'克服方式', d:'心理调适', t:'接纳自我', kw:['接纳自己','接受自己','想开了'], conf:'high'},
+    {m:'克服方式', d:'心理调适', t:'降低预期', kw:['降低预期','不强求','不指望'], conf:'mid'},
+    {m:'克服方式', d:'社群支持', t:'看评测', kw:['评测','测评','功课','看视频'], conf:'high'},
+    {m:'克服方式', d:'社群支持', t:'问社群', kw:['问群','群里问','请教'], conf:'mid'},
+    {m:'克服方式', d:'社群支持', t:'经验帖', kw:['经验帖','帖子','攻略'], conf:'mid'},
+
+    /* ---- Module 07 用户忠诚度 ---- */
+    {m:'用户忠诚度', d:'复购行为', t:'多次复购', kw:['回购','复购','第几次','又买','再买','回购了'], conf:'high'},
+    {m:'用户忠诚度', d:'复购行为', t:'推荐他人', kw:['推荐给','安利给','介绍给'], conf:'high'},
+    {m:'用户忠诚度', d:'复购行为', t:'品牌偏好', kw:['就认','只买这个','只认'], conf:'high'},
+    {m:'用户忠诚度', d:'满意度表达', t:'主动好评', kw:['好评','评价好','给好评'], conf:'high'},
+    {m:'用户忠诚度', d:'满意度表达', t:'晒单', kw:['晒','买家秀','晒图'], conf:'high'},
+    {m:'用户忠诚度', d:'满意度表达', t:'安利', kw:['安利','强推','墙裂推荐'], conf:'high'},
+    {m:'用户忠诚度', d:'品牌粘性', t:'固定复购品牌', kw:['一直用','固定','老顾客','老粉'], conf:'high'},
+    {m:'用户忠诚度', d:'品牌粘性', t:'对比后回归', kw:['还是回归','还是它','比过','还是这个'], conf:'high'},
+
+    /* ---- Module 08 产品改进建议 ---- */
+    {m:'产品改进建议', d:'产品设计', t:'外观优化', kw:['外观','颜值','好看','漂亮','设计感'], conf:'high'},
+    {m:'产品改进建议', d:'产品设计', t:'人体工学', kw:['人体工学','贴合','握姿','手感'], conf:'high'},
+    {m:'产品改进建议', d:'产品设计', t:'材质升级', kw:['硅胶','材质','软','医用','更舒服的材质'], conf:'high'},
+    {m:'产品改进建议', d:'功能增强', t:'智能加热', kw:['加热','温感'], conf:'high'},
+    {m:'产品改进建议', d:'功能增强', t:'静音设计', kw:['静音','声音小','没声音','安静'], conf:'high'},
+    {m:'产品改进建议', d:'功能增强', t:'APP联动', kw:['APP','手机','智能','蓝牙'], conf:'high'},
+    {m:'产品改进建议', d:'体验优化', t:'开箱体验', kw:['开箱','包装','盒子'], conf:'high'},
+    {m:'产品改进建议', d:'体验优化', t:'清洁便利', kw:['好洗','容易清洗','清洁方便','好清理'], conf:'high'},
+    {m:'产品改进建议', d:'体验优化', t:'收纳设计', kw:['收纳','好放','便携收纳'], conf:'high'},
+    {m:'产品改进建议', d:'服务支持', t:'售后响应', kw:['售后','客服','退换','维修'], conf:'high'},
+    {m:'产品改进建议', d:'服务支持', t:'使用指导', kw:['指导','说明','教程','怎么用'], conf:'high'},
+    {m:'产品改进建议', d:'服务支持', t:'隐私保护', kw:['隐私','别印','保密','匿名','不写名字'], conf:'high'},
+
+    /* ---- Module 09 十三种需求（用于需求映射） ---- */
+    {m:'十三种需求', d:'身份层', t:'主宰 Autonomy', kw:['掌控','自己做主','按我的','说了算'], conf:'mid'},
+    {m:'十三种需求', d:'身份层', t:'审美 Beauty', kw:['好看','美','颜值','漂亮','审美'], conf:'mid'},
+    {m:'十三种需求', d:'身份层', t:'目的 Purpose', kw:['目的','意义','为了','价值'], conf:'mid'},
+    {m:'十三种需求', d:'身份层', t:'刺激 Stimulation', kw:['刺激','新鲜','心跳','兴奋'], conf:'mid'},
+    {m:'十三种需求', d:'身份层', t:'道德 Morality', kw:['环保','可持续','道德','无害'], conf:'mid'},
+    {m:'十三种需求', d:'体验层', t:'掌控感', kw:['掌控'], conf:'mid'},
+    {m:'十三种需求', d:'体验层', t:'胜任感', kw:['搞定','胜任','会了','学会'], conf:'mid'},
+    {m:'十三种需求', d:'体验层', t:'沉浸感', kw:['沉浸','入迷','上头'], conf:'mid'},
+    {m:'十三种需求', d:'体验层', t:'心流', kw:['心流','忘我'], conf:'mid'},
+    {m:'十三种需求', d:'功能层', t:'安全', kw:['安全','无毒','材质安全','放心'], conf:'mid'},
+    {m:'十三种需求', d:'功能层', t:'归属', kw:['归属','融入','圈子','认同'], conf:'mid'},
+    {m:'十三种需求', d:'功能层', t:'安稳', kw:['安稳','踏实','稳定'], conf:'mid'},
+    {m:'十三种需求', d:'功能层', t:'保障', kw:['保障','靠谱','可靠'], conf:'mid'},
+    {m:'十三种需求', d:'必买层', t:'健康', kw:['健康','身体','卫生'], conf:'mid'},
+    {m:'十三种需求', d:'必买层', t:'生理刚需', kw:['刚需','必须','离不开'], conf:'mid'}
+];
+
+/* ===================== 渲染模块多选 ===================== */
+function renderModChips(){
+    const row = document.getElementById('modRow');
+    row.innerHTML = '';
+    MODULE_ORDER.forEach(m=>{
+        const meta = MODULE_META[m];
+        const el = document.createElement('button');
+        el.type='button';
+        el.className='mod-chip' + (activeModules.has(m)?' active':' off');
+        el.style.setProperty('--mc', meta.color);
+        el.innerHTML = `<span class="dot"></span>${m}`;
+        el.onclick = ()=>{
+            if(activeModules.has(m)){ if(activeModules.size>1) activeModules.delete(m); }
+            else activeModules.add(m);
+            renderModChips();
+        };
+        row.appendChild(el);
+    });
+}
+
+/* ===================== 示例评价 ===================== */
+function loadSample(){
+    const s = `第一次买这种东西，看博主种草推荐的，刚好赶上双11折扣就下单了，深夜一个人用在卧室里还挺放松的。
+
+材质有点硬不舒服，合租怕室友听到挺尴尬的，希望能出更软的医用硅胶款，加个静音模式就更好了。
+
+已经第5次回购了，每次都晒单安利给朋友，别的牌子试过还是回归它，材质安全用着放心。
+
+出差住酒店也会带，伴侣知道但有点不好意思，想提升亲密体验，希望快递盒子别印名字保护隐私，外观好看点就更好了。`;
+    document.getElementById('vocInput').value = s;
+}
+
+/* ===================== 规则匹配 ===================== */
+function hasNegationBefore(text, idx){
+    const before = text.slice(Math.max(0, idx-4), idx);
+    return /不|没|无|别|未|非|不太/.test(before);
+}
+function tagComment(text){
+    const hits = [];
+    const seen = new Set();
+    for(const r of RULES){
+        if(!activeModules.has(r.m)) continue;
+        for(const k of r.kw){
+            const idx = text.indexOf(k);
+            if(idx >= 0){
+                if(r.neg && hasNegationBefore(text, idx)) continue;
+                const key = r.m+'|'+r.t;
+                if(seen.has(key)) break;
+                seen.add(key);
+                hits.push({m:r.m, d:r.d, t:r.t, kw:k, conf:r.conf, color:MODULE_META[r.m].color});
+                break;
+            }
+        }
+    }
+    return hits;
+}
+function splitComments(text){
+    const blocks = text.split(/\n\s*\n|(?:\r?\n)\s*-{3,}\s*(?:\r?\n)/);
+    const arr = blocks.map(b=>b.replace(/\r/g,'').trim()).filter(b=>b.length>0);
+    return arr.length ? arr : [text.trim()].filter(Boolean);
+}
+
+/* ===================== 主流程 ===================== */
+function runTagging(){
+    const raw = document.getElementById('vocInput').value;
+    if(!raw.trim()){ alert('请先粘贴用户评价，或点「载入示例评价」。'); return; }
+    const btn = document.getElementById('genBtn');
+    btn.disabled = true;
+
+    const pw = document.getElementById('pipelineWrap');
+    pw.classList.add('show');
+    document.getElementById('results').classList.remove('show');
+    ['pn1','pn2','pn3'].forEach(id=>document.getElementById(id).className='pnode');
+    document.getElementById('pipeBar').style.width = '0%';
+
+    const comments = splitComments(raw);
+
+    setTimeout(()=>{
+        document.getElementById('pn1').className='pnode active';
+        document.getElementById('pc1').innerHTML = `已切分 <b>${comments.length}</b> 条评价，清洗标点与空行。`;
+        document.getElementById('pipeBar').style.width = '33%';
+    }, 200);
+
+    setTimeout(()=>{
+        document.getElementById('pn1').className='pnode done';
+        document.getElementById('pn2').className='pnode active';
+        document.getElementById('pc2').innerHTML = `遍历 <b>${RULES.length}</b> 条规则，对每条评价做关键词 / 语义匹配…`;
+        document.getElementById('pipeBar').style.width = '66%';
+    }, 900);
+
+    setTimeout(()=>{
+        document.getElementById('pn2').className='pnode done';
+        document.getElementById('pn3').className='pnode active';
+        const all = comments.map(c=>tagComment(c));
+        const totalTags = all.reduce((s,a)=>s+a.length,0);
+        document.getElementById('pc3').innerHTML = `共命中 <b>${totalTags}</b> 个标签，正在聚合标签云与需求映射…`;
+        document.getElementById('pipeBar').style.width = '100%';
+        renderResults(comments, all);
+        document.getElementById('pn3').className='pnode done';
+        document.getElementById('results').classList.add('show');
+        document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
+        btn.disabled = false;
+    }, 1700);
+}
+
+/* ===================== 渲染结果 ===================== */
+function renderResults(comments, allHits){
+    // meta
+    const totalTags = allHits.reduce((s,a)=>s+a.length,0);
+    const modSet = new Set();
+    allHits.flat().forEach(h=>modSet.add(h.m));
+    document.getElementById('resMeta').innerHTML =
+        `<span class="m">评价 ${comments.length} 条</span>`+
+        `<span class="m">命中标签 ${totalTags} 个</span>`+
+        `<span class="m">覆盖模块 ${modSet.size}/${MODULE_ORDER.length}</span>`;
+
+    // summary text
+    const modCount = {};
+    allHits.flat().forEach(h=>{ modCount[h.m]=(modCount[h.m]||0)+1; });
+    const topMods = Object.entries(modCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
+    const sumEl = document.getElementById('resSummary');
+    if(totalTags===0){
+        sumEl.innerHTML = '这次输入的评价未命中任何规则标签。可尝试载入示例评价，或调整重点模块后重试。';
+    } else {
+        sumEl.innerHTML = `这批评价最集中在 <b>${topMods.join('、')}</b> 三个模块。每条评价右侧标签均附「判断依据」（命中的关键词）与置信度，可据此核对准确率；如需深度语义标注，点下方「找智能体聊真的」。`;
+    }
+
+    // per-comment cards
+    const cc = document.getElementById('cmtCards');
+    cc.innerHTML = '';
+    comments.forEach((c, i)=>{
+        const hits = allHits[i];
+        const card = document.createElement('div');
+        card.className = 'cmt-card';
+        const quote = c.length>80 ? c.slice(0,80)+'…<span class="more" onclick="this.parentNode.innerHTML=this.getAttribute(\'data-full\')">展开全文</span>' : c;
+        const quoteFull = c.replace(/</g,'&lt;');
+        let inner = `<div class="cmt-head"><div class="cmt-idx">${i+1}</div>`+
+            `<div class="cmt-quote" data-full="${quoteFull.replace(/"/g,'&quot;')}">${quoteFull.slice(0,80)}${c.length>80?'…<span class="more" onclick="this.parentNode.innerHTML=this.parentNode.getAttribute(\'data-full\')">展开全文</span>':''}</div></div>`;
+        if(hits.length===0){
+            inner += `<div class="cmt-empty">未命中标签（可能语义过于隐晦，建议找智能体深聊）。</div>`;
+        } else {
+            inner += '<div class="cmt-tags">';
+            hits.forEach(h=>{
+                inner += `<span class="tchip" style="background:${hex2rgba(h.color,0.1)}; color:${h.color}; border-color:${hex2rgba(h.color,0.3)};" title="判断依据：命中关键词「${h.kw}」 · 维度：${h.d}">`+
+                    `<span class="conf ${h.conf}"></span>${h.t}<span class="td">${h.d}</span></span>`;
+            });
+            inner += '</div>';
+        }
+        card.innerHTML = inner;
+        cc.appendChild(card);
+    });
+
+    // tag cloud (aggregate by tag)
+    const tagCount = {};
+    allHits.flat().forEach(h=>{
+        const k = h.m+'|'+h.t;
+        if(!tagCount[k]) tagCount[k] = {m:h.m, t:h.t, color:h.color, n:0};
+        tagCount[k].n++;
+    });
+    const cloudArr = Object.values(tagCount).sort((a,b)=>b.n-a.n);
+    const maxN = cloudArr.length?cloudArr[0].n:1;
+    const cloud = document.getElementById('tagCloud');
+    cloud.innerHTML = '';
+    if(cloudArr.length===0){
+        cloud.innerHTML = '<span class="cmt-empty">暂无标签</span>';
+    } else {
+        cloudArr.forEach(o=>{
+            const size = 12 + Math.round((o.n/maxN)*12); // 12~24px
+            const el = document.createElement('span');
+            el.className='ct';
+            el.style.fontSize = size+'px';
+            el.style.background = hex2rgba(o.color,0.1);
+            el.style.color = o.color;
+            el.style.borderColor = hex2rgba(o.color,0.3);
+            el.innerHTML = `${o.t} <small>×${o.n}</small>`;
+            cloud.appendChild(el);
+        });
+    }
+
+    // module bars
+    const mb = document.getElementById('modBars');
+    mb.innerHTML = '';
+    const maxMod = Math.max(1, ...Object.values(modCount));
+    MODULE_ORDER.forEach(m=>{
+        const cnt = modCount[m]||0;
+        const color = MODULE_META[m].color;
+        const row = document.createElement('div');
+        row.className='modbar';
+        row.innerHTML = `<span class="nm">${m}</span>`+
+            `<span class="track"><span class="fill" style="width:${cnt?Math.max(8,cnt/maxMod*100):0}%; background:${color};"></span></span>`+
+            `<span class="cnt">${cnt}</span>`;
+        mb.appendChild(row);
+    });
+
+    // need map (module 09)
+    const needPills = document.getElementById('needPills');
+    const needHits = allHits.flat().filter(h=>h.m==='十三种需求');
+    if(needHits.length===0){
+        needPills.innerHTML = '<span class="cmt-empty">本次评价未直接命中十三种需求维度（需结合上下文由智能体进一步判断）。</span>';
+    } else {
+        needPills.innerHTML = '';
+        // dedupe by tag
+        const seenN = new Set();
+        needHits.forEach(h=>{
+            if(seenN.has(h.t)) return; seenN.add(h.t);
+            const el = document.createElement('span');
+            el.className='need-pill';
+            el.textContent = h.t;
+            el.title = '判断依据：命中「'+h.kw+'」';
+            needPills.appendChild(el);
+        });
+    }
+}
+
+function hex2rgba(hex, a){
+    const h = hex.replace('#','');
+    const r = parseInt(h.substring(0,2),16), g=parseInt(h.substring(2,4),16), b=parseInt(h.substring(4,6),16);
+    return `rgba(${r},${g},${b},${a})`;
+}
+
+/* ===================== 重置 / 智能体 ===================== */
+function resetDemo(){
+    document.getElementById('results').classList.remove('show');
+    document.getElementById('pipelineWrap').classList.remove('show');
+    document.getElementById('cmtCards').innerHTML='';
+    window.scrollTo({top:0, behavior:'smooth'});
+}
+function toggleAgentCards(){
+    document.getElementById('agentCards').classList.toggle('show');
+}
+
+/* init */
+renderModChips();
+</script>
+</body>
+</html>
