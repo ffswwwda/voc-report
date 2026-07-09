@@ -138,6 +138,42 @@ textarea::placeholder{color:var(--muted);}
     .purpose-grid{grid-template-columns:repeat(2,1fr);}
     .pipe-nodes{flex-direction:column;}
 }
+
+/* ===== 载入示例案例 ===== */
+.sample-row{display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap;}
+.sample-row .sr-label{font-size:13px; color:var(--muted); font-weight:600;}
+.sample-pill{border:1.5px dashed var(--line); background:#F8FAFC; border-radius:999px; padding:7px 14px; font-size:13px; font-weight:600; color:var(--slate); cursor:pointer; font-family:inherit; transition:all .2s;}
+.sample-pill:hover{border-color:var(--indigo); color:var(--indigo); background:#EEF2FF;}
+
+/* ===== 用户案例表 ===== */
+.case-card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px 22px; margin-bottom:22px; box-shadow:var(--shadow); border-left:5px solid var(--amber);}
+.case-title{font-size:16px; font-weight:800; color:var(--ink); margin-bottom:14px; display:flex; align-items:center; gap:8px;}
+.case-table{width:100%; border-collapse:collapse;}
+.case-table th, .case-table td{text-align:left; padding:10px 12px; font-size:14px; border-bottom:1px solid var(--line); vertical-align:top;}
+.case-table th{width:120px; color:var(--slate); font-weight:700; background:#F8FAFC; border-radius:8px 0 0 8px; white-space:nowrap;}
+.case-table tr:last-child th, .case-table tr:last-child td{border-bottom:none;}
+.case-table td{color:var(--ink); line-height:1.5;}
+
+/* ===== 用户完全体合成 ===== */
+.synth-btn{display:block; width:100%; background:linear-gradient(135deg,#7C3AED,#DB2777); color:#fff; border:none; border-radius:16px; padding:20px; font-size:18px; font-weight:800; cursor:pointer; font-family:inherit; box-shadow:0 10px 30px rgba(124,58,237,.35); transition:transform .15s, box-shadow .15s, filter .15s; letter-spacing:.5px; margin-top:4px;}
+.synth-btn:hover{transform:translateY(-3px); box-shadow:0 16px 40px rgba(124,58,237,.45); filter:brightness(1.05);}
+.synth-btn:disabled{opacity:.78; cursor:default; transform:none;}
+.synth-result{display:none; margin-top:18px;}
+.synth-result.show{display:block; animation:fadeUp .5s ease;}
+.synth-card{background:linear-gradient(135deg,#F5F3FF,#FDF2F8); border:1px solid #E9D5FF; border-radius:16px; padding:24px; box-shadow:var(--shadow);}
+.synth-head{font-size:18px; font-weight:800; color:#6D28D9; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+.synth-lead{font-size:15px; line-height:1.6; color:#4C1D95; margin-bottom:18px; font-weight:600;}
+.synth-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px;}
+.synth-col{background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px;}
+.synth-h{font-size:13px; font-weight:800; color:var(--slate); margin:0 0 6px; display:flex; align-items:center; gap:6px;}
+.synth-col p{font-size:14px; color:var(--ink); line-height:1.6; margin:0 0 14px;}
+.synth-col p:last-child{margin-bottom:0;}
+.synth-needs{background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:16px;}
+.need-tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+.need-tag{background:#EDE9FE; color:#6D28D9; border-radius:8px; padding:5px 12px; font-size:13px; font-weight:700;}
+.synth-verdict{background:#fff; border:1px solid #FBCFE8; border-left:5px solid var(--pink); border-radius:12px; padding:16px 18px; font-size:14px; line-height:1.7; color:var(--ink);}
+.synth-verdict b{color:var(--pink);}
+@media(max-width:720px){ .synth-grid{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
@@ -176,6 +212,12 @@ textarea::placeholder{color:var(--muted);}
         <div class="cfg-block">
             <div class="cfg-label"><span class="num">3</span> 描述你的产品（基本情况 / 想要什么）</div>
             <textarea id="prodDesc" placeholder="例：我们是一款主打「逼真触感+静音」的飞机杯，售价中端。目前差评集中在清洗困难和入口偏紧，想看看用户真实需求和产品改进方向……"></textarea>
+            <div class="sample-row">
+                <span class="sr-label">📎 没思路？一键载入示例：</span>
+                <button class="sample-pill" onclick="loadSampleCase('airplane')">✈️ 飞机杯</button>
+                <button class="sample-pill" onclick="loadSampleCase('mold')">🫧 倒模</button>
+                <button class="sample-pill" onclick="loadSampleCase('vibe')">🔋 振动器</button>
+            </div>
         </div>
 
         <div class="gen-wrap">
@@ -212,6 +254,9 @@ textarea::placeholder{color:var(--muted);}
         <div class="res-meta" id="resMeta"></div>
     </div>
     <div class="res-summary" id="resSummary"></div>
+    <div class="case-card" id="caseBlock"></div>
+    <button class="synth-btn" id="synthBtn" onclick="synthComplete()">🦞 用户完全体合成</button>
+    <div class="synth-result" id="synthResult"></div>
     <div id="resCards"></div>
     <div class="reset-wrap">
         <button class="reset-btn agent-cta" onclick="toggleAgentCards()">🦞 找智能体聊真的</button>
@@ -304,26 +349,47 @@ const CATEGORIES = {
         blocks:['内部通道清洗困难','噪音偏大','入口紧度不适','材质轻微气味'],
         improve:['可拆洗内胆','静音马达结构','医用硅胶无气味','入口渐宽设计'],
         motive:'隐私 discreet、逼真体验、便携收纳',
-        scene:'独处夜间、差旅便携'}},
+        scene:'独处夜间、差旅便携',
+        needs:['舒适','安全','审美','认可','亲密','主宰']}},
     '倒模':{icon:'🫧', sample:{
         blocks:['重量大不便收纳','清洁死角多','价格偏高','通道易积灰'],
         improve:['分体式减轻重量','抗菌防霉材质','可站立底座','磁吸快拆'],
         motive:'逼真触感、视觉冲击、收藏展示',
-        scene:'居家固定空间、伴侣互动'}},
+        scene:'居家固定空间、伴侣互动',
+        needs:['审美','认可','亲密','主宰','影响','刺激']}},
     '振动器':{icon:'🔋', sample:{
         blocks:['续航短','噪音明显','模式单一','充电不便'],
         improve:['长续航电池','磁吸静音马达','APP多模式控制','无线快充'],
         motive:'自我探索、伴侣互动、健康放松',
-        scene:'独处、伴侣前戏、旅行'}}
+        scene:'独处、伴侣前戏、旅行',
+        needs:['舒适','安全','胜任','亲密','刺激','健康']}}
 };
 /* 自定义类目的通用兜底样本（未内置真实数据时用） */
 const FALLBACK_SAMPLE = {
     blocks:['基础体验未达预期','差异化卖点不清晰','用户复购动力弱'],
     improve:['聚焦核心痛点打磨','打造可记忆的差异化点','建立用户反馈闭环'],
     motive:'满足真实需求、获得稳定好的体验',
-    scene:'日常使用场景'
+    scene:'日常使用场景',
+    needs:['舒适','安全','认可','亲密']
 };
 function getCategory(key){ return CATEGORIES[key] || {icon:'🆕', custom:true, sample:FALLBACK_SAMPLE}; }
+
+/* 示例案例（一键载入，方便演示） */
+const SAMPLE_CASES = {
+    airplane:{purpose:'product_dev', category:'飞机杯', desc:'我们是一款主打「逼真触感 + 静音」的飞机杯，售价中端。目前差评集中在清洗困难和入口偏紧，想看看用户真实需求和产品改进方向，下一步准备做二代升级。'},
+    mold:{purpose:'marketing', category:'倒模', desc:'我们做高仿真倒模，卖点是最强视觉冲击和收藏价值。但用户只记得"贵"，复购一般。想搞清楚怎么把"逼真触感"讲成打动人的故事，提升转化和口碑。'},
+    vibe:{purpose:'innovation', category:'振动器', desc:'我们的振动器主打自我探索与伴侣互动。用户反馈续航短、噪音明显、模式单一。想找未来1-2年的差异化创新方向，跳出"加个模式"的同质化。'}
+};
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function loadSampleCase(key){
+    const sc = SAMPLE_CASES[key];
+    if(!sc) return;
+    state.purpose = sc.purpose;
+    state.category = sc.category;
+    document.querySelectorAll('.pcard').forEach(c=>c.classList.toggle('active', c.dataset.key===sc.purpose));
+    setActiveCat(sc.category);
+    document.getElementById('prodDesc').value = sc.desc;
+}
 
 /* ============ 状态 ============ */
 let state = { purpose:null, category:null };
@@ -332,7 +398,7 @@ let state = { purpose:null, category:null };
 function renderPurpose(){
     const pg = document.getElementById('purposeGrid');
     pg.innerHTML = Object.entries(PURPOSES).map(([k,v])=>
-        `<button class="pcard" onclick="pickPurpose('${k}')">
+        `<button class="pcard" data-key="${k}" onclick="pickPurpose('${k}')">
             <div class="pi">${v.icon}</div>
             <div class="pn">${v.name}</div>
             <div class="pd">${v.desc}</div>
@@ -474,6 +540,14 @@ function renderResults(p, c){
         `针对目的「<b>${p.name}</b>」，核心洞察是：用户最在意的并非单一功能，而是「<b>${ex.motive}</b>」所代表的综合体验；当前主要卡点在 <b>${ex.blocks[0]}</b> 与 <b>${ex.blocks[1]}</b>。` +
         (c.custom ? `<br><span style="color:#7C3AED;font-size:13px;">⚠️ 该类目为自定义输入，未内置真实样本，结论基于通用示例，建议补充该类目的真实评价数据后再分析。</span>` : '');
 
+    // 用户案例表（本次分析对象）
+    document.getElementById('caseBlock').innerHTML = buildCaseTable(p, c, desc);
+    // 重置「用户完全体合成」状态
+    const sb = document.getElementById('synthBtn');
+    sb.disabled = false; sb.textContent = '🦞 用户完全体合成';
+    document.getElementById('synthResult').classList.remove('show');
+    document.getElementById('synthResult').innerHTML = '';
+
     const wrap = document.getElementById('resCards');
     wrap.innerHTML = p.frameworks.map(fk=>buildCard(fk, p, c, desc)).join('');
 
@@ -556,6 +630,60 @@ function buildCard(fk, p, c, desc){
 
 function shorten(s){ return s.length>24 ? s.slice(0,24)+'…' : s; }
 
+function buildCaseTable(p, c, desc){
+    const ex = c.sample, catName = state.category;
+    const rows = [
+        ['分析目的', p.name],
+        ['产品类目', catName + ' ' + c.icon],
+        ['基本情况', desc || '（未填写）'],
+        ['用户想要什么', ex.motive],
+        ['使用场景', ex.scene],
+        ['核心阻碍', ex.blocks.join('、')],
+        ['改进方向', ex.improve.join('、')]
+    ];
+    return `<div class="case-title">📋 用户案例（本次分析对象）</div>
+    <table class="case-table"><tbody>
+        ${rows.map(r=>`<tr><th>${r[0]}</th><td>${escapeHtml(r[1])}</td></tr>`).join('')}
+    </tbody></table>`;
+}
+
+function synthComplete(){
+    const p = PURPOSES[state.purpose], c = getCategory(state.category), ex = c.sample, catName = state.category;
+    const desc = document.getElementById('prodDesc').value.trim() || '（未填写产品描述）';
+    const btn = document.getElementById('synthBtn');
+    if(btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = '🦞 正在合成用户完全体…';
+    setTimeout(()=>{
+        const lead = `一位注重「${ex.motive.split('、')[0]}」的${catName}用户，在${ex.scene}中使用产品；表面追求功能满足，深层渴望「${ex.motive.split('、')[1]||ex.motive.split('、')[0]}」与被理解的安心感。`;
+        const needTags = (ex.needs||[]).map(n=>`<span class="need-tag">${n}</span>`).join('');
+        const verdict = `完全体结论：${catName}用户不是要"一个更猛的功能"，而是要在「${ex.blocks.slice(0,2).join('、')}」被解决后，获得「${ex.motive}」的综合体验。先把 <b>${ex.improve.slice(0,2).join('、')}</b> 落地，再用 13 种需求里的「<b>${ex.needs.slice(0,3).join('、')}</b>」做差异化沟通，才是完整的用户经营闭环。`;
+        document.getElementById('synthResult').innerHTML =
+            `<div class="synth-card">
+                <div class="synth-head">🧬 用户完全体 · 合成画像</div>
+                <div class="synth-lead">${lead}</div>
+                <div class="synth-grid">
+                    <div class="synth-col">
+                        <div class="synth-h">🎯 用户想要什么</div><p>${ex.motive}</p>
+                        <div class="synth-h">📍 使用场景</div><p>${ex.scene}</p>
+                    </div>
+                    <div class="synth-col">
+                        <div class="synth-h">⚠️ 核心卡点</div><p>${ex.blocks.join('、')}</p>
+                        <div class="synth-h">🛠️ 改进方向</div><p>${ex.improve.join('、')}</p>
+                    </div>
+                </div>
+                <div class="synth-needs">
+                    <div class="synth-h">🧭 十三种需求映射（高优先级）</div>
+                    <div class="need-tags">${needTags}</div>
+                </div>
+                <div class="synth-verdict">${verdict}</div>
+            </div>`;
+        document.getElementById('synthResult').classList.add('show');
+        btn.textContent = '🦞 用户完全体已合成 ✓';
+        document.getElementById('synthResult').scrollIntoView({behavior:'smooth', block:'nearest'});
+    }, 700);
+}
+
 function toggleAgentCards(){
     const el = document.getElementById('agentCards');
     el.classList.toggle('show');
@@ -571,6 +699,10 @@ function resetExperience(){
     document.getElementById('pipeline').classList.remove('show');
     document.getElementById('results').classList.remove('show');
     document.getElementById('genBtn').disabled = false;
+    const sb = document.getElementById('synthBtn');
+    if(sb){ sb.disabled = false; sb.textContent = '🦞 用户完全体合成'; }
+    document.getElementById('synthResult').classList.remove('show');
+    document.getElementById('synthResult').innerHTML = '';
     window.scrollTo({top:0, behavior:'smooth'});
 }
 
