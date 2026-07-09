@@ -50,10 +50,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .pcard .pd{font-size:12px; color:var(--slate); margin-top:4px; line-height:1.4;}
 
 /* category chips */
-.cat-row{display:flex; gap:12px; flex-wrap:wrap;}
+.cat-row{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
 .cchip{border:2px solid var(--line); border-radius:999px; padding:10px 20px; cursor:pointer; transition:all .2s; background:#fff; font-family:inherit; font-size:14px; font-weight:600; color:var(--slate); display:flex; align-items:center; gap:8px;}
 .cchip:hover{border-color:#C7D2FE;}
 .cchip.active{border-color:var(--pink); background:#FDF2F8; color:var(--pink);}
+.cchip-add{border-style:dashed; color:#94A3B8; background:#F8FAFC;}
+.cchip-add:hover{border-color:#CBD5E1; color:var(--slate);}
+.cchip.custom{border-color:#8B5CF6; background:#F5F3FF; color:#7C3AED;}
+.cat-input{display:none; border:2px solid var(--pink); border-radius:999px; padding:10px 16px; font-family:inherit; font-size:14px; color:var(--ink); width:240px; outline:none; background:#FDF2F8;}
+.cat-input::placeholder{color:#C4B5FD;}
 
 /* textarea */
 textarea{width:100%; min-height:110px; border:2px solid var(--line); border-radius:12px; padding:14px 16px; font-family:inherit; font-size:14px; color:var(--ink); resize:vertical; transition:border-color .2s;}
@@ -152,8 +157,9 @@ textarea::placeholder{color:var(--muted);}
         </div>
 
         <div class="cfg-block">
-            <div class="cfg-label"><span class="num">2</span> 选择你的产品类目</div>
+            <div class="cfg-label"><span class="num">2</span> 选择你的产品类目 <span style="font-weight:400;color:#94A3B8;font-size:12px;">（没有就点「➕ 其他」自己输入）</span></div>
             <div class="cat-row" id="catRow"></div>
+            <input id="customCatInput" class="cat-input" placeholder="输入类目，如 润滑剂 / 男女共用 / 情趣内衣…" onkeydown="if(event.key==='Enter')commitCustomCat()" onblur="commitCustomCat()" />
         </div>
 
         <div class="cfg-block">
@@ -282,12 +288,20 @@ const CATEGORIES = {
         motive:'自我探索、伴侣互动、健康放松',
         scene:'独处、伴侣前戏、旅行'}}
 };
+/* 自定义类目的通用兜底样本（未内置真实数据时用） */
+const FALLBACK_SAMPLE = {
+    blocks:['基础体验未达预期','差异化卖点不清晰','用户复购动力弱'],
+    improve:['聚焦核心痛点打磨','打造可记忆的差异化点','建立用户反馈闭环'],
+    motive:'满足真实需求、获得稳定好的体验',
+    scene:'日常使用场景'
+};
+function getCategory(key){ return CATEGORIES[key] || {icon:'🆕', custom:true, sample:FALLBACK_SAMPLE}; }
 
 /* ============ 状态 ============ */
 let state = { purpose:null, category:null };
 
 /* ============ 渲染选择器 ============ */
-function renderSelectors(){
+function renderPurpose(){
     const pg = document.getElementById('purposeGrid');
     pg.innerHTML = Object.entries(PURPOSES).map(([k,v])=>
         `<button class="pcard" onclick="pickPurpose('${k}')">
@@ -295,13 +309,36 @@ function renderSelectors(){
             <div class="pn">${v.name}</div>
             <div class="pd">${v.desc}</div>
         </button>`).join('');
-
+}
+function renderCategories(){
     const cr = document.getElementById('catRow');
     cr.innerHTML = Object.entries(CATEGORIES).map(([k,v])=>
-        `<button class="cchip" onclick="pickCategory('${k}')">${v.icon} ${k}</button>`).join('');
+        `<button class="cchip${v.custom?' custom':''}" data-key="${k}" onclick="pickCategory('${k}')">${v.icon} ${k}</button>`).join('') +
+        `<button class="cchip cchip-add" onclick="showCustomCat()">➕ 其他</button>`;
 }
 function pickPurpose(k){ state.purpose=k; document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('active')); event.currentTarget.classList.add('active'); }
-function pickCategory(k){ state.category=k; document.querySelectorAll('.cchip').forEach(c=>c.classList.remove('active')); event.currentTarget.classList.add('active'); }
+function pickCategory(k){ setActiveCat(k); }
+function setActiveCat(key){
+    state.category = key;
+    document.querySelectorAll('.cchip').forEach(c=>{
+        c.classList.remove('active');
+        if(c.dataset.key===key) c.classList.add('active');
+    });
+}
+function showCustomCat(){
+    const inp = document.getElementById('customCatInput');
+    inp.style.display = 'inline-block';
+    inp.focus();
+}
+function commitCustomCat(){
+    const inp = document.getElementById('customCatInput');
+    const v = inp.value.trim();
+    if(!v){ inp.style.display='none'; inp.value=''; return; }
+    if(!CATEGORIES[v]){ CATEGORIES[v] = {icon:'🆕', custom:true, sample:FALLBACK_SAMPLE}; }
+    renderCategories();          // 重渲染类目行（含新类目 + 其他按钮）
+    inp.style.display='none'; inp.value='';
+    setActiveCat(v);             // 选中刚输入的自定义类目
+}
 
 /* ============ 工具 ============ */
 const sleep = ms => new Promise(r=>setTimeout(r,ms));
@@ -321,7 +358,7 @@ async function startExperience(){
     }
     const btn = document.getElementById('genBtn');
     btn.disabled = true;
-    const p = PURPOSES[state.purpose], c = CATEGORIES[state.category];
+    const p = PURPOSES[state.purpose], c = getCategory(state.category);
 
     // 显示管线
     const pipe = document.getElementById('pipeline');
@@ -406,7 +443,8 @@ function renderResults(p, c){
 
     document.getElementById('resSummary').innerHTML =
         `基于你描述的「${catName}」产品，我们完成了 <b>${p.sources.length}</b> 个数据源接入、<b>${p.tags.length}</b> 类标签抽取，并匹配了 <b>${p.frameworks.length}</b> 个分析框架。` +
-        `针对目的「<b>${p.name}</b>」，核心洞察是：用户最在意的并非单一功能，而是「<b>${ex.motive}</b>」所代表的综合体验；当前主要卡点在 <b>${ex.blocks[0]}</b> 与 <b>${ex.blocks[1]}</b>。`;
+        `针对目的「<b>${p.name}</b>」，核心洞察是：用户最在意的并非单一功能，而是「<b>${ex.motive}</b>」所代表的综合体验；当前主要卡点在 <b>${ex.blocks[0]}</b> 与 <b>${ex.blocks[1]}</b>。` +
+        (c.custom ? `<br><span style="color:#7C3AED;font-size:13px;">⚠️ 该类目为自定义输入，未内置真实样本，结论基于通用示例，建议补充该类目的真实评价数据后再分析。</span>` : '');
 
     const wrap = document.getElementById('resCards');
     wrap.innerHTML = p.frameworks.map(fk=>buildCard(fk, p, c, desc)).join('');
@@ -500,7 +538,8 @@ function resetExperience(){
     window.scrollTo({top:0, behavior:'smooth'});
 }
 
-renderSelectors();
+renderPurpose();
+renderCategories();
 </script>
 </body>
 </html>
