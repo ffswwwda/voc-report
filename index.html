@@ -1973,6 +1973,7 @@
             }
 
             </style>
+    <style>
     /* ===== 框架迷你交互演示 ===== */
     .mini-demo{margin-top:30px;padding:22px 24px;background:linear-gradient(135deg,#F8FAFC 0%,#EEF2FF 100%);border:1px solid #E0E7FF;border-radius:16px;}
     .mini-demo-head{display:flex;align-items:center;gap:10px;margin-bottom:3px;}
@@ -2002,6 +2003,7 @@
     .qb-lab{position:absolute;font-size:11px;font-weight:700;color:#94A3B8;padding:6px;pointer-events:none;}
     .qb-dot{position:absolute;width:28px;height:28px;border-radius:50%;background:#6366F1;border:3px solid #fff;box-shadow:0 2px 10px rgba(99,102,241,.5);cursor:grab;transform:translate(-50%,-50%);left:72%;top:28%;}
     .qb-dot:active{cursor:grabbing;}
+    </style>
 </head>
 <body>
 
@@ -3354,7 +3356,7 @@
                     </p>
                 </div>
             </div>
-        </div>
+
 
         <div class="mini-demo">
             <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · JTBD 句式生成器</h4></div>
@@ -3365,6 +3367,7 @@
                 <span class="mini-chip" onclick="miniJtbd('privacy',this)">🤫 在意隐私安全</span>
             </div>
             <div class="mini-out" id="jtbdOut"></div>
+        </div>
         </div>
 
         <!-- 十三种需求分析框架 -->
@@ -3494,7 +3497,7 @@
                     </ol>
                 </div>
             </div>
-        </div>
+
 
         <div class="mini-demo">
             <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · 需求探测仪</h4></div>
@@ -3515,6 +3518,7 @@
                 <span class="mini-chip" onclick="miniNeed('健康',this)">健康</span>
             </div>
             <div class="mini-out" id="needOut"></div>
+        </div>
         </div>
 
         <!-- 产品创意罗盘 -->
@@ -3665,7 +3669,7 @@
                     </table>
                 </div>
             </div>
-        </div>
+
 
 
         <div class="mini-demo">
@@ -3678,6 +3682,7 @@
                 <span class="mini-chip" onclick="miniCompass('transplant',this)">🌉 移植法</span>
             </div>
             <div class="mini-out" id="compassOut"></div>
+        </div>
         </div>
 
         <!-- 极端/领先用户查找-分析 -->
@@ -3917,7 +3922,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+
 
         <div class="mini-demo">
             <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · 领先用户判别器</h4></div>
@@ -3925,6 +3930,7 @@
             <div class="mini-slider-wrap"><label>时间领先性</label><input type="range" min="0" max="10" value="3" id="extLead" oninput="miniExtreme()"><span class="mini-slider-val" id="extLeadV">3</span></div>
             <div class="mini-slider-wrap"><label>收益预期</label><input type="range" min="0" max="10" value="3" id="extBen" oninput="miniExtreme()"><span class="mini-slider-val" id="extBenV">3</span></div>
             <div class="mini-out" id="extremeOut"></div>
+        </div>
         </div>
 
         <!-- Plutchik 情绪罗盘 -->
@@ -4259,7 +4265,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+
 
         <div class="mini-demo">
             <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · 情绪触发探针</h4></div>
@@ -4275,6 +4281,7 @@
                 <span class="mini-chip" onclick="miniPlut('anticipate',this)">🤔 盼</span>
             </div>
             <div class="mini-out" id="plutOut"></div>
+        </div>
         </div>
 
         <!-- 4象限用户需求 -->
@@ -4647,7 +4654,7 @@
                 </div>
 
             </div>
-        </div>
+
 
         <div class="mini-demo">
             <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · 重要度×满意度定位台</h4></div>
@@ -4669,6 +4676,7 @@
                 <span class="mini-chip" onclick="miniRw('unexpected',this)">非预期需求</span>
             </div>
             <div class="mini-out" id="rwOut"></div>
+        </div>
         </div>
 
         <!-- TRIZ 创新方法 -->
@@ -4942,7 +4950,7 @@
                 </div>
 
             </div>
-        </div>
+
 
         <div class="mini-demo">
             <div class="mini-demo-head"><span class="mini-demo-emoji">🎮</span><h4 class="mini-demo-title">迷你演示 · 痛点→发明原理映射器</h4></div>
@@ -4956,6 +4964,7 @@
                 <span class="mini-chip" onclick="miniTriz('size',this)">📏 尺寸不适配</span>
             </div>
             <div class="mini-out" id="trizOut"></div>
+        </div>
         </div>
 
         <!-- ========== 方法论技能下载板块 ========== -->
