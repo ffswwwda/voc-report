@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='white'/><text x='32' y='48' text-anchor='middle' font-size='40'>🦞</text></svg>">
+<title>VOC 一条龙分析体验</title>
+<style>
+:root{
+    --indigo:#4F46E5; --indigo-d:#4338CA; --blue:#2563EB; --blue-l:#EFF6FF;
+    --ink:#0F172A; --slate:#475569; --muted:#94A3B8; --line:#E2E8F0;
+    --green:#059669; --pink:#DB2777; --amber:#D97706; --cyan:#0891B2; --purple:#7C3AED;
+    --bg:#F8FAFC; --card:#FFFFFF; --radius:16px; --shadow:0 4px 20px rgba(15,23,42,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.6; -webkit-font-smoothing:antialiased;}
+.topbar{position:sticky; top:0; z-index:50; background:rgba(255,255,255,.85); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line); padding:10px 20px; display:flex; align-items:center; gap:12px;}
+.topbar a{color:var(--slate); text-decoration:none; font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px;}
+.topbar a:hover{color:var(--indigo);}
+.topbar .brand{margin-left:auto; font-weight:700; color:var(--indigo); display:flex; align-items:center; gap:6px;}
+
+/* ===== Hero ===== */
+.hero{max-width:920px; margin:0 auto; padding:56px 24px 28px; text-align:center;}
+.hero .eyebrow{display:inline-block; background:var(--blue-l); color:var(--blue); font-weight:700;
+    font-size:13px; padding:5px 14px; border-radius:999px; margin-bottom:18px;}
+.hero h1{font-size:40px; line-height:1.2; letter-spacing:-.5px; margin-bottom:14px;}
+.hero h1 .grad{background:linear-gradient(90deg,var(--indigo),var(--pink)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.hero p{font-size:17px; color:var(--slate); max-width:640px; margin:0 auto;}
+.hero .steps-hint{display:flex; gap:10px; justify-content:center; margin-top:26px; flex-wrap:wrap;}
+.hero .steps-hint .sh{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px 14px; font-size:13px; color:var(--slate); font-weight:600; box-shadow:var(--shadow);}
+.hero .steps-hint .sh b{color:var(--indigo);}
+
+/* ===== Config panel ===== */
+.panel{max-width:920px; margin:18px auto 0; padding:0 24px 40px;}
+.cfg{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:30px; box-shadow:var(--shadow);}
+.cfg-block{margin-bottom:26px;}
+.cfg-block:last-child{margin-bottom:0;}
+.cfg-label{font-size:14px; font-weight:700; color:var(--ink); margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+.cfg-label .num{width:22px; height:22px; border-radius:50%; background:var(--indigo); color:#fff; font-size:12px; display:flex; align-items:center; justify-content:center; font-weight:700;}
+
+/* purpose cards */
+.purpose-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+.pcard{border:2px solid var(--line); border-radius:12px; padding:16px; cursor:pointer; transition:all .2s; background:#fff; text-align:left; font-family:inherit;}
+.pcard:hover{border-color:#C7D2FE; transform:translateY(-2px);}
+.pcard.active{border-color:var(--indigo); background:#EEF2FF; box-shadow:0 0 0 3px rgba(79,70,229,.12);}
+.pcard .pi{font-size:24px;}
+.pcard .pn{font-weight:700; font-size:15px; margin-top:6px;}
+.pcard .pd{font-size:12px; color:var(--slate); margin-top:4px; line-height:1.4;}
+
+/* category chips */
+.cat-row{display:flex; gap:12px; flex-wrap:wrap;}
+.cchip{border:2px solid var(--line); border-radius:999px; padding:10px 20px; cursor:pointer; transition:all .2s; background:#fff; font-family:inherit; font-size:14px; font-weight:600; color:var(--slate); display:flex; align-items:center; gap:8px;}
+.cchip:hover{border-color:#C7D2FE;}
+.cchip.active{border-color:var(--pink); background:#FDF2F8; color:var(--pink);}
+
+/* textarea */
+textarea{width:100%; min-height:110px; border:2px solid var(--line); border-radius:12px; padding:14px 16px; font-family:inherit; font-size:14px; color:var(--ink); resize:vertical; transition:border-color .2s;}
+textarea:focus{outline:none; border-color:var(--indigo);}
+textarea::placeholder{color:var(--muted);}
+
+/* generate btn */
+.gen-wrap{text-align:center; margin-top:8px;}
+.gen-btn{background:linear-gradient(90deg,var(--indigo),var(--pink)); color:#fff; border:none; border-radius:999px;
+    padding:15px 44px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; box-shadow:0 8px 24px rgba(79,70,229,.32); transition:transform .15s, box-shadow .15s;}
+.gen-btn:hover{transform:translateY(-2px); box-shadow:0 12px 30px rgba(79,70,229,.42);}
+.gen-btn:disabled{opacity:.6; cursor:not-allowed; transform:none;}
+.gen-hint{font-size:12px; color:var(--muted); margin-top:10px;}
+
+/* ===== Pipeline ===== */
+.pipeline-wrap{max-width:920px; margin:10px auto 0; padding:0 24px; display:none;}
+.pipeline-wrap.show{display:block; animation:fadeUp .5s ease;}
+@keyframes fadeUp{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:none;}}
+.pipe-progress{height:8px; background:var(--line); border-radius:999px; overflow:hidden; margin-bottom:26px;}
+.pipe-progress .bar{height:100%; width:0; background:linear-gradient(90deg,var(--indigo),var(--pink)); border-radius:999px; transition:width .6s ease;}
+.pipe-nodes{display:flex; gap:14px; position:relative;}
+.pnode{flex:1; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; position:relative; opacity:.45; transition:opacity .4s, border-color .4s, box-shadow .4s;}
+.pnode.active{opacity:1; border-color:#C7D2FE; box-shadow:var(--shadow);}
+.pnode.done{opacity:1; border-color:#A7F3D0;}
+.pnode .ph{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+.pnode .pcircle{width:30px; height:30px; border-radius:50%; background:var(--line); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; transition:background .4s;}
+.pnode.active .pcircle, .pnode.done .pcircle{background:var(--indigo);}
+.pnode.done .pcircle{background:var(--green);}
+.pnode .ptitle{font-weight:700; font-size:15px;}
+.pnode .pcontent{min-height:54px;}
+.chip{display:inline-flex; align-items:center; gap:6px; background:var(--blue-l); color:var(--blue); border-radius:8px; padding:5px 10px; font-size:12px; font-weight:600; margin:3px 4px 3px 0; opacity:0; transform:translateY(6px); transition:opacity .35s, transform .35s;}
+.chip.in{opacity:1; transform:none;}
+.chip.tag{background:#FEF3C7; color:#B45309;}
+.chip.fw{background:#EDE9FE; color:var(--purple);}
+.chip .rk{font-size:10px; background:rgba(0,0,0,.08); border-radius:4px; padding:1px 5px;}
+.waiting{font-size:12px; color:var(--muted);}
+
+/* ===== Results ===== */
+.results{max-width:920px; margin:30px auto 0; padding:0 24px 60px; display:none;}
+.results.show{display:block; animation:fadeUp .5s ease;}
+.res-head{text-align:center; margin-bottom:24px;}
+.res-head h2{font-size:26px;}
+.res-head .sub{color:var(--slate); font-size:14px; margin-top:6px;}
+.res-meta{display:inline-flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:12px;}
+.res-meta .m{background:#EEF2FF; color:var(--indigo); border-radius:999px; padding:4px 12px; font-size:12px; font-weight:700;}
+.res-summary{background:linear-gradient(135deg,#EEF2FF,#FDF2F8); border:1px solid #E0E7FF; border-radius:14px; padding:20px 22px; margin-bottom:24px; font-size:15px; color:#312E81;}
+.res-summary b{color:var(--indigo-d);}
+.fw-result{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px; margin-bottom:18px; box-shadow:var(--shadow); border-left:5px solid var(--indigo);}
+.fw-result h3{font-size:18px; display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+.fw-result .ftag{font-size:11px; font-weight:700; color:#fff; background:var(--indigo); border-radius:6px; padding:2px 8px;}
+.fw-result .fdesc{font-size:13px; color:var(--slate); margin-bottom:14px;}
+.fw-result .finsight{font-size:15px; font-weight:600; color:var(--ink); margin-bottom:12px; line-height:1.5;}
+.fw-result ul{list-style:none; margin-bottom:12px;}
+.fw-result li{position:relative; padding-left:22px; margin-bottom:8px; font-size:14px; color:var(--slate);}
+.fw-result li::before{content:"▹"; position:absolute; left:0; color:var(--indigo); font-weight:700;}
+.fw-result .faction{background:#F0FDF4; border-radius:10px; padding:12px 14px; font-size:13px; color:#166534;}
+.fw-result .faction b{color:var(--green);}
+.reset-wrap{text-align:center; margin-top:8px;}
+.reset-btn{background:#fff; border:2px solid var(--line); border-radius:999px; padding:12px 32px; font-size:14px; font-weight:700; color:var(--slate); cursor:pointer; font-family:inherit; transition:all .2s;}
+.reset-btn:hover{border-color:var(--indigo); color:var(--indigo);}
+
+.footer{text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; border-top:1px solid var(--line); margin-top:40px;}
+
+@media(max-width:720px){
+    .hero h1{font-size:30px;}
+    .purpose-grid{grid-template-columns:repeat(2,1fr);}
+    .pipe-nodes{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <a href="voc_analysis_report.html">← 返回主报告</a>
+    <span class="brand">🦞 VOC 一条龙体验</span>
+</div>
+
+<!-- ===== Hero ===== -->
+<header class="hero">
+    <span class="eyebrow">交互式 Demo · 无需登录</span>
+    <h1>体验我们的 <span class="grad">完整 VOC 分析能力</span></h1>
+    <p>选一个目的、挑个类目、描述你的产品，一键看我们如何从「数据源」走到「分析结论」。整个过程就是真实分析流程的缩影。</p>
+    <div class="steps-hint">
+        <span class="sh"><b>①</b> 数据源获取</span>
+        <span class="sh"><b>②</b> 框架匹配</span>
+        <span class="sh"><b>③</b> 分析结论</span>
+    </div>
+</header>
+
+<!-- ===== Config ===== -->
+<div class="panel">
+    <div class="cfg">
+        <div class="cfg-block">
+            <div class="cfg-label"><span class="num">1</span> 选择一个大的分析目的</div>
+            <div class="purpose-grid" id="purposeGrid"></div>
+        </div>
+
+        <div class="cfg-block">
+            <div class="cfg-label"><span class="num">2</span> 选择你的产品类目</div>
+            <div class="cat-row" id="catRow"></div>
+        </div>
+
+        <div class="cfg-block">
+            <div class="cfg-label"><span class="num">3</span> 描述你的产品（基本情况 / 想要什么）</div>
+            <textarea id="prodDesc" placeholder="例：我们是一款主打「逼真触感+静音」的飞机杯，售价中端。目前差评集中在清洗困难和入口偏紧，想看看用户真实需求和产品改进方向……"></textarea>
+        </div>
+
+        <div class="gen-wrap">
+            <button class="gen-btn" id="genBtn" onclick="startExperience()">🚀 一键生成分析结论</button>
+            <div class="gen-hint">演示数据基于你选的目的与类目自动生成，结论为示例，不是真实分析产出。</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Pipeline ===== -->
+<div class="pipeline-wrap" id="pipeline">
+    <div class="pipe-progress"><div class="bar" id="progBar"></div></div>
+    <div class="pipe-nodes">
+        <div class="pnode" id="node1">
+            <div class="ph"><div class="pcircle">1</div><div class="ptitle">数据源获取</div></div>
+            <div class="pcontent" id="node1Content"><span class="waiting">准备中…</span></div>
+        </div>
+        <div class="pnode" id="node2">
+            <div class="ph"><div class="pcircle">2</div><div class="ptitle">分析框架匹配</div></div>
+            <div class="pcontent" id="node2Content"><span class="waiting">等待上一步…</span></div>
+        </div>
+        <div class="pnode" id="node3">
+            <div class="ph"><div class="pcircle">3</div><div class="ptitle">分析结果</div></div>
+            <div class="pcontent" id="node3Content"><span class="waiting">等待上一步…</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Results ===== -->
+<div class="results" id="results">
+    <div class="res-head">
+        <h2>📊 你的分析结论</h2>
+        <div class="sub" id="resSub"></div>
+        <div class="res-meta" id="resMeta"></div>
+    </div>
+    <div class="res-summary" id="resSummary"></div>
+    <div id="resCards"></div>
+    <div class="reset-wrap">
+        <button class="reset-btn" onclick="resetExperience()">↺ 重新体验一次</button>
+    </div>
+</div>
+
+<footer class="footer">
+    VOC 完整分析体系 · 一条龙体验 Demo · 标签体系 × 分析框架 × 创意输出<br>
+    Generated by WorkBuddy · 2026
+</footer>
+
+<script>
+/* ============ 数据模型 ============ */
+const PURPOSES = {
+    product_dev:{name:'产品开发', icon:'🛠️', desc:'用户最需要什么功能？该改进什么？',
+        sources:[{n:'Amazon评价',r:'主',d:'详细使用体验+评分'},{n:'Reddit',r:'次',d:'深度痛点+workarounds'},{n:'社媒反馈',r:'补',d:'真实场景'}],
+        tags:['用户画像','购买动机','使用场景','使用阻碍','克服方式','产品改进建议','用户忠诚度'],
+        frameworks:['jtbd','needs-analysis','extreme'],
+        outcomes:['产品改进清单（按频率+强度排序）','新功能建议（来自workarounds）','用户需求地图（指导路线图）']},
+    marketing:{name:'营销建议', icon:'📣', desc:'用户最在意什么价值？如何打动他？',
+        sources:[{n:'Amazon评价',r:'主',d:'4-5星，用户推荐理由'},{n:'社媒分享帖',r:'次',d:'用户主动分享'},{n:'Reddit正面讨论',r:'补',d:'口碑内容'}],
+        tags:['购买动机','使用场景','用户画像','预期符合度','用户忠诚度'],
+        frameworks:['jtbd','needs-analysis','researcher'],
+        outcomes:['卖点提炼（含原文引用+文案）','目标受众画像（含渠道）','使用场景地图（广告素材）']},
+    innovation:{name:'产品创新', icon:'💡', desc:'未来1-2年机会在哪？如何差异化？',
+        sources:[{n:'Reddit',r:'主',d:'全量，workarounds+未来需求'},{n:'Amazon评价',r:'次',d:'1-3星，设计缺陷'},{n:'社媒边缘讨论',r:'补',d:'边缘场景'}],
+        tags:['克服方式','使用阻碍','购买动机','用户忠诚度','使用场景'],
+        frameworks:['extreme','triz','compass'],
+        outcomes:['创新机会地图（含workarounds）','领先用户洞察（von Hippel）','TRIZ创新方案（含可行性）']},
+    user_insight:{name:'用户洞察', icon:'🔍', desc:'用户为什么买/不买？真正在意什么？',
+        sources:[{n:'Amazon评价',r:'主',d:'全量1-5星'},{n:'Reddit',r:'次',d:'全量讨论'},{n:'客服记录',r:'补',d:'真实反馈'}],
+        tags:['用户画像','使用场景','购买动机','预期符合度','用户忠诚度'],
+        frameworks:['jtbd','needs-analysis','researcher'],
+        outcomes:['用户画像报告（3-5类群体）','用户旅程地图（含情感曲线）','满意度分析（满意vs不满意）']},
+    competitor:{name:'竞品分析', icon:'⚔️', desc:'竞品哪里好/差？如何对标差异化？',
+        sources:[{n:'本+竞品 Amazon评价',r:'主',d:'全量对比'},{n:'Reddit竞品讨论',r:'次',d:'竞品口碑'},{n:'社媒对比帖',r:'补',d:'横向对比'}],
+        tags:['使用阻碍','预期符合度','性价比感受','产品改进建议','用户忠诚度'],
+        frameworks:['jtbd','needs-analysis','researcher'],
+        outcomes:['竞品对标矩阵','差异化优势清单','竞品转换用户洞察']},
+    market_trend:{name:'市场趋势', icon:'📈', desc:'需求往哪走？未来机会是什么？',
+        sources:[{n:'Reddit',r:'主',d:'全量，含时间戳'},{n:'Amazon近12月',r:'次',d:'按月分层'},{n:'社媒讨论',r:'补',d:'含时间戳'}],
+        tags:['购买动机','产品改进建议','使用场景','使用阻碍','克服方式'],
+        frameworks:['extreme','needs-analysis','jtbd'],
+        outcomes:['趋势识别报告（含时序证据）','领先用户趋势预测','未来1-2年行动时间线']}
+};
+
+const FRAMEWORKS = {
+    'jtbd':{name:'JTBD 待完成任务', icon:'🎯', color:'#2563EB', desc:'理解用户真正想要完成的任务（功能/情感/社会三层）'},
+    'needs-analysis':{name:'十三种需求分析', icon:'🧭', color:'#7C3AED', desc:'从13种人类需求出发，定位需求层次与优先级'},
+    'compass':{name:'产品创意罗盘', icon:'🧩', color:'#0891B2', desc:'4象限×20种打法，系统化发散产品创意'},
+    'extreme':{name:'极端/领先用户', icon:'🔬', color:'#059669', desc:'基于 von Hippel 理论，从领先用户挖未来需求'},
+    'triz':{name:'TRIZ 创新方法', icon:'⚙️', color:'#D97706', desc:'40个发明原理，系统化解决技术矛盾'},
+    'researcher':{name:'4象限用户需求', icon:'📊', color:'#DB2777', desc:'重要度-满意度矩阵，区分表达需求与真实需求'},
+    'plutchik':{name:'Plutchik 情绪罗盘', icon:'🎭', color:'#BE185D', desc:'8种基本情绪+强度，洞察情感驱动因素'}
+};
+
+/* 9大标签模块 + 子标签（动画里逐条展示） */
+const TAG_SUBS = {
+    '用户画像':['价值观','人口统计','生活方式','社会地位'],
+    '购买动机':['生理满足','情感慰藉','自我探索','关系增进'],
+    '购买目的':['自用','送礼','伴侣互动'],
+    '使用场景':['独处','伴侣','旅行','夜间'],
+    '使用阻碍':['噪音','清洁','隐私','尺寸/紧度'],
+    '克服方式':['静音款','免洗设计','隐私包装','分体结构'],
+    '用户忠诚度':['复购','主动推荐','KOC传播'],
+    '产品改进建议':['材质','功能','外观','续航'],
+    '预期符合度':['超预期','不达预期','符合预期'],
+    '性价比感受':['偏高','适中','偏低']
+};
+
+const CATEGORIES = {
+    '飞机杯':{icon:'✈️', sample:{
+        blocks:['内部通道清洗困难','噪音偏大','入口紧度不适','材质轻微气味'],
+        improve:['可拆洗内胆','静音马达结构','医用硅胶无气味','入口渐宽设计'],
+        motive:'隐私 discreet、逼真体验、便携收纳',
+        scene:'独处夜间、差旅便携'}},
+    '倒模':{icon:'🫧', sample:{
+        blocks:['重量大不便收纳','清洁死角多','价格偏高','通道易积灰'],
+        improve:['分体式减轻重量','抗菌防霉材质','可站立底座','磁吸快拆'],
+        motive:'逼真触感、视觉冲击、收藏展示',
+        scene:'居家固定空间、伴侣互动'}},
+    '振动器':{icon:'🔋', sample:{
+        blocks:['续航短','噪音明显','模式单一','充电不便'],
+        improve:['长续航电池','磁吸静音马达','APP多模式控制','无线快充'],
+        motive:'自我探索、伴侣互动、健康放松',
+        scene:'独处、伴侣前戏、旅行'}}
+};
+
+/* ============ 状态 ============ */
+let state = { purpose:null, category:null };
+
+/* ============ 渲染选择器 ============ */
+function renderSelectors(){
+    const pg = document.getElementById('purposeGrid');
+    pg.innerHTML = Object.entries(PURPOSES).map(([k,v])=>
+        `<button class="pcard" onclick="pickPurpose('${k}')">
+            <div class="pi">${v.icon}</div>
+            <div class="pn">${v.name}</div>
+            <div class="pd">${v.desc}</div>
+        </button>`).join('');
+
+    const cr = document.getElementById('catRow');
+    cr.innerHTML = Object.entries(CATEGORIES).map(([k,v])=>
+        `<button class="cchip" onclick="pickCategory('${k}')">${v.icon} ${k}</button>`).join('');
+}
+function pickPurpose(k){ state.purpose=k; document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('active')); event.currentTarget.classList.add('active'); }
+function pickCategory(k){ state.category=k; document.querySelectorAll('.cchip').forEach(c=>c.classList.remove('active')); event.currentTarget.classList.add('active'); }
+
+/* ============ 工具 ============ */
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+function addChip(container, cls, html){
+    const el = document.createElement('span');
+    el.className = 'chip ' + cls;
+    el.innerHTML = html;
+    container.appendChild(el);
+    requestAnimationFrame(()=>el.classList.add('in'));
+}
+
+/* ============ 主流程 ============ */
+async function startExperience(){
+    if(!state.purpose || !state.category){
+        alert('请先选择「分析目的」和「产品类目」～');
+        return;
+    }
+    const btn = document.getElementById('genBtn');
+    btn.disabled = true;
+    const p = PURPOSES[state.purpose], c = CATEGORIES[state.category];
+
+    // 显示管线
+    const pipe = document.getElementById('pipeline');
+    pipe.classList.add('show');
+    pipe.scrollIntoView({behavior:'smooth', block:'start'});
+    document.getElementById('results').classList.remove('show');
+
+    // 重置节点
+    ['node1','node2','node3'].forEach(id=>{
+        const n = document.getElementById(id);
+        n.classList.remove('active','done');
+    });
+    document.getElementById('progBar').style.width = '0%';
+
+    /* ---- 步骤1：数据源获取 ---- */
+    const n1 = document.getElementById('node1');
+    n1.classList.add('active');
+    const c1 = document.getElementById('node1Content');
+    c1.innerHTML = '<span class="waiting">正在接入数据源…</span>';
+    await sleep(500);
+    c1.innerHTML = '';
+    for(const s of p.sources){
+        addChip(c1, '', `<span class="rk">${s.r}</span>${s.n} · ${s.d}`);
+        await sleep(280);
+    }
+    await sleep(300);
+    const tlabel = document.createElement('div');
+    tlabel.style.cssText = 'font-size:11px;color:#94A3B8;margin:8px 0 2px;font-weight:700;';
+    tlabel.textContent = '提取标签板块 →';
+    c1.appendChild(tlabel);
+    for(const t of p.tags){
+        const subs = (TAG_SUBS[t]||[]).slice(0,3).join(' · ');
+        addChip(c1, 'tag', `${t}${subs?'：'+subs:''}`);
+        await sleep(220);
+    }
+    n1.classList.remove('active'); n1.classList.add('done');
+    document.getElementById('progBar').style.width = '33%';
+    await sleep(400);
+
+    /* ---- 步骤2：框架匹配 ---- */
+    const n2 = document.getElementById('node2');
+    n2.classList.add('active');
+    const c2 = document.getElementById('node2Content');
+    c2.innerHTML = '<span class="waiting">根据目的匹配分析框架…</span>';
+    await sleep(500);
+    c2.innerHTML = '';
+    for(const fk of p.frameworks){
+        const f = FRAMEWORKS[fk];
+        addChip(c2, 'fw', `${f.icon} ${f.name}`);
+        await sleep(320);
+    }
+    n2.classList.remove('active'); n2.classList.add('done');
+    document.getElementById('progBar').style.width = '66%';
+    await sleep(400);
+
+    /* ---- 步骤3：分析结果 ---- */
+    const n3 = document.getElementById('node3');
+    n3.classList.add('active');
+    const c3 = document.getElementById('node3Content');
+    c3.innerHTML = '<span class="waiting">正在生成结论…</span>';
+    await sleep(800);
+    c3.innerHTML = '';
+    addChip(c3, 'fw', `✓ 已生成 ${p.frameworks.length} 份分析结论`);
+    n3.classList.remove('active'); n3.classList.add('done');
+    document.getElementById('progBar').style.width = '100%';
+    await sleep(500);
+
+    renderResults(p, c);
+    btn.disabled = false;
+}
+
+/* ============ 渲染结论 ============ */
+function renderResults(p, c){
+    const desc = document.getElementById('prodDesc').value.trim() || '（未填写产品描述）';
+    const catName = state.category;
+    const ex = c.sample;
+
+    document.getElementById('resSub').textContent =
+        `目的「${p.name}」 × 类目「${catName}」 — 共匹配 ${p.frameworks.length} 个分析框架`;
+    document.getElementById('resMeta').innerHTML =
+        `<span class="m">🎯 ${p.name}</span><span class="m">${c.icon} ${catName}</span><span class="m">📦 数据源 ${p.sources.length} 个</span><span class="m">🏷️ 标签 ${p.tags.length} 类</span>`;
+
+    document.getElementById('resSummary').innerHTML =
+        `基于你描述的「${catName}」产品，我们完成了 <b>${p.sources.length}</b> 个数据源接入、<b>${p.tags.length}</b> 类标签抽取，并匹配了 <b>${p.frameworks.length}</b> 个分析框架。` +
+        `针对目的「<b>${p.name}</b>」，核心洞察是：用户最在意的并非单一功能，而是「<b>${ex.motive}</b>」所代表的综合体验；当前主要卡点在 <b>${ex.blocks[0]}</b> 与 <b>${ex.blocks[1]}</b>。`;
+
+    const wrap = document.getElementById('resCards');
+    wrap.innerHTML = p.frameworks.map(fk=>buildCard(fk, p, c, desc)).join('');
+
+    document.getElementById('results').classList.add('show');
+    document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function buildCard(fk, p, c, desc){
+    const f = FRAMEWORKS[fk];
+    const ex = c.sample;
+    const catName = state.category;
+    let insight='', finds=[], action='';
+
+    if(fk==='jtbd'){
+        insight = `${catName}用户表面任务是「获得生理满足」，深层情感任务是「${ex.motive.split('、')[0]}」，社会任务是「私密不尴尬地拥有」。你的描述里提到的「${shorten(desc)}」正对应这一层。`;
+        finds = [
+            `功能任务：${ex.scene}下能稳定完成核心体验`,
+            `情感任务：通过${ex.improve[0]}等设计获得「被照顾到」的安心感`,
+            `社会任务：隐私包装（${ex.blocks[2]||'隐私'}相关）让用户敢于复购和外露`
+        ];
+        action = `在详情页与广告中，从「功能参数」叙事切换到「情感/社会任务」叙事，突出${ex.improve[0]}与隐私设计。`;
+    } else if(fk==='needs-analysis'){
+        insight = `按13种需求看，${catName}用户的高频需求集中在「舒适」「安全」「审美」，而「认可」「亲密」是差异化空白点。`;
+        finds = [
+            `舒适+安全：当前差评的${ex.blocks[0]}、${ex.blocks[1]}直接拉低这两项满足度`,
+            `审美：外观与材质质感（${ex.improve[2]||'材质'}）是溢价感知来源`,
+            `认可/亲密：目前几乎无人从「被理解」角度做沟通，存在蓝海`
+        ];
+        action = `优先补「舒适+安全」短板（${ex.improve.slice(0,2).join('、')}），再用「审美+认可」做价值升级与品牌差异化。`;
+    } else if(fk==='extreme'){
+        insight = `在${catName}品类，领先用户已经自发用「${ex.improve[1]||'静音'}」「${ex.improve[2]||'材质'}」等 workaround 改造体验——这就是未来1-2年的主流需求。`;
+        finds = [
+            `领先用户信号：${ex.blocks.join('、')} 是他们仍在将就的点`,
+            `未来需求：把 workaround 产品化（${ex.improve.join('、')}）`,
+            `可对话对象：复购≥3次、主动写长评的用户即为领先用户样本`
+        ];
+        action = `建立领先用户回访机制，把他们的 workaround 纳入下一代路线图，抢占品类定义权。`;
+    } else if(fk==='triz'){
+        insight = `针对「${ex.blocks[0]}」与「${ex.blocks[1]}」这对技术矛盾，可用 TRIZ 原理求解：`;
+        finds = [
+            `分割原理：将内胆/主体分离（对应${ex.improve[0]||'可拆洗'}）`,
+            `柔性壳体原理：用软质包裹降低${ex.blocks[1]}`,
+            `预先反作用原理：出厂预润滑/预清洁减少用户动作`
+        ];
+        action = `用 TRIZ 40原理做一轮方案发散，优先验证「分割+柔性壳体」组合的可行性。`;
+    } else if(fk==='compass'){
+        insight = `用产品创意罗盘对「${catName}」做4象限发散，最具潜力的是「场景延伸 × 体验升级」象限：`;
+        finds = [
+            `场景延伸：${ex.scene}之外拓展到新使用情境`,
+            `体验升级：用${ex.improve[2]||'材质'}提升触感真实度`,
+            `情感加成：加入${ex.motive.split('、')[1]||'情感'}向的仪式感设计`
+        ];
+        action = `从罗盘20种打法中筛选3个低成本概念做快速验证（众筹/预售测需求）。`;
+    } else if(fk==='researcher'){
+        insight = `重要度-满意度矩阵显示：${catName}用户「${ex.blocks[0]}」「${ex.blocks[1]}」重要度高但满意度低——是优先改进区；「${ex.motive.split('、')[0]}」重要度高且基本满足——是维持区。`;
+        finds = [
+            `优先改进区（高重要/低满意）：${ex.blocks.slice(0,2).join('、')}`,
+            `维持区（高重要/高满意）：${ex.motive.split('、')[0]}`,
+            `过度供给区（低重要）：可削减成本不伤体验`
+        ];
+        action = `资源先投向优先改进区（${ex.improve.slice(0,2).join('、')}），ROI 最高。`;
+    } else { // plutchik
+        insight = `情绪层面，${catName}评论里「厌恶」（${ex.blocks[0]}）与「恐惧」（${ex.blocks[2]||'隐私'}）是负向高频，而「信任」「愉悦」是正向驱动。`;
+        finds = [
+            `负向：厌恶/恐惧 → 指向清洁与隐私痛点`,
+            `正向：愉悦/信任 → 来自${ex.improve[2]||'材质'}与静音`,
+            `文案机会：用「安心」「无负担」对冲负向情绪`
+        ];
+        action = `在详情页用「安心感」视觉与文案中和用户的厌恶/恐惧情绪，提升转化。`;
+    }
+
+    return `<div class="fw-result" style="border-left-color:${f.color}">
+        <h3>${f.icon} ${f.name} <span class="ftag" style="background:${f.color}">框架</span></h3>
+        <div class="fdesc">${f.desc}</div>
+        <div class="finsight">${insight}</div>
+        <ul>${finds.map(x=>`<li>${x}</li>`).join('')}</ul>
+        <div class="faction"><b>🎯 行动建议：</b>${action}</div>
+    </div>`;
+}
+
+function shorten(s){ return s.length>24 ? s.slice(0,24)+'…' : s; }
+
+function resetExperience(){
+    state = { purpose:null, category:null };
+    document.querySelectorAll('.pcard,.cchip').forEach(c=>c.classList.remove('active'));
+    document.getElementById('prodDesc').value='';
+    document.getElementById('pipeline').classList.remove('show');
+    document.getElementById('results').classList.remove('show');
+    document.getElementById('genBtn').disabled = false;
+    window.scrollTo({top:0, behavior:'smooth'});
+}
+
+renderSelectors();
+</script>
+</body>
+</html>
