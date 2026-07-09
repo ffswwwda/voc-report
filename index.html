@@ -1381,6 +1381,94 @@
             margin: 14px 0;
         }
 
+        /* ===== 需求卡可点选 + 合成工具栏 + 弹窗 ===== */
+        .needs-main .need-card { cursor: pointer; }
+        .needs-main .need-card.selectable:active { transform: scale(0.98); }
+        .needs-main .need-card.selected {
+            border-color: #7C3AED;
+            background: linear-gradient(to bottom right, #F5F3FF, #FFFFFF);
+            box-shadow: 0 6px 18px rgba(124,58,237,0.22);
+        }
+        .needs-main .need-card .sel-check {
+            position: absolute;
+            top: 6px; right: 6px;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: #7C3AED; color: #fff;
+            font-size: 12px; font-weight: 700;
+            display: none; align-items: center; justify-content: center;
+            box-shadow: 0 2px 6px rgba(124,58,237,0.4);
+        }
+        .needs-main .need-card.selected .sel-check { display: flex; }
+
+        .need-toolbar {
+            margin-top: 28px;
+            padding: 20px 22px;
+            background: linear-gradient(135deg, #F5F3FF, #EEF2FF);
+            border: 1px solid #E9D5FF;
+            border-radius: 14px;
+        }
+        .need-macbook-btn {
+            border: 1px solid #C4B5FD;
+            background: #fff; color: #6D28D9;
+            font-size: 13px; font-weight: 700;
+            padding: 9px 16px; border-radius: 999px;
+            cursor: pointer; transition: all .2s;
+        }
+        .need-macbook-btn:hover { background: #7C3AED; color: #fff; border-color: #7C3AED; }
+        .need-preview {
+            margin: 16px 0 12px;
+            font-size: 14px; line-height: 1.7; color: #4C1D95;
+            min-height: 24px;
+            background: #fff; border-radius: 10px;
+            padding: 14px 16px; border: 1px dashed #D8B4FE;
+        }
+        .need-preview.empty { color: #94A3B8; }
+        .need-preview b { color: #7C3AED; }
+        .need-actionbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .need-count { font-size: 13px; font-weight: 700; color: #6D28D9; }
+        .need-synth-btn {
+            border: none; cursor: pointer;
+            background: linear-gradient(135deg, #7C3AED, #2563EB);
+            color: #fff; font-size: 14px; font-weight: 800;
+            padding: 11px 22px; border-radius: 999px;
+            box-shadow: 0 6px 16px rgba(124,58,237,0.35);
+            transition: all .2s;
+        }
+        .need-synth-btn:hover:not(:disabled) { transform: translateY(-2px); }
+        .need-synth-btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+        .need-hint { margin-top: 10px; font-size: 12px; color: #B45309; min-height: 16px; }
+
+        .ns-overlay {
+            position: fixed; inset: 0;
+            background: rgba(15,23,42,.85); backdrop-filter: blur(8px);
+            z-index: 1001; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity .3s ease;
+            padding: 24px; overflow: auto;
+        }
+        .ns-overlay.show { opacity: 1; pointer-events: auto; }
+        .ns-modal {
+            background: #fff; border-radius: 18px; max-width: 860px; width: 100%;
+            padding: 8px; position: relative;
+            transform: scale(.94); transition: transform .3s ease;
+        }
+        .ns-overlay.show .ns-modal { transform: scale(1); }
+        .ns-close {
+            position: absolute; top: 12px; right: 14px; z-index: 3;
+            width: 34px; height: 34px; border-radius: 50%; border: none;
+            background: rgba(15,23,42,.08); color: #334155; font-size: 16px; cursor: pointer;
+        }
+        .ns-close:hover { background: rgba(15,23,42,.16); }
+        .ns-card { border-radius: 14px; overflow: hidden; }
+        .ns-card svg { width: 100%; height: auto; display: block; border-radius: 12px; }
+        .ns-actions { display: flex; gap: 12px; justify-content: center; padding: 16px 8px 8px; }
+        .ns-actions button {
+            border: 1px solid #E2E8F0; background: #F8FAFC; color: #334155;
+            font-size: 13px; font-weight: 700; padding: 10px 18px; border-radius: 10px; cursor: pointer;
+            transition: all .2s;
+        }
+        .ns-actions button:hover { background: #7C3AED; color: #fff; border-color: #7C3AED; }
+
         /* ===== 需求随机转盘（俄罗斯转盘风格）===== */
         .roulette-wrap {
             margin-top: 48px;
@@ -3215,6 +3303,16 @@
 
                 </div><!-- /needs-main -->
             </div><!-- /needs-grid-wrapper -->
+            <!-- 需求点选 + 合成工具栏 -->
+            <div class="need-toolbar">
+                <button class="need-macbook-btn" onclick="applyMacbookExample()">🎯 试试 MacBook 示例</button>
+                <div class="need-preview empty" id="needPreview">点选上方需求卡片，实时生成你的价值主张预览…</div>
+                <div class="need-actionbar">
+                    <span class="need-count" id="needCount">已选 0 项</span>
+                    <button class="need-synth-btn" id="needSynthBtn" onclick="openNeedModal()" disabled>✨ 合成价值主张</button>
+                </div>
+                <div class="need-hint" id="needHint"></div>
+            </div>
         </div><!-- /card needs-container -->
 
         <!-- ===== 品牌 × 需求 随机转盘（基于真实品牌案例）===== -->
@@ -5837,6 +5935,223 @@
     const NEED_MAP = {};
     NEEDS.forEach(n => NEED_MAP[n.cn] = n);
     const BN_LAYER = {identity:'身份层', experience:'体验层', function:'功能层', must:'必买层'};
+
+    // ===== 需求合成引擎数据 =====
+    const LAYER_CN = {identity:'身份层', experience:'体验层', function:'功能层', must:'必买层'};
+    const LAYER_COLOR = {identity:'#6366F1', experience:'#10B981', function:'#F59E0B', must:'#DC2626'};
+    const FEELING = {
+        '主宰':'掌控人生的自主感','审美':'被取悦的自信','目的':'踏实的意义感','刺激':'鲜活的新鲜感','道德':'坦荡的心安',
+        '认可':'被看见的满足','亲密':'被在意的温暖','胜任':'搞得定的厉害感','影响':'被需要的价值感',
+        '安全':'全然放松的安心','归属':'不孤单的踏实','舒适':'无压力的松弛','健康':'有底气的精力充沛'
+    };
+    const NEED_DEPS = {
+        '主宰':{base:'安全', warn:'若缺乏稳定预期，自主感会沦为焦虑的失控'},
+        '审美':{base:'胜任', warn:'审美若没有胜任打底，会停在"好看但难用"的尴尬'},
+        '目的':{base:'认可', warn:'意义感若没被认可，容易变成自我感动的孤独'},
+        '刺激':{base:'安全', warn:'新鲜刺激若没有安全兜底，会变成让人不安的冒险'},
+        '道德':{base:'归属', warn:'道德坚守若没有圈子认同，会成孤勇的消耗'},
+        '认可':{base:'归属', warn:'被认可若没有归属承接，会沦为对外部评价的依赖'},
+        '亲密':{base:'安全', warn:'亲密体验若没有安全打底，焦虑会侵蚀陪伴感'},
+        '胜任':{base:'安全', warn:'胜任感若没有安全环境，会因一次失误而崩塌'},
+        '影响':{base:'认可', warn:'影响力若没有认可回响，会变成自说自话'},
+        '安全':{base:'健康', warn:'安全若没有健康托底，所有安稳都悬于一线'},
+        '归属':{base:'安全', warn:'归属感若没有安全，群体会异化成消耗'},
+        '舒适':{base:'安全', warn:'舒适若没有安全，松弛会变成放纵的隐患'},
+        '健康':null
+    };
+    const MACBOOK_NEEDS = ['审美','认可','胜任'];
+
+    // ===== 需求点选 + 合成逻辑 =====
+    let currentSelected = [];
+    function initNeedCards(){
+        document.querySelectorAll('#section-needs .needs-main .need-card').forEach(card=>{
+            const cn = card.querySelector('.need-title-cn')?.textContent.trim();
+            if(!cn) return;
+            card.dataset.need = cn;
+            const chk = document.createElement('span');
+            chk.className = 'sel-check'; chk.textContent = '✓';
+            card.appendChild(chk);
+            card.addEventListener('click', ()=>toggleNeed(card));
+        });
+    }
+    function toggleNeed(card){
+        const cn = card.dataset.need;
+        if(!cn) return;
+        if(card.classList.contains('selected')){
+            card.classList.remove('selected');
+            currentSelected = currentSelected.filter(x=>x!==cn);
+        } else {
+            card.classList.add('selected');
+            if(!currentSelected.includes(cn)) currentSelected.push(cn);
+        }
+        renderNeedState();
+    }
+    function applyMacbookExample(){
+        currentSelected = MACBOOK_NEEDS.slice();
+        document.querySelectorAll('#section-needs .needs-main .need-card').forEach(card=>{
+            card.classList.toggle('selected', MACBOOK_NEEDS.includes(card.dataset.need));
+        });
+        renderNeedState();
+    }
+    function renderNeedState(){
+        const n = currentSelected.length;
+        const cnt = document.getElementById('needCount');
+        const btn = document.getElementById('needSynthBtn');
+        const prev = document.getElementById('needPreview');
+        const hint = document.getElementById('needHint');
+        if(cnt) cnt.textContent = '已选 ' + n + ' 项';
+        if(btn) btn.disabled = (n < 1);
+        if(n < 3) hint.textContent = n===0 ? '' : '建议聚焦 3–5 个核心需求，结果会更聚焦有力。';
+        else if(n > 5) hint.textContent = '已选 ' + n + ' 项，偏多；建议收敛到 3–5 个核心需求。';
+        else hint.textContent = '';
+        if(prev){
+            if(n === 0){ prev.className = 'need-preview empty'; prev.textContent = '点选上方需求卡片，实时生成你的价值主张预览…'; }
+            else { prev.className = 'need-preview'; prev.innerHTML = buildOneLiner(currentSelected); }
+        }
+    }
+    function getLayers(selected){
+        const set = {};
+        selected.forEach(cn=>{ const l = NEED_MAP[cn] && NEED_MAP[cn].layer; if(l) set[l]=(set[l]||0)+1; });
+        return set;
+    }
+    function valueLayerSentence(selected){
+        const set = getLayers(selected);
+        const order = ['identity','experience','function','must'];
+        const names = order.filter(l=>set[l]).map(l=>LAYER_CN[l]);
+        if(names.length===1) return '应重点表达「'+names[0]+'」价值——让用户在这一层被强烈打动。';
+        if(names.length===2) return '应「'+names[0]+' + '+names[1]+'」双线并进，让价值表达更有纵深。';
+        return '「'+names.join(' + ')+'」多线并进，从底层保障一路打到上层自我定义。';
+    }
+    function feelingSentence(selected){
+        return selected.map(cn=>FEELING[cn]).join(' + ');
+    }
+    function baseHintSentence(selected){
+        const missing = [];
+        selected.forEach(cn=>{
+            const dep = NEED_DEPS[cn];
+            if(dep && dep.base && !selected.includes(dep.base)){
+                missing.push('「'+cn+'」需要「'+dep.base+'」打底，否则'+dep.warn+'，建议补上「'+dep.base+'」。');
+            }
+        });
+        if(missing.length===0) return '你的需求层次已自洽，基础需求均已就位，可放心向上表达价值。';
+        return missing.join(' ');
+    }
+    function buildOneLiner(selected){
+        const names = selected.join(' · ');
+        const feel = feelingSentence(selected).replace(/\s*\+\s*/g,'、');
+        const vl = valueLayerSentence(selected);
+        const bs = baseHintSentence(selected);
+        return '聚焦 <b>'+names+'</b>：用'+feel+'的感受锚定用户；'+vl+' '+bs;
+    }
+    function buildNeedText(selected){
+        let t = '【价值主张 · 十三种需求合成】\n';
+        t += '选中需求：' + selected.join('、') + '\n\n';
+        t += '① 价值层：' + valueLayerSentence(selected) + '\n';
+        t += '② 给用户的感觉：' + feelingSentence(selected) + '\n';
+        t += '③ 底座提示：' + baseHintSentence(selected) + '\n';
+        return t;
+    }
+    function buildNeedPoster(selected){
+        const W = 820, pad = 40;
+        const lines = [];
+        lines.push({t:'① 价值层', c:'#7C3AED'});
+        wrapText(valueLayerSentence(selected), 22).forEach(w=>lines.push({t:w, c:'#334155'}));
+        lines.push({t:'② 给用户的感觉', c:'#7C3AED'});
+        wrapText(feelingSentence(selected), 22).forEach(w=>lines.push({t:w, c:'#334155'}));
+        lines.push({t:'③ 底座提示', c:'#7C3AED'});
+        baseHintSentence(selected).split('。').filter(x=>x.trim()).forEach(seg=>{
+            wrapText(seg+'。', 24).forEach(w=>lines.push({t:w, c:'#334155'}));
+        });
+        const chipH = 34, lineH = 30, headH = 150, footH = 50;
+        let cy0 = 92;
+        selected.forEach(()=>{});
+        const H = headH + chipH + 20 + lines.length*lineH + footH;
+        let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">';
+        svg += '<rect width="'+W+'" height="'+H+'" rx="18" fill="#FFFFFF"/>';
+        svg += '<rect x="0" y="0" width="'+W+'" height="70" rx="18" fill="#7C3AED"/>';
+        svg += '<rect x="0" y="50" width="'+W+'" height="20" fill="#7C3AED"/>';
+        svg += '<text x="40" y="44" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="24" font-weight="800" fill="#FFFFFF">价值主张 · 十三种需求合成</text>';
+        let cx = pad, cy = cy0;
+        selected.forEach(cn=>{
+            const layer = NEED_MAP[cn] && NEED_MAP[cn].layer;
+            const col = LAYER_COLOR[layer] || '#64748B';
+            const label = cn;
+            const tw = 24 + label.length*16;
+            svg += '<rect x="'+cx+'" y="'+cy+'" width="'+tw+'" height="28" rx="14" fill="'+col+'" opacity="0.15"/>';
+            svg += '<text x="'+(cx+tw/2)+'" y="'+(cy+19)+'" text-anchor="middle" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="'+col+'">'+label+'</text>';
+            cx += tw + 10;
+            if(cx > W - pad - tw){ cx = pad; cy += 36; }
+        });
+        let y = cy + chipH + 24;
+        lines.forEach(l=>{
+            svg += '<text x="'+pad+'" y="'+y+'" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="'+(l.c==='#7C3AED'?'800':'400')+'" fill="'+l.c+'">'+escapeXml(l.t)+'</text>';
+            y += lineH;
+        });
+        svg += '<text x="'+pad+'" y="'+(H-18)+'" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#94A3B8">VOC 分析平台 · 十三种需求核心模型</text>';
+        svg += '</svg>';
+        return svg;
+    }
+    function escapeXml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function wrapText(str, max){
+        const out=[]; let cur='';
+        for(const ch of String(str)){ cur+=ch; if(cur.length>=max){ out.push(cur); cur=''; } }
+        if(cur) out.push(cur);
+        return out;
+    }
+    function openNeedModal(){
+        if(currentSelected.length===0) return;
+        const inner = document.getElementById('nsCardInner');
+        if(inner) inner.innerHTML = buildNeedPoster(currentSelected);
+        const ov = document.getElementById('needSynthOverlay');
+        if(ov){ ov.classList.add('show'); document.body.style.overflow='hidden'; }
+    }
+    function closeNeedModal(e){
+        if(e && e.target && e.target.id!=='needSynthOverlay') return;
+        const ov = document.getElementById('needSynthOverlay');
+        if(ov){ ov.classList.remove('show'); document.body.style.overflow=''; }
+    }
+    function downloadNeedPNG(){
+        if(currentSelected.length===0) return;
+        const svg = buildNeedPoster(currentSelected);
+        const blob = new Blob([svg], {type:'image/svg+xml;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = function(){
+            const scale = 2;
+            const pw = img.width || 820, ph = img.height || 600;
+            const canvas = document.createElement('canvas');
+            canvas.width = pw*scale; canvas.height = ph*scale;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(scale,scale);
+            ctx.drawImage(img,0,0);
+            canvas.toBlob(function(b){
+                if(!b){ alert('海报生成失败，请改用复制文本'); return; }
+                const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='价值主张_'+Date.now()+'.png'; document.body.appendChild(a); a.click(); a.remove();
+                setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+            },'image/png');
+            URL.revokeObjectURL(url);
+        };
+        img.onerror = function(){ alert('海报生成失败，请改用复制文本'); URL.revokeObjectURL(url); };
+        img.src = url;
+    }
+    function copyNeedText(){
+        const txt = buildNeedText(currentSelected);
+        if(navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(txt).then(()=>flashHint('已复制到剪贴板')).catch(()=>fallbackCopy(txt));
+        } else fallbackCopy(txt);
+    }
+    function fallbackCopy(txt){
+        const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); flashHint('已复制到剪贴板'); }catch(e){ alert('复制失败，请手动选择文本'); }
+        ta.remove();
+    }
+    function flashHint(msg){
+        const h=document.getElementById('needHint'); if(!h) return;
+        const old=h.textContent; h.textContent=msg; h.style.color='#059669';
+        setTimeout(()=>{ h.textContent=old; h.style.color=''; }, 1800);
+    }
+    if(document.readyState!=='loading') initNeedCards();
+    else document.addEventListener('DOMContentLoaded', initNeedCards);
 
     // 品牌库：覆盖 功能→体验→身份→必买 全层级；needs 为真实锚定的需求（最多4个）
     const BRANDS = [
