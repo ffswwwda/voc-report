@@ -239,6 +239,33 @@
             btn.setAttribute('aria-expanded', open ? 'true' : 'false');
             btn.textContent = open ? '收起详细说明 ▴' : '查看标签体系详细说明 ▾';
         }
+
+        // ===== 白天/夜晚模式切换开关 =====
+        function applyTheme(isDark) {
+            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            var btn = document.getElementById('themeToggle');
+            if (!btn) return;
+            btn.setAttribute('data-active', isDark ? 'dark' : 'light');
+            btn.innerHTML = isDark
+                ? '<span class="theme-icon">🌙</span><span class="theme-text">夜晚</span>'
+                : '<span class="theme-icon">☀️</span><span class="theme-text">白天</span>';
+        }
+        function initThemeToggle() {
+            var btn = document.getElementById('themeToggle');
+            if (!btn) return;
+            var saved = localStorage.getItem('voc_theme');
+            applyTheme(saved === 'dark');
+            btn.addEventListener('click', function () {
+                var next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('voc_theme', next);
+                applyTheme(next === 'dark');
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initThemeToggle);
+        } else {
+            initThemeToggle();
+        }
     </script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
@@ -290,6 +317,37 @@
             justify-content: center;
             padding: 0 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .nav-bar .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            margin-right: 4px;
+            border: 1px solid #E2E8F0;
+            border-radius: 999px;
+            background: #FFFFFF;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+        }
+        .nav-bar .theme-toggle:hover {
+            background: #F1F5F9;
+            border-color: #CBD5E1;
+            color: #2563EB;
+        }
+        .nav-bar .theme-toggle[data-active="dark"] {
+            background: #E0E7FF;
+            border-color: #6366F1;
+            color: #4338CA;
+        }
+        .nav-bar .theme-toggle .theme-icon {
+            font-size: 16px;
+            line-height: 1;
         }
         .nav-inner {
             display: flex;
@@ -2764,6 +2822,10 @@
 <!-- 导航栏（两级下拉） -->
 <nav class="nav-bar">
     <div class="nav-inner">
+        <button type="button" class="theme-toggle" id="themeToggle" aria-label="切换白天/夜晚模式">
+            <span class="theme-icon">☀️</span>
+            <span class="theme-text">白天</span>
+        </button>
         <div class="nav-item">
             标签体系
             <span class="nav-arrow">▼</span>
