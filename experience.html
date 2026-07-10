@@ -12,6 +12,15 @@
     --green:#059669; --pink:#DB2777; --amber:#D97706; --cyan:#0891B2; --purple:#7C3AED;
     --bg:#F8FAFC; --card:#FFFFFF; --radius:16px; --shadow:0 4px 20px rgba(15,23,42,.07);
 }
+
+/* ===== 深空全息 夜晚模式（Radium deep-space）变量覆盖 ===== */
+body[data-theme="dark"]{
+    --indigo:#4d8bff; --indigo-d:#3b6fd4; --blue:#00f0ff; --blue-l:rgba(0,240,255,.08);
+    --brand:#00f0ff; --brand-bg:rgba(0,240,255,.12);
+    --ink:#E6EDF6; --slate:#A3B1C6; --muted:#64748B; --line:rgba(255,255,255,.12);
+    --green:#4ade80; --pink:#ff4d8b; --amber:#ff9f43; --cyan:#00f0ff; --purple:#a855f7;
+    --bg:#0A0E1A; --card:rgba(28,38,64,.55); --shadow:0 8px 32px rgba(0,0,0,.45);
+}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
     background:var(--bg); color:var(--ink); line-height:1.6; -webkit-font-smoothing:antialiased;}
@@ -20,6 +29,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .topbar a{color:var(--slate); text-decoration:none; font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px;}
 .topbar a:hover{color:var(--indigo);}
 .topbar .brand{margin-left:auto; font-weight:700; color:var(--indigo); display:flex; align-items:center; gap:6px;}
+.theme-toggle{display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border:1px solid var(--line); border-radius:999px; background:#fff; color:var(--slate); font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; transition:all .18s ease; white-space:nowrap;}
+.theme-toggle:hover{background:#F1F5F9; border-color:#CBD5E1; color:var(--indigo);}
+.theme-toggle .theme-icon{font-size:15px; line-height:1;}
+.theme-toggle[data-active="dark"]{background:#E0E7FF; border-color:#6366F1; color:#4338CA;}
 
 /* ===== Hero ===== */
 .hero{max-width:920px; margin:0 auto; padding:56px 24px 28px; text-align:center;}
@@ -45,8 +58,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .pcard{border:2px solid var(--line); border-radius:12px; padding:16px; cursor:pointer; transition:all .2s; background:#fff; text-align:left; font-family:inherit;}
 .pcard:hover{border-color:#C7D2FE; transform:translateY(-2px);}
 .pcard.active{border-color:var(--indigo); background:#EEF2FF; box-shadow:0 0 0 3px rgba(79,70,229,.12);}
-.pcard .pi{font-size:24px;}
-.pcard .pn{font-weight:700; font-size:15px; margin-top:6px;}
+.pcard .pi{font-size:24px; display:none;}
+.pcard .pn{font-weight:700; font-size:15px; margin:0 0 6px; color:var(--ink);}
 .pcard .pd{font-size:12px; color:var(--slate); margin-top:4px; line-height:1.4;}
 
 /* category chips */
@@ -76,6 +89,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .imp-chip.pos{background:#F0FDF4; border-color:#BBF7D0; color:#15803D;}
 .import-clear{margin-top:14px; display:inline-flex; align-items:center; gap:6px; background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:8px 16px; font-size:13px; font-weight:700; color:var(--slate); cursor:pointer; font-family:inherit; transition:all .2s;}
 .import-clear:hover{border-color:#DB2777; color:#DB2777;}
+.import-tree{display:flex; flex-direction:column; gap:6px; flex:1;}
+.it-row{align-items:flex-start !important;}
+.it-mod{font-size:13px; border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:#fff;}
+.it-mod summary{cursor:pointer; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:8px; list-style:none;}
+.it-mod summary::-webkit-details-marker{display:none;}
+.it-mn{flex:1;}
+.it-dims{margin-top:8px; padding-left:10px; display:flex; flex-direction:column; gap:6px;}
+.it-dim{padding:5px 0; border-bottom:1px dashed var(--line);}
+.it-dim:last-child{border-bottom:none;}
+.it-dn{font-weight:700; color:var(--indigo);}
+.it-tags{margin-top:6px; display:flex; flex-wrap:wrap; gap:5px;}
+.it-tag{font-size:12px; background:var(--bg); color:var(--slate); padding:3px 7px; border-radius:6px; border:1px solid var(--line);}
+.it-n{color:var(--pink); font-weight:800; font-size:12px;}
 .import-manual-toggle{display:inline-flex; align-items:center; gap:6px; background:#fff; border:1.5px dashed var(--indigo); border-radius:999px; padding:9px 18px; font-size:13px; font-weight:700; color:var(--indigo); cursor:pointer; font-family:inherit; transition:all .2s;}
 .import-manual-toggle:hover{background:#EEF2FF;}
 .import-manual{display:none; margin-top:14px; background:#F8FAFC; border:1px solid var(--line); border-radius:12px; padding:16px;}
@@ -143,6 +169,9 @@ textarea::placeholder{color:var(--muted);}
 .fw-result li::before{content:"▹"; position:absolute; left:0; color:var(--indigo); font-weight:700;}
 .fw-result .faction{background:#F0FDF4; border-radius:10px; padding:12px 14px; font-size:13px; color:#166534;}
 .fw-result .faction b{color:var(--green);}
+.f-detail{margin-top:14px;}
+.detail-btn{background:#fff; border:1.5px solid var(--indigo); color:var(--indigo); border-radius:999px; padding:8px 18px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s;}
+.detail-btn:hover{background:var(--indigo); color:#fff;}
 .reset-wrap{text-align:center; margin-top:8px;}
 .reset-btn{background:#fff; border:2px solid var(--line); border-radius:999px; padding:12px 32px; font-size:14px; font-weight:700; color:var(--slate); cursor:pointer; font-family:inherit; transition:all .2s;}
 .reset-btn:hover{border-color:var(--indigo); color:var(--indigo);}
@@ -216,12 +245,21 @@ textarea::placeholder{color:var(--muted);}
 .synth-verdict{background:#fff; border:1px solid #FBCFE8; border-left:5px solid var(--pink); border-radius:12px; padding:16px 18px; font-size:14px; line-height:1.7; color:var(--ink);}
 .synth-verdict b{color:var(--pink);}
 @media(max-width:720px){ .synth-grid{grid-template-columns:1fr;} .synth-preview-img{border-radius:10px; margin-top:14px;} }
+
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="radium-dark.css">
 </head>
 <body>
 
 <div class="topbar">
     <a href="index.html">← 返回主网页</a>
+    <button type="button" class="theme-toggle" id="themeToggle" aria-label="切换白天/夜晚模式">
+        <span class="theme-icon">☀️</span>
+        <span class="theme-text">白天</span>
+    </button>
     <span class="brand">🦞 VOC 一条龙体验</span>
 </div>
 
@@ -347,6 +385,26 @@ textarea::placeholder{color:var(--muted);}
 </div>
 
 <script>
+/* ===================== 白天/夜晚模式切换（跨页共享 voc_theme） ===================== */
+(function(){
+    function applyTheme(isDark){
+        document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        var btn = document.getElementById('themeToggle');
+        if(!btn) return;
+        btn.setAttribute('data-active', isDark ? 'dark' : 'light');
+        btn.innerHTML = isDark
+            ? '<span class="theme-icon">🌙</span><span class="theme-text">夜晚</span>'
+            : '<span class="theme-icon">☀️</span><span class="theme-text">白天</span>';
+    }
+    var saved = localStorage.getItem('voc_theme');
+    applyTheme(saved === 'dark');
+    var btn = document.getElementById('themeToggle');
+    if(btn) btn.addEventListener('click', function(){
+        var next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('voc_theme', next);
+        applyTheme(next === 'dark');
+    });
+})();
 /* ============ 数据模型 ============ */
 const PURPOSES = {
     product_dev:{name:'产品开发', icon:'🛠️', desc:'用户最需要什么功能？该改进什么？',
@@ -474,17 +532,31 @@ function topTagsByModule(prof, m, n){
     if(!prof || !prof.topTags) return [];
     return prof.topTags.filter(t=>t.m===m).sort((a,b)=>b.n-a.n).slice(0, n||3).map(t=>t.t);
 }
+function buildTagTreeHTML(p){
+    const tree = p && p.tagTree;
+    if(!tree || !Object.keys(tree).length) return '';
+    const mods = Object.entries(tree).sort((a,b)=>b[1].n-a[1].n).slice(0,6);
+    return mods.map(([m,mo])=>{
+        const dims = Object.entries(mo.dims).sort((a,b)=>b[1].n-a[1].n).slice(0,4);
+        const dimsHtml = dims.map(([d, dim])=>{
+            const tags = Object.entries(dim.tags).sort((a,b)=>b[1]-a[1]).slice(0,5);
+            const tagsHtml = tags.map(([t,n])=>`<span class="it-tag">${escapeHtml(t)} <span class="it-n">${n}</span></span>`).join('');
+            return `<div class="it-dim"><span class="it-dn">${escapeHtml(d)}</span> <span class="it-n">${dim.n}</span>${tagsHtml?'<div class="it-tags">'+tagsHtml+'</div>':''}</div>`;
+        }).join('');
+        return `<details class="it-mod" open><summary><span class="it-mn">${escapeHtml(m)}</span> <span class="it-n">${mo.n}</span></summary><div class="it-dims">${dimsHtml}</div></details>`;
+    }).join('');
+}
 function renderImportArea(){
     const el = document.getElementById('importArea'); if(!el) return;
     const p = state.imported;
     if(p){
         const meta = p.meta || {};
         const modEntries = Object.entries(p.modules||{}).sort((a,b)=>((b[1].precise+b[1].prov)-(a[1].precise+a[1].prov))).slice(0,4);
-        const topMods = modEntries.map(([m,o])=>`<span class="imp-chip">${m} <span class="n">${o.precise}${o.prov?('+'+o.prov):''}</span></span>`).join('');
-        const topNeeds = (p.needPriority||[]).slice(0,3).map(x=>`<span class="imp-chip">${x.t} <span class="n">${(x.imp*100).toFixed(0)}%</span></span>`).join('');
-        const pos = (p.emotions||[]).filter(e=>e.polarity>0).sort((a,b)=>b.count-a.count).slice(0,2).map(e=>`<span class="imp-chip pos">${e.name} <span class="n">${e.count}</span></span>`).join('');
-        const neg = (p.emotions||[]).filter(e=>e.polarity<0).sort((a,b)=>b.count-a.count).slice(0,2).map(e=>`<span class="imp-chip neg">${e.name} <span class="n">${e.count}</span></span>`).join('');
-        const tagsN = (p.topTags||[]).length;
+        const topMods = modEntries.map(([m,o])=>`<span class="imp-chip">${escapeHtml(m)} <span class="n">${o.precise}${o.prov?('+'+o.prov):''}</span></span>`).join('');
+        const topNeeds = (p.needPriority||[]).slice(0,3).map(x=>`<span class="imp-chip">${escapeHtml(x.t)} <span class="n">${(x.imp*100).toFixed(0)}%</span></span>`).join('');
+        const pos = (p.emotions||[]).filter(e=>e.polarity>0).sort((a,b)=>b.count-a.count).slice(0,2).map(e=>`<span class="imp-chip pos">${escapeHtml(e.name)} <span class="n">${e.count}</span></span>`).join('');
+        const neg = (p.emotions||[]).filter(e=>e.polarity<0).sort((a,b)=>b.count-a.count).slice(0,2).map(e=>`<span class="imp-chip neg">${escapeHtml(e.name)} <span class="n">${e.count}</span></span>`).join('');
+        const tagTreeHTML = buildTagTreeHTML(p);
         el.innerHTML =
             `<div class="import-card">
                 <div class="imp-head">
@@ -493,6 +565,7 @@ function renderImportArea(){
                 </div>
                 <div class="import-stats">
                     <div class="import-stat-row"><span class="import-stat-label">痛点 Top</span><div class="import-chips">${topMods||'<span class="imp-chip">无</span>'}</div></div>
+                    ${tagTreeHTML?`<div class="import-stat-row it-row"><span class="import-stat-label">标签层级</span><div class="import-tree">${tagTreeHTML}</div></div>`:''}
                     ${topNeeds?`<div class="import-stat-row"><span class="import-stat-label">需求 Top</span><div class="import-chips">${topNeeds}</div></div>`:''}
                     ${pos?`<div class="import-stat-row"><span class="import-stat-label">正向情绪</span><div class="import-chips">${pos}</div></div>`:''}
                     ${neg?`<div class="import-stat-row"><span class="import-stat-label">负向情绪</span><div class="import-chips">${neg}</div></div>`:''}
@@ -565,7 +638,6 @@ function renderPurpose(){
     const pg = document.getElementById('purposeGrid');
     pg.innerHTML = Object.entries(PURPOSES).map(([k,v])=>
         `<button class="pcard" data-key="${k}" onclick="pickPurpose('${k}')">
-            <div class="pi">${v.icon}</div>
             <div class="pn">${v.name}</div>
             <div class="pd">${v.desc}</div>
         </button>`).join('');
@@ -983,8 +1055,16 @@ function buildCardDeep(fk, p, profile, desc){
         <div class="finsight">${insight}</div>
         <ul>${finds.map(x=>`<li>${x}</li>`).join('')}</ul>
         <div class="faction"><b>🎯 行动建议：</b>${action}</div>
+        <div class="f-detail"><button class="detail-btn" onclick="openFrameworkDetail('${fk}')">查看详细分析</button></div>
     </div>`;
 }
+
+function openFrameworkDetail(fk){
+    const f = FRAMEWORKS[fk];
+    // 占位：后续接入对应框架技能 + 真实 VOC 标签数据做深度分析
+    alert(`「${f.name}」详细分析功能即将上线。\n\n后续将基于你导入的真实 VOC 标签数据，调用对应框架技能生成可下钻的完整分析报告。`);
+}
+
 
 function synthComplete(){
     const p = PURPOSES[state.purpose], c = getCategory(state.category), ex = c.sample, catName = state.category;
@@ -1029,10 +1109,10 @@ function synthComplete(){
             </div>`;
         document.getElementById('synthResult').classList.add('show');
         btn.textContent = '🦞 用户完全体已合成 ✓';
-        // 显示对应类目的用户画像海报
+        // 显示对应类目的用户画像海报（仅在演示模式下展示；真实数据深度模式不展示示例画像）
         const preview = document.getElementById('synthPreview');
         const previewHint = document.getElementById('synthPreviewHint');
-        if(c.image){
+        if(c.image && !deep){
             preview.src = c.image;
             preview.style.display = 'block';
             previewHint.style.display = 'block';
