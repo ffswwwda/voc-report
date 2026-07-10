@@ -332,6 +332,8 @@ textarea::placeholder{color:var(--muted);}
     display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
     margin:18px 0 10px; padding:12px 14px; background:linear-gradient(135deg,#F5F3FF,#EEF2FF);
     border:1px solid #E9D5FF; border-radius:12px;
+    position:sticky; top:58px; z-index:40;
+    box-shadow:0 4px 14px rgba(124,58,237,.08);
 }
 .res-toolbar .rt-info{font-size:13px; color:#4C1D95; font-weight:600;}
 .res-toolbar .rt-info b{color:#7C3AED;}
@@ -1476,71 +1478,79 @@ function computeJourney(allHits){
 /* ===================== 用户旅程地图：SVG 矢量渲染（用于导出 PNG，规避 grid 栅格化问题） ===================== */
 function renderJourneyMapSVG(d){
     const {buckets, effTotal, emoData, maxIntensity} = d;
-    const PAD=24, LBL=104, CW=170, GAP=12, HEAD=74, RGAP=14;
-    const chipH=22, chipGap=6, txtPad=10, pillGap=8;
+    const PAD=24, LBL=100, CW=172, GAP=12, HEAD=78, RGAP=16;
+    const chipH=26, chipGap=7, txtPad=11, pillR=7;
     const colX = JOURNEY.map((j,i)=> PAD + LBL + i*(CW+GAP));
     const W = PAD + LBL + JOURNEY.length*CW + (JOURNEY.length-1)*GAP + PAD;
     let y = PAD;
-    let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" viewBox="0 0 '+W+' __JH__" font-family="-apple-system,BlinkMacSystemFont,\'PingFang SC\',\'Microsoft YaHei\',sans-serif">';
+    // 使用更通用的字体栈；导出 PNG 时即使系统字体回退，也能保持可读
+    let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" viewBox="0 0 '+W+' __JH__" font-family="-apple-system, BlinkMacSystemFont, \'PingFang SC\', \'Microsoft YaHei\', \'Noto Sans CJK SC\', sans-serif">';
     svg += '<rect x="0" y="0" width="'+W+'" height="__JH__" fill="#F8FAFC"/>';
     JOURNEY.forEach((j,i)=>{
         const x = colX[i];
         svg += '<rect x="'+x+'" y="'+(y+6)+'" width="30" height="30" rx="9" fill="'+j.color+'"/>';
-        svg += '<text x="'+(x+15)+'" y="'+(y+26)+'" text-anchor="middle" font-size="16">'+j.icon+'</text>';
+        svg += '<text x="'+(x+15)+'" y="'+(y+25)+'" text-anchor="middle" font-size="16">'+j.icon+'</text>';
         svg += '<text x="'+(x+38)+'" y="'+(y+20)+'" font-size="13" font-weight="800" fill="#0F172A">'+j.name+'</text>';
-        svg += '<text x="'+(x+38)+'" y="'+(y+36)+'" font-size="9" font-weight="700" fill="#94A3B8">阶段 '+(i+1)+'</text>';
+        svg += '<text x="'+(x+38)+'" y="'+(y+38)+'" font-size="9" font-weight="700" fill="#94A3B8">阶段 '+(i+1)+'</text>';
     });
     y += HEAD;
     function rowLabel(label, ly, lh){
-        svg += '<text x="'+(PAD+LBL-10)+'" y="'+(ly + lh/2)+'" text-anchor="end" dominant-baseline="middle" font-size="12" font-weight="800" fill="#475569">'+label+'</text>';
+        // 用 dy 替代 dominant-baseline，canvas 渲染 SVG 时更稳定
+        svg += '<text x="'+(PAD+LBL-12)+'" y="'+(ly + lh/2)+'" text-anchor="end" font-size="12" font-weight="800" fill="#475569" dy=".35em">'+label+'</text>';
     }
+    function textW(str){ return str.split('').reduce((a,c)=>a+(c.charCodeAt(0)>127?12:7),0); }
     function pill(x, yy, w, h, t, cnt, color){
-        svg += '<rect x="'+x+'" y="'+yy+'" width="'+w+'" height="'+h+'" rx="6" fill="'+hex2rgba(color,0.10)+'" stroke="'+hex2rgba(color,0.28)+'"/>';
+        svg += '<rect x="'+x+'" y="'+yy+'" width="'+w+'" height="'+h+'" rx="'+pillR+'" fill="'+hex2rgba(color,0.10)+'" stroke="'+hex2rgba(color,0.30)+'"/>';
         let label = t + (cnt>1? ' ×'+cnt : '');
-        if(label.length>9) label = label.slice(0,9)+'…';
-        svg += '<text x="'+(x+w/2)+'" y="'+(yy+h/2)+'" text-anchor="middle" dominant-baseline="middle" font-size="10.5" font-weight="700" fill="'+color+'">'+escHtml(label)+'</text>';
+        // 按字体回退最宽情况估算，保留边距，避免导出时文字溢出 pill
+        let maxChars = Math.max(4, Math.floor((w - 14) / 7.2));
+        if(textW(label) > w - 14){
+            while(textW(label+'…') > w - 14 && label.length > 2) label = label.slice(0,-1);
+            label += '…';
+        }
+        svg += '<text x="'+(x+w/2)+'" y="'+(yy+h/2)+'" text-anchor="middle" font-size="11" font-weight="700" fill="'+color+'" dy=".35em">'+escHtml(label)+'</text>';
     }
-    const pillW = (CW - txtPad*2 - pillGap)/2;
-    /* 图层一：用户旅程 */
+    const pillW = CW - txtPad*2;
+    /* 图层一：用户旅程 —— 改为单列流式，避免双列拥挤导致文字重合 */
     const jCells = JOURNEY.map(j=>{
         const hs = buckets[j.key]; const tagCnt={}; hs.forEach(h=>{tagCnt[h.t]=(tagCnt[h.t]||0)+1;});
-        const sorted = Object.entries(tagCnt).sort((a,b)=>b[1]-a[1]);
-        return {rows:Math.max(1, Math.ceil(sorted.length/2)), sorted, color:j.color};
+        const sorted = Object.entries(tagCnt).sort((a,b)=>b[1]-a[1]).slice(0,8); // 导出时只保留 top8，防止过高
+        return {rows:Math.max(1, sorted.length), sorted, color:j.color};
     });
     const jRowsMax = Math.max.apply(null, jCells.map(c=>c.rows));
-    let layerH = txtPad + jRowsMax*chipH + (jRowsMax-1)*chipGap;
+    let layerH = txtPad + jRowsMax*chipH + (jRowsMax-1)*chipGap + txtPad;
     rowLabel('🧭 用户旅程', y, layerH);
     jCells.forEach((c,i)=>{
         const x=colX[i];
         svg += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+layerH+'" rx="10" fill="#F1F5F9"/>';
-        c.sorted.forEach(([t,tc],k)=>{ const col=Math.floor(k/2), r=k%2; pill(x+txtPad+col*(pillW+pillGap), y+txtPad+r*(chipH+chipGap), pillW, chipH, t, tc, c.color); });
-        if(c.sorted.length===0) svg += '<text x="'+(x+CW/2)+'" y="'+(y+layerH/2)+'" text-anchor="middle" dominant-baseline="middle" font-size="10.5" fill="#94A3B8">本批未涉及</text>';
+        c.sorted.forEach(([t,tc],k)=>{ pill(x+txtPad, y+txtPad+k*(chipH+chipGap), pillW, chipH, t, tc, c.color); });
+        if(c.sorted.length===0) svg += '<text x="'+(x+CW/2)+'" y="'+(y+layerH/2)+'" text-anchor="middle" font-size="10.5" fill="#94A3B8" dy=".35em">本批未涉及</text>';
     });
     y += layerH + RGAP;
-    /* 图层二：效果影响 */
+    /* 图层二：效果影响 —— 同样单列 */
     const eCells = JOURNEY.map(j=>{
         const eff = effTotal[j.key]; const keys=Object.keys(eff);
-        const sorted = keys.length? keys.sort((a,b)=>eff[b]-eff[a]).map(k=>({e:EFFECTS.find(x=>x.key===k), c:eff[k]})) : [];
-        return {rows:Math.max(1, Math.ceil(sorted.length/2)), sorted};
+        const sorted = keys.length? keys.sort((a,b)=>eff[b]-eff[a]).slice(0,6).map(k=>({e:EFFECTS.find(x=>x.key===k), c:eff[k]})) : [];
+        return {rows:Math.max(1, sorted.length), sorted};
     });
     const eRowsMax = Math.max.apply(null, eCells.map(c=>c.rows));
-    let eH = txtPad + eRowsMax*chipH + (eRowsMax-1)*chipGap;
+    let eH = txtPad + eRowsMax*chipH + (eRowsMax-1)*chipGap + txtPad;
     rowLabel('📈 效果影响', y, eH);
     eCells.forEach((c,i)=>{
         const x=colX[i];
         svg += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+eH+'" rx="10" fill="#F1F5F9"/>';
-        c.sorted.forEach((it,k)=>{ const col=Math.floor(k/2), r=k%2; pill(x+txtPad+col*(pillW+pillGap), y+txtPad+r*(chipH+chipGap), pillW, chipH, it.e.name, it.c, it.e.color); });
-        if(c.sorted.length===0) svg += '<text x="'+(x+CW/2)+'" y="'+(y+eH/2)+'" text-anchor="middle" dominant-baseline="middle" font-size="10.5" fill="#94A3B8">暂无明显效果信号</text>';
+        c.sorted.forEach((it,k)=>{ pill(x+txtPad, y+txtPad+k*(chipH+chipGap), pillW, chipH, it.e.name, it.c, it.e.color); });
+        if(c.sorted.length===0) svg += '<text x="'+(x+CW/2)+'" y="'+(y+eH/2)+'" text-anchor="middle" font-size="10.5" fill="#94A3B8" dy=".35em">暂无明显效果信号</text>';
     });
     y += eH + RGAP;
     /* 图层三：情绪强度 */
-    const emoH = 62;
+    const emoH = 78;
     rowLabel('🔥 情绪强度', y, emoH);
     JOURNEY.forEach((j,i)=>{
         const x=colX[i]; const dd=emoData[j.key];
         svg += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+emoH+'" rx="10" fill="#F1F5F9"/>';
         if(dd.intensity===0){
-            svg += '<text x="'+(x+CW/2)+'" y="'+(y+emoH/2)+'" text-anchor="middle" dominant-baseline="middle" font-size="10.5" fill="#94A3B8">暂无明显情绪信号</text>';
+            svg += '<text x="'+(x+CW/2)+'" y="'+(y+emoH/2)+'" text-anchor="middle" font-size="10.5" fill="#94A3B8" dy=".35em">暂无明显情绪信号</text>';
         } else {
             const pct=Math.max(14, Math.round(dd.intensity/maxIntensity*100));
             const color = dd.score>1?'#059669':(dd.score<-1?'#DC2626':'#D97706');
@@ -1548,10 +1558,18 @@ function renderJourneyMapSVG(d){
             const bx=x+txtPad, bw=CW-txtPad*2;
             svg += '<rect x="'+bx+'" y="'+(y+10)+'" width="'+bw+'" height="13" rx="999" fill="#fff" stroke="rgba(0,0,0,.06)"/>';
             svg += '<rect x="'+bx+'" y="'+(y+10)+'" width="'+Math.max(6,bw*pct/100)+'" height="13" rx="999" fill="'+color+'"/>';
-            svg += '<text x="'+bx+'" y="'+(y+38)+'" font-size="9.5" font-weight="700" fill="'+color+'">'+tone+'</text>';
-            svg += '<text x="'+(x+CW-txtPad)+'" y="'+(y+38)+'" text-anchor="end" font-size="9.5" font-weight="700" fill="#475569">强度 '+dd.intensity+'</text>';
+            // 正面/负面/中性与强度数字左右分开，避免重叠
+            svg += '<text x="'+bx+'" y="'+(y+40)+'" font-size="10" font-weight="800" fill="'+color+'" dy=".35em">'+tone+'</text>';
+            svg += '<text x="'+(x+CW-txtPad)+'" y="'+(y+40)+'" text-anchor="end" font-size="10" font-weight="700" fill="#475569" dy=".35em">强度 '+dd.intensity+'</text>';
+            // 情绪色点 + 名称，顶部情绪展示不重合
             const top = Object.entries(dd.emo).sort((a,b)=>b[1]-a[1]).slice(0,3);
-            top.forEach(([k,c],ti)=>{ const e=EMOTIONS.find(x=>x.key===k); svg += '<circle cx="'+(bx+4+ti*13)+'" cy="'+(y+52)+'" r="4" fill="'+e.color+'"/>'; });
+            let cx=bx, cy=y+62;
+            top.forEach(([k,c])=>{
+                const e=EMOTIONS.find(x=>x.key===k);
+                svg += '<circle cx="'+(cx+5)+'" cy="'+cy+'" r="4" fill="'+e.color+'"/>';
+                svg += '<text x="'+(cx+12)+'" y="'+cy+'" font-size="9" font-weight="700" fill="#475569" dy=".35em">'+e.name+(c>1?'×'+c:'')+'</text>';
+                cx += 12 + textW(e.name+(c>1?'×'+c:'')) + 12;
+            });
         }
     });
     y += emoH + PAD;
