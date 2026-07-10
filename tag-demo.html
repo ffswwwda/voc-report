@@ -258,13 +258,27 @@ textarea::placeholder{color:var(--muted);}
 
 .csv-cfg{display:none;}
 .csv-cfg .file-drop{
-    border:2px dashed var(--line); border-radius:12px; padding:18px; text-align:center;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    border:2px dashed var(--line); border-radius:12px; padding:22px 18px; text-align:center;
     background:var(--bg); color:var(--slate); font-size:13px; cursor:pointer; transition:all .18s;
 }
-.csv-cfg .file-drop:hover{border-color:var(--brand); color:var(--brand);}
+.csv-cfg .file-drop:hover{border-color:var(--indigo); color:var(--indigo); background:#F8FAFF;}
+.csv-cfg .file-drop.has-file{border-style:solid; border-color:#C7D2FE; background:#fff; color:var(--ink);}
+.csv-cfg .file-drop .fd-icon{font-size:28px; line-height:1;}
+.csv-cfg .file-drop.has-file .fd-icon{display:none;}
+.csv-cfg .file-drop .fd-text{line-height:1.5;}
 .csv-cfg input[type=file]{display:none;}
 .csv-info{margin-top:10px; font-size:12px; color:var(--muted); min-height:16px;}
-.csv-info b{color:var(--brand);}
+.csv-info b{color:var(--indigo);}
+
+/* CSV 多列选择 */
+.csv-cols select[multiple]{min-width:220px; min-height:120px; padding:6px; border:2px solid var(--line); border-radius:10px; font-family:inherit; font-size:13px; background:#fff;}
+.csv-cols select[multiple]:focus{outline:none; border-color:var(--indigo);}
+.csv-cols select[multiple] option{padding:5px 8px; border-radius:6px; margin:2px 0;}
+.csv-cols select[multiple] option:checked{background:linear-gradient(90deg,var(--indigo),var(--pink)); color:#fff;}
+
+/* 公共模块选择块 */
+.shared-mod-block{margin-top:22px;}
 
 /* 结果表格 */
 .res-toolbar{
@@ -369,32 +383,37 @@ table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
                 <span class="sm-hint">复制多条评价时，智能模式自动识别分隔（空行 / 4 个以上空格 / 序号 1. / 星级 ★ / 多行短评）</span>
             </div>
         </div>
-        <div class="cfg-block">
-            <div class="cfg-label"><span class="num">2</span>重点打标模块<span class="hint">（默认全选，点击可屏蔽某模块）</span></div>
-            <div class="mod-row" id="modRow"></div>
-        </div>
-        <div class="gen-wrap">
-            <button class="gen-btn" id="genBtn" onclick="runTagging()">🏷️ 开始打标</button>
-            <div class="gen-hint">本地规则引擎实时匹配 · 不上传任何数据 · 复杂语义可找智能体深聊</div>
-        </div>
     </div>
 
     <div class="cfg csv-cfg" id="cfgCsv">
         <div class="cfg-block">
             <div class="cfg-label"><span class="num">1</span>上传 CSV 文件<span class="hint">每行 = 一条评价</span></div>
-            <label class="file-drop" for="csvFile" id="csvDrop">点击选择 CSV 文件（支持中文列名，自动检测文本列）</label>
+            <label class="file-drop" for="csvFile" id="csvDrop">
+                <span class="fd-icon">📂</span>
+                <span class="fd-text">点击选择 CSV 文件（支持中文列名，自动检测文本列）</span>
+            </label>
             <input type="file" id="csvFile" accept=".csv,text/csv" onchange="onCsvSelected(this)">
             <div class="csv-info" id="csvInfo"></div>
-            <div class="split-mode">
-                <span>文本列：</span>
-                <select id="csvCol"></select>
-                <span class="sm-hint">自动检测「内容/评论/评价/正文」等，可手动切换</span>
+            <div class="split-mode csv-cols">
+                <span>文本列（可多选）：</span>
+                <select id="csvCol" multiple></select>
+                <span class="sm-hint">自动检测「内容/评论/评价/正文」等文本列，可按住 Ctrl/Cmd 多选；多列会合并成一条评价打标</span>
             </div>
         </div>
-        <div class="gen-wrap">
-            <button class="gen-btn" id="csvBtn" onclick="runCsvTagging()">📑 解析并打标</button>
-            <div class="gen-hint">CSV 每行评价自动打标，结果可在下方表格内增删标签并导出</div>
-        </div>
+    </div>
+
+    <div class="cfg-block shared-mod-block">
+        <div class="cfg-label"><span class="num">2</span>重点打标模块<span class="hint">（默认全选，点击可屏蔽某模块）</span></div>
+        <div class="mod-row" id="modRow"></div>
+    </div>
+
+    <div class="gen-wrap" id="genWrapPaste">
+        <button class="gen-btn" id="genBtn" onclick="runTagging()">🏷️ 开始打标</button>
+        <div class="gen-hint">本地规则引擎实时匹配 · 不上传任何数据 · 复杂语义可找智能体深聊</div>
+    </div>
+    <div class="gen-wrap" id="genWrapCsv" style="display:none;">
+        <button class="gen-btn" id="csvBtn" onclick="runCsvTagging()">📑 解析并打标</button>
+        <div class="gen-hint">CSV 每行评价自动打标，结果可在下方表格内增删标签并导出</div>
     </div>
 </div>
 
@@ -784,6 +803,8 @@ function switchMode(mode){
     document.getElementById('tabCsv').classList.toggle('active', !paste);
     document.getElementById('cfgPaste').style.display = paste ? '' : 'none';
     document.getElementById('cfgCsv').style.display = paste ? 'none' : 'block';
+    document.getElementById('genWrapPaste').style.display = paste ? 'block' : 'none';
+    document.getElementById('genWrapCsv').style.display = paste ? 'none' : 'block';
 }
 
 /* 简易 CSV 解析（支持引号包裹、转义双引号、逗号/换行） */
@@ -808,26 +829,44 @@ function parseCSV(text){
     return rows;
 }
 
-function detectCsvColumn(cols){
+function detectCsvColumns(cols){
     const cands = ['内容','评论','评价','正文','评论内容','review','content','text','comment'];
-    for(const c of cands){ if(cols.includes(c)) return c; }
-    return cols[0];
+    const found = [];
+    for(const c of cands){ if(cols.includes(c)) found.push(c); }
+    if(found.length === 0 && cols.length) found.push(cols[0]);
+    return found;
+}
+
+function formatFileSize(bytes){
+    if(bytes < 1024) return bytes + ' B';
+    if(bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/(1024*1024)).toFixed(2) + ' MB';
 }
 
 function onCsvSelected(input){
     const file = input.files && input.files[0];
+    const drop = document.getElementById('csvDrop');
     const info = document.getElementById('csvInfo');
     const colSel = document.getElementById('csvCol');
-    if(!file){ info.innerHTML=''; colSel.innerHTML=''; return; }
+    if(!file){ 
+        drop.classList.remove('has-file');
+        drop.querySelector('.fd-text').textContent = '点击选择 CSV 文件（支持中文列名，自动检测文本列）';
+        info.innerHTML=''; colSel.innerHTML=''; return; 
+    }
+    drop.classList.add('has-file');
+    drop.querySelector('.fd-text').innerHTML = `<b>${escHtml(file.name)}</b> <span style="color:var(--muted);font-weight:500">(${formatFileSize(file.size)})</span> · 点击重新选择`;
     const reader = new FileReader();
     reader.onload = function(e){
         const rows = parseCSV(e.target.result);
         if(rows.length < 2){ info.innerHTML = '⚠️ 文件行数过少，请检查格式（需含表头）。'; return; }
         CSV_COLUMNS = rows[0].map(c=>(c||'').trim());
-        const tcol = detectCsvColumn(CSV_COLUMNS);
-        CSV_TEXT_COL = tcol;
-        colSel.innerHTML = CSV_COLUMNS.map(c=>`<option value="${c}" ${c===tcol?'selected':''}>${c}</option>`).join('');
-        info.innerHTML = `已读取 <b>${rows.length-1}</b> 行 · 检测到文本列：<b>${tcol}</b>`;
+        const tcols = detectCsvColumns(CSV_COLUMNS);
+        CSV_TEXT_COL = tcols.join(', ');
+        colSel.innerHTML = CSV_COLUMNS.map(c=>{
+            const selected = tcols.includes(c) ? 'selected' : '';
+            return `<option value="${escHtml(c)}" ${selected}>${escHtml(c)}</option>`;
+        }).join('');
+        info.innerHTML = `已读取 <b>${rows.length-1}</b> 行 · 检测到文本列：${tcols.map(c=>`<b>${escHtml(c)}</b>`).join('、')}`;
     };
     reader.readAsText(file, 'utf-8');
 }
@@ -836,16 +875,21 @@ function runCsvTagging(){
     const input = document.getElementById('csvFile');
     const file = input.files && input.files[0];
     if(!file){ alert('请先选择 CSV 文件。'); return; }
-    const col = document.getElementById('csvCol').value;
-    CSV_TEXT_COL = col;
+    const sel = document.getElementById('csvCol');
+    const cols = Array.from(sel.selectedOptions).map(o => o.value);
+    if(cols.length === 0){ alert('请至少选择一个文本列。'); return; }
+    CSV_TEXT_COL = cols.join(', ');
     const reader = new FileReader();
     reader.onload = function(e){
         const rows = parseCSV(e.target.result);
         const header = rows[0].map(c=>(c||'').trim());
-        const ci = header.indexOf(col);
-        if(ci < 0){ alert('未找到文本列：'+col); return; }
-        const comments = rows.slice(1).map(r=> (r[ci]||'').trim()).filter(Boolean);
-        if(comments.length===0){ alert('文本列无有效内容。'); return; }
+        const cis = cols.map(c => header.indexOf(c)).filter(i => i >= 0);
+        if(cis.length === 0){ alert('未找到选中的文本列。'); return; }
+        const comments = rows.slice(1).map(r => {
+            const parts = cis.map(ci => (r[ci] || '').trim()).filter(Boolean);
+            return parts.join('\n');
+        }).filter(Boolean);
+        if(comments.length === 0){ alert('选中的文本列无有效内容。'); return; }
         runTaggingWith(comments);
     };
     reader.readAsText(file, 'utf-8');
@@ -888,9 +932,8 @@ function renderTable(){
     MODULE_ORDER.forEach(m=>{ html += `<th>${m}</th>`; });
     html += '<th>操作</th></tr></thead><tbody>';
     TAG_STATE.forEach((row, ri)=>{
-        const esc = escHtml;
-        const full = esc(row.text);
-        const short = row.text.length>60 ? esc(row.text.slice(0,60)+'…') : full;
+        const full = escHtml(row.text);
+        const short = row.text.length>60 ? escHtml(row.text.slice(0,60)+'…') : full;
         let tr = `<tr data-ri="${ri}"><td class="td-idx">${ri+1}</td>`;
         tr += `<td class="td-text"><span class="tt-short">${short}</span><span class="tt-long">${full}</span>`;
         if(row.text.length>60) tr += `<span class="tt-full" onclick="var td=this.closest('.td-text');td.classList.toggle('exp');this.textContent=td.classList.contains('exp')?'收起':'展开';">展开</span>`;
@@ -899,7 +942,7 @@ function renderTable(){
             const chips = row.hits.filter(h=>h.m===m);
             let cell = '<div class="cell-chips">';
             chips.forEach(h=>{
-                cell += `<span class="tchip2" style="background:${hex2rgba(h.color,0.12)};color:${h.color};border-color:${hex2rgba(h.color,0.35)};" title="依据：${esc(h.kw)}">${esc(h.t)}<span class="x" onclick="editTag(${ri},'${m}','${esc(h.t)}','remove')">✕</span></span>`;
+                cell += `<span class="tchip2" style="background:${hex2rgba(h.color,0.12)};color:${h.color};border-color:${hex2rgba(h.color,0.35)};" title="依据：${escHtml(h.kw)}">${escHtml(h.t)}<span class="x" onclick="editTag(${ri},'${m}','${escHtml(h.t)}','remove')">✕</span></span>`;
             });
             cell += '</div>';
             const opts = MODULE_LABELS[m].filter(t=>!chips.some(c=>c.t===t))
