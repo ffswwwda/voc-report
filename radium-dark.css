@@ -23,13 +23,13 @@ body[data-theme="dark"]{
   --glass-bg-light:rgba(255, 255, 255, .05);
   --glass-border:rgba(255, 255, 255, .10);
 
-  /* 霓虹强调色 */
-  --neon-cyan:#00f0ff;
-  --neon-blue:#4d8bff;
-  --neon-purple:#a855f7;
+  /* 霓虹强调色（严格对齐参考页 voc-report-home-radium） */
+  --neon-cyan:#38bdf8;
+  --neon-blue:#60a5fa;
+  --neon-purple:#a78bfa;
   --neon-green:#4ade80;
-  --neon-pink:#ff4d8b;
-  --neon-orange:#ff9f43;
+  --neon-pink:#f43f5e;
+  --neon-orange:#f59e0b;
   --neon-yellow:#fcd34d;
 
   /* 发光（克制：不过亮刺眼） */
@@ -46,12 +46,12 @@ body[data-theme="dark"]{
   --font-mono:'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
   --font-display:'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* —— 映射页面原有变量，保持页面逻辑不变、仅换值 —— */
-  --indigo:#6366F1; --indigo-d:#4F46E5; --blue:#2563EB; --blue-l:rgba(37,99,235,.08);
-  --brand:#2563EB; --brand-bg:rgba(37,99,235,.12);
-  --ink:#E6EDF6; --slate:#E2E8F0; --muted:#94A3B8; --line:rgba(255,255,255,.10);
-  --green:#16A34A; --pink:#EC4899; --amber:#F59E0B; --cyan:#0891B2; --purple:#7C3AED;
-  --bg:#0F1525; --card:rgba(15,21,37,.60); --shadow:0 20px 60px rgba(0,0,0,.40);
+  /* —— 映射页面原有变量，保持页面逻辑不变、仅换值（完全复刻参考页 voc-report-home-radium 配色） —— */
+  --indigo:#6366F1; --indigo-d:#4F46E5; --blue:#60a5fa; --blue-l:rgba(96,165,250,.10);
+  --brand:#60a5fa; --brand-bg:rgba(96,165,250,.14);
+  --ink:#e2e8f0; --slate:#cbd5e1; --muted:#94a3b8; --line:rgba(255,255,255,.08);
+  --green:#4ade80; --pink:#f43f5e; --amber:#f59e0b; --cyan:#38bdf8; --purple:#a78bfa;
+  --bg:#0F1525; --card:rgba(28,38,64,.5); --shadow:0 20px 60px rgba(0,0,0,.40);
 
   /* —— 深空背景：参考 voc-report-home-radium 风格，纯色深空 + 极淡网格 —— */
   background-color:#0F1525;
@@ -135,7 +135,7 @@ body[data-theme="dark"] .import-manual,
 body[data-theme="dark"] .dsc-section,
 body[data-theme="dark"] .purpose-section,
 body[data-theme="dark"] .data-source-section{
-  background:rgba(15, 21, 37, .60);
+  background:rgba(28, 38, 64, .5);
   border:1px solid rgba(255, 255, 255, .08);
   border-radius:16px;
   box-shadow:0 8px 30px rgba(0, 0, 0, .25);
@@ -319,7 +319,7 @@ body[data-theme="dark"] .section-desc{ color:#E2E8F0; }
 body[data-theme="dark"] .eyebrow{ background:rgba(37,99,235,.10); color:#93C5FD; }
 body[data-theme="dark"] .hero .steps-hint .sh,
 body[data-theme="dark"] .steps-hint .sh{
-  background:rgba(15,21,37,.60); border-color:rgba(255,255,255,.08); color:#E2E8F0;
+  background:rgba(28,38,64,.5); border-color:rgba(255,255,255,.08); color:#E2E8F0;
 }
 body[data-theme="dark"] .steps-hint .sh b{ color:#93C5FD; }
 
@@ -338,16 +338,16 @@ body[data-theme="dark"] .tag{
   border-radius:6px;
 }
 body[data-theme="dark"] .tag-intro,
-body[data-theme="dark"] .tag-intro-panel{ background:rgba(15,21,37,.60); border-color:rgba(255,255,255,.08); }
+body[data-theme="dark"] .tag-intro-panel{ background:rgba(28,38,64,.5); border-color:rgba(255,255,255,.08); }
 body[data-theme="dark"] .tag-intro-lead,
 body[data-theme="dark"] .tag-intro p{ color:#E2E8F0; }
-body[data-theme="dark"] .tag-intro-step{ background:rgba(15,21,37,.60); border-color:rgba(255,255,255,.08); }
+body[data-theme="dark"] .tag-intro-step{ background:rgba(28,38,64,.5); border-color:rgba(255,255,255,.08); }
 body[data-theme="dark"] .tag-intro-step .t-title{ color:#fff; }
 body[data-theme="dark"] .tag-intro-step .t-desc{ color:#94A3B8; }
 body[data-theme="dark"] .module-toggle{ background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.10); color:#E2E8F0; }
 body[data-theme="dark"] .module-toggle:hover{ color:#fff; background:rgba(255,255,255,.08); }
 body[data-theme="dark"] .module-toggle[aria-expanded="true"]{ background:#2563EB; color:#fff; border-color:transparent; }
-body[data-theme="dark"] .module-explain{ background:rgba(15,21,37,.60); border-bottom-color:rgba(255,255,255,.08); }
+body[data-theme="dark"] .module-explain{ background:rgba(28,38,64,.5); border-bottom-color:rgba(255,255,255,.08); }
 body[data-theme="dark"] .module-desc{ color:#fff; background:rgba(255,255,255,.03); border-left-color:#2563EB; }
 body[data-theme="dark"] .module-desc b{ color:#93C5FD; }
 body[data-theme="dark"] .explain-list li{ border-bottom-color:rgba(255,255,255,.06); color:#E2E8F0; }
@@ -457,7 +457,7 @@ body[data-theme="dark"] .rec,
 body[data-theme="dark"] .appendix,
 body[data-theme="dark"] .pctx .pc,
 body[data-theme="dark"] .empty-state{
-  background:rgba(15,21,37,.60);
+  background:rgba(28,38,64,.5);
   border-color:rgba(255,255,255,.08);
   box-shadow:0 8px 30px rgba(0,0,0,.25);
 }
@@ -508,4 +508,71 @@ body[data-theme="dark"] .pcard,
 body[data-theme="dark"] .force,
 body[data-theme="dark"] .rec,
 body[data-theme="dark"] .job-statement{ animation:none; }
+
+/* ---------- 19. framework-detail.html 通用框架详细分析页（完全复刻参考页配色） ---------- */
+body[data-theme="dark"] .topbar{background:rgba(15,21,37,.85);border-bottom-color:rgba(255,255,255,.08);}
+body[data-theme="dark"] .topbar .brand{color:#fff;}
+body[data-theme="dark"] .topbar .brand small{color:#94a3b8;}
+body[data-theme="dark"] .topbar .left{color:#e2e8f0;}
+body[data-theme="dark"] .back-link,
+body[data-theme="dark"] .theme-toggle{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.10);color:#cbd5e1;}
+body[data-theme="dark"] .back-link:hover,
+body[data-theme="dark"] .theme-toggle:hover{border-color:#93C5FD;color:#93C5FD;}
+body[data-theme="dark"] .brand .dot{background:#60a5fa;box-shadow:0 0 12px #60a5fa;}
+body[data-theme="dark"] .theme-toggle .ti{color:#cbd5e1;}
+
+body[data-theme="dark"] .hero{background:linear-gradient(135deg,#1e3a8a,#155e75);box-shadow:0 10px 30px rgba(0,0,0,.4);}
+body[data-theme="dark"] .hero .kicker{background:rgba(255,255,255,.18);color:#fff;}
+body[data-theme="dark"] .hero h1{color:#fff;}
+body[data-theme="dark"] .hero .sub{color:#e2e8f0;}
+body[data-theme="dark"] .pctx .pc{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.22);color:#fff;}
+body[data-theme="dark"] .pctx .pc b{color:#fff;}
+body[data-theme="dark"] .pctx .pc .ic{color:#fff;}
+
+body[data-theme="dark"] .card{background:rgba(28,38,64,.5);border-color:rgba(255,255,255,.08);box-shadow:0 8px 30px rgba(0,0,0,.25);}
+body[data-theme="dark"] .card h2{color:#fff;}
+body[data-theme="dark"] .card h2 .n{background:#60a5fa;}
+body[data-theme="dark"] .lead{color:#cbd5e1;}
+body[data-theme="dark"] .lead b{color:#93C5FD;}
+body[data-theme="dark"] .checklist li{color:#cbd5e1;}
+body[data-theme="dark"] .checklist li::before{color:#60a5fa;}
+
+body[data-theme="dark"] .cell{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08);}
+body[data-theme="dark"] .cell h3{color:#fff;}
+body[data-theme="dark"] .cell p{color:#cbd5e1;}
+body[data-theme="dark"] .cell .tag{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.10);color:#cbd5e1;}
+body[data-theme="dark"] .cell .count{color:#f43f5e;}
+body[data-theme="dark"] .quad{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08);}
+body[data-theme="dark"] .quad h3{color:#fff;}
+body[data-theme="dark"] .quad ul{color:#cbd5e1;}
+body[data-theme="dark"] .quad li::before{color:#60a5fa;}
+body[data-theme="dark"] .quad.high{border-top-color:#f87171;}
+body[data-theme="dark"] .quad.keep{border-top-color:#4ade80;}
+body[data-theme="dark"] .quad.diff{border-top-color:#60a5fa;}
+body[data-theme="dark"] .quad.over{border-top-color:#94a3b8;}
+
+body[data-theme="dark"] .bar-row{border-color:rgba(255,255,255,.08);}
+body[data-theme="dark"] .bar-row .t{color:#e2e8f0;}
+body[data-theme="dark"] .bar-row .bar{background:rgba(255,255,255,.06);}
+body[data-theme="dark"] .bar-row .bar i{background:#60a5fa;}
+body[data-theme="dark"] .bar-row .c{color:#94a3b8;}
+
+body[data-theme="dark"] .tagcloud span{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.10);color:#cbd5e1;}
+body[data-theme="dark"] .tagcloud span.pos{background:rgba(74,222,128,.16);border-color:rgba(74,222,128,.35);color:#86efac;}
+body[data-theme="dark"] .tagcloud span.neg{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.35);color:#fca5a5;}
+
+body[data-theme="dark"] .rec{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08);border-top-color:#60a5fa;}
+body[data-theme="dark"] .rec h3{color:#fff;}
+body[data-theme="dark"] .rec ul{color:#cbd5e1;}
+body[data-theme="dark"] .rec li::before{color:#60a5fa;}
+
+body[data-theme="dark"] .appx{color:#cbd5e1;}
+body[data-theme="dark"] .appx th{background:rgba(255,255,255,.05);color:#fff;}
+body[data-theme="dark"] .appx td{border-color:rgba(255,255,255,.08);}
+body[data-theme="dark"] .appx td .c{color:#94a3b8;}
+
+body[data-theme="dark"] .empty-state h2{color:#fff;}
+body[data-theme="dark"] .empty-state p{color:#cbd5e1;}
+body[data-theme="dark"] .empty-state .ebtn{background:linear-gradient(135deg,#60a5fa,#a78bfa);color:#fff;}
+body[data-theme="dark"] .foot{color:#94a3b8;}
 
