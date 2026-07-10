@@ -1434,8 +1434,8 @@
         }
 
         .need-card.highlight {
-            border-color: #DC2626;
-            background: linear-gradient(to bottom right, #FEF2F2, #FFFFFF);
+            border-color: #10B981;
+            background: linear-gradient(to bottom right, #ECFDF5, #FFFFFF);
         }
 
         /* 需求层级徽章 */
@@ -1504,7 +1504,7 @@
             top: -8px;
             left: 50%;
             transform: translateX(-50%);
-            background: #DC2626;
+            background: #7C3AED;
             color: white;
             font-size: 9px;
             font-weight: 700;
@@ -1524,58 +1524,101 @@
         .needs-main .need-card { cursor: pointer; }
         .needs-main .need-card.selectable:active { transform: scale(0.98); }
         .needs-main .need-card.selected {
-            border-color: #7C3AED;
-            background: linear-gradient(to bottom right, #F5F3FF, #FFFFFF);
-            box-shadow: 0 6px 18px rgba(124,58,237,0.22);
+            border-color: #10B981;
+            background: linear-gradient(to bottom right, #ECFDF5, #FFFFFF);
+            box-shadow: 0 6px 18px rgba(16,185,129,0.16);
         }
         .needs-main .need-card .sel-check {
             position: absolute;
-            top: 6px; right: 6px;
-            width: 20px; height: 20px;
+            top: 8px; right: 8px;
+            width: 18px; height: 18px;
             border-radius: 50%;
-            background: #7C3AED; color: #fff;
-            font-size: 12px; font-weight: 700;
-            display: none; align-items: center; justify-content: center;
-            box-shadow: 0 2px 6px rgba(124,58,237,0.4);
+            background: #E2E8F0; color: #94A3B8;
+            font-size: 11px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 1px 3px rgba(15,23,42,0.08);
+            transition: all 0.2s ease;
         }
-        .needs-main .need-card.selected .sel-check { display: flex; }
+        .needs-main .need-card.selected .sel-check {
+            background: #10B981; color: #fff;
+            box-shadow: 0 2px 6px rgba(16,185,129,0.35);
+        }
+        .needs-main .need-card:hover {
+            border-color: #10B981;
+            box-shadow: 0 4px 12px rgba(16,185,129,0.12);
+        }
 
         .need-toolbar {
-            margin-top: 28px;
-            padding: 20px 22px;
-            background: linear-gradient(135deg, #F5F3FF, #EEF2FF);
-            border: 1px solid #E9D5FF;
-            border-radius: 14px;
+            margin-top: 12px;
+            padding: 22px 24px;
+            background: linear-gradient(135deg, #F0FDF4 0%, #F5F3FF 100%);
+            border: 1px solid #BBF7D0;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(16,185,129,0.08);
+            position: relative;
         }
+        .need-toolbar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 60px; height: 4px;
+            background: #10B981;
+            border-radius: 0 0 4px 4px;
+        }
+        .need-toolbar-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .need-toolbar-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0F172A;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .need-toolbar-title span { color: #10B981; }
         .need-macbook-btn {
-            border: 1px solid #C4B5FD;
-            background: #fff; color: #6D28D9;
+            border: 1px solid #7C3AED;
+            background: #fff; color: #7C3AED;
             font-size: 13px; font-weight: 700;
-            padding: 9px 16px; border-radius: 999px;
+            padding: 9px 18px; border-radius: 999px;
             cursor: pointer; transition: all .2s;
+            box-shadow: 0 2px 8px rgba(124,58,237,0.1);
         }
-        .need-macbook-btn:hover { background: #7C3AED; color: #fff; border-color: #7C3AED; }
+        .need-macbook-btn:hover { background: #7C3AED; color: #fff; border-color: #7C3AED; box-shadow: 0 4px 12px rgba(124,58,237,0.22); }
         .need-preview {
-            margin: 16px 0 12px;
-            font-size: 14px; line-height: 1.7; color: #4C1D95;
+            margin: 14px 0 14px;
+            font-size: 14px; line-height: 1.7; color: #15803D;
             min-height: 24px;
-            background: #fff; border-radius: 10px;
-            padding: 14px 16px; border: 1px dashed #D8B4FE;
+            background: #fff; border-radius: 12px;
+            padding: 16px 18px; border: 1px dashed #86EFAC;
         }
-        .need-preview.empty { color: #94A3B8; }
-        .need-preview b { color: #7C3AED; }
+        .need-preview.empty { color: #94A3B8; border-color: #D8B4FE; }
+        .need-preview b { color: #059669; }
         .need-actionbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-        .need-count { font-size: 13px; font-weight: 700; color: #6D28D9; }
+        .need-count { font-size: 13px; font-weight: 700; color: #047857; }
+        .need-count.zero { color: #94A3B8; }
         .need-synth-btn {
             border: none; cursor: pointer;
-            background: linear-gradient(135deg, #7C3AED, #2563EB);
+            background: linear-gradient(135deg, #10B981, #059669);
             color: #fff; font-size: 14px; font-weight: 800;
-            padding: 11px 22px; border-radius: 999px;
-            box-shadow: 0 6px 16px rgba(124,58,237,0.35);
+            padding: 12px 26px; border-radius: 999px;
+            box-shadow: 0 6px 16px rgba(16,185,129,0.35);
             transition: all .2s;
         }
-        .need-synth-btn:hover:not(:disabled) { transform: translateY(-2px); }
-        .need-synth-btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+        .need-synth-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(16,185,129,0.45); }
+        .need-synth-btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; background: #94A3B8; }
+        .need-synth-btn.ready:not(:disabled) { animation: synthPulse 1.8s ease-in-out infinite; }
+        @keyframes synthPulse {
+            0%, 100% { box-shadow: 0 6px 16px rgba(16,185,129,0.35); }
+            50% { box-shadow: 0 6px 24px rgba(16,185,129,0.55); }
+        }
         .need-hint { margin-top: 10px; font-size: 12px; color: #B45309; min-height: 16px; }
 
         .ns-overlay {
@@ -1626,14 +1669,14 @@
             font-size: 15px;
             font-weight: 700;
             color: #fff;
-            background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+            background: linear-gradient(135deg, #7C3AED 0%, #2563EB 100%);
             border: none;
             border-radius: 999px;
             cursor: pointer;
-            box-shadow: 0 6px 18px rgba(220,38,38,0.3);
+            box-shadow: 0 6px 18px rgba(124,58,237,0.3);
             transition: all 0.2s;
         }
-        .roulette-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(220,38,38,0.45); }
+        .roulette-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(124,58,237,0.45); }
         .roulette-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .roulette-slots {
             display: grid;
@@ -1653,17 +1696,17 @@
         .slot-card.spinning {
             opacity: 1;
             border-style: solid;
-            border-color: #DC2626;
+            border-color: #7C3AED;
             animation: slotBlink 0.28s steps(2) infinite;
         }
         .slot-card.locked {
             opacity: 1;
             border-style: solid;
-            border-color: #DC2626;
-            background: linear-gradient(to bottom right, #FEF2F2, #FFFFFF);
+            border-color: #7C3AED;
+            background: linear-gradient(to bottom right, #F5F3FF, #FFFFFF);
             animation: slotPop 0.45s ease;
         }
-        @keyframes slotBlink { 0% { background: #FEF2F2; } 100% { background: #FFFFFF; } }
+        @keyframes slotBlink { 0% { background: #F5F3FF; } 100% { background: #FFFFFF; } }
         @keyframes slotPop { 0% { transform: scale(0.9); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
         .roulette-combo {
             margin-top: 22px;
@@ -1676,7 +1719,7 @@
             line-height: 1.9;
             letter-spacing: 0.5px;
         }
-        .roulette-combo b { color: #FB7185; }
+        .roulette-combo b { color: #C4B5FD; }
         @media (max-width: 768px) {
             .roulette-slots { grid-template-columns: repeat(2, 1fr); }
         }
@@ -1696,8 +1739,8 @@
             transition: all 0.3s;
         }
         .brand-hero.locked {
-            border-color: #DC2626;
-            background: linear-gradient(to bottom right, #FEF2F2, #FFFFFF);
+            border-color: #7C3AED;
+            background: linear-gradient(to bottom right, #F5F3FF, #FFFFFF);
             animation: slotPop 0.45s ease;
         }
         .brand-emoji { font-size: 46px; line-height: 1; display: flex; align-items: center; justify-content: center; }
@@ -1707,16 +1750,16 @@
         .brand-need-card { cursor: default; }
         .brand-need-card.empty { display: none; }
         .brand-need-card.locked {
-            border-color: #DC2626;
-            background: linear-gradient(to bottom right, #FEF2F2, #FFFFFF);
+            border-color: #7C3AED;
+            background: linear-gradient(to bottom right, #F5F3FF, #FFFFFF);
         }
         .bn-why {
             display: block;
             margin-top: 10px;
             padding-top: 10px;
-            border-top: 1px dashed #FCA5A5;
+            border-top: 1px dashed #C4B5FD;
             font-size: 11.5px;
-            color: #B91C1C;
+            color: #6D28D9;
             line-height: 1.75;
         }
         .brand-need-card.spinning .bn-why { display: none; }
@@ -3374,8 +3417,7 @@
                             <div class="need-title-en">Autonomy</div>
                             <div class="need-desc">我可以自己决定怎么做、什么时候做、不被限制、不被打断，按自己的方式来。</div>
                         </div>
-                        <div class="need-card highlight">
-                            <span class="macbook-badge">MacBook</span>
+                        <div class="need-card">
                             <div class="need-layer layer-identity">身份层</div>
                             <div class="need-title-cn">审美</div>
                             <div class="need-title-en">Beauty</div>
@@ -3405,8 +3447,7 @@
 
                     <!-- 第二行：体验层 (4个，居中) -->
                     <div class="needs-row">
-                        <div class="need-card highlight">
-                            <span class="macbook-badge">MacBook</span>
+                        <div class="need-card">
                             <div class="need-layer layer-experience">体验层</div>
                             <div class="need-title-cn">认可</div>
                             <div class="need-title-en">Recognition</div>
@@ -3418,8 +3459,7 @@
                             <div class="need-title-en">Relatedness</div>
                             <div class="need-desc">我希望有人理解我、有人在意我、有人陪着我，而不是一个人孤立地活在这个世界上。</div>
                         </div>
-                        <div class="need-card highlight">
-                            <span class="macbook-badge">MacBook</span>
+                        <div class="need-card">
                             <div class="need-layer layer-experience">体验层</div>
                             <div class="need-title-cn">胜任</div>
                             <div class="need-title-en">Competence</div>
@@ -3473,10 +3513,13 @@
             </div><!-- /needs-grid-wrapper -->
             <!-- 需求点选 + 合成工具栏 -->
             <div class="need-toolbar">
-                <button class="need-macbook-btn" onclick="applyMacbookExample()">🎯 试试 MacBook 示例</button>
+                <div class="need-toolbar-head">
+                    <div class="need-toolbar-title"><span>👇</span> 选完后，点击下方按钮合成价值主张</div>
+                    <button class="need-macbook-btn" onclick="applyMacbookExample()">🎯 试试 MacBook 示例</button>
+                </div>
                 <div class="need-preview empty" id="needPreview">点选上方需求卡片，实时生成你的价值主张预览…</div>
                 <div class="need-actionbar">
-                    <span class="need-count" id="needCount">已选 0 项</span>
+                    <span class="need-count zero" id="needCount">已选 0 项</span>
                     <button class="need-synth-btn" id="needSynthBtn" onclick="openNeedModal()" disabled>✨ 合成价值主张</button>
                 </div>
                 <div class="need-hint" id="needHint"></div>
@@ -6167,8 +6210,14 @@
         const btn = document.getElementById('needSynthBtn');
         const prev = document.getElementById('needPreview');
         const hint = document.getElementById('needHint');
-        if(cnt) cnt.textContent = '已选 ' + n + ' 项';
-        if(btn) btn.disabled = (n < 1);
+        if(cnt){
+            cnt.textContent = '已选 ' + n + ' 项';
+            cnt.classList.toggle('zero', n === 0);
+        }
+        if(btn){
+            btn.disabled = (n < 1);
+            btn.classList.toggle('ready', n >= 1 && n <= 5);
+        }
         if(n < 3) hint.textContent = n===0 ? '' : '建议聚焦 3–5 个核心需求，结果会更聚焦有力。';
         else if(n > 5) hint.textContent = '已选 ' + n + ' 项，偏多；建议收敛到 3–5 个核心需求。';
         else hint.textContent = '';
