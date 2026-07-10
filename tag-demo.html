@@ -188,10 +188,17 @@ textarea::placeholder{color:var(--muted);}
 
 .jm-rowlabel{display:flex; align-items:center; justify-content:flex-end; text-align:right; font-size:11px; font-weight:800; color:var(--slate); padding-right:6px; border-right:2px solid var(--line); line-height:1.25;}
 .jm-rowlabel--journey{color:#2563EB;}
+.jm-rowlabel--effect{color:#7C3AED;}
 .jm-rowlabel--emo{color:#DC2626;}
 
 .jm-cell{background:#F1F5F9; border-radius:10px; padding:9px 8px; min-height:58px; display:flex; flex-direction:column; gap:6px;}
+.jm-cell--effect{justify-content:center;}
 .jm-cell--emo{justify-content:center;}
+
+/* effect impact chips (middle layer) */
+.jm-effs{display:flex; flex-wrap:wrap; gap:5px; align-content:flex-start;}
+.jm-eff{display:inline-flex; align-items:center; gap:3px; border-radius:6px; padding:3px 7px; font-size:10.5px; font-weight:700; border:1px solid transparent; line-height:1.1;}
+.jm-eff small{font-weight:600; opacity:.6; font-size:9px;}
 
 .jm-chips{display:flex; flex-wrap:wrap; gap:5px; align-content:flex-start;}
 .jm-chip{display:inline-flex; align-items:center; gap:3px; border-radius:6px; padding:3px 7px; font-size:10.5px; font-weight:700; border:1px solid transparent; line-height:1.1;}
@@ -834,6 +841,48 @@ const JOURNEY_MAP = {
 function stageOf(hit){
     return JOURNEY_MAP[hit.m + '|' + hit.t] || 'exp';
 }
+/* ===================== 效果影响（业务产出映射） ===================== */
+/* 每个标签（模块|标签名）会撬动哪些业务效果：
+   conv=购买转化  repurchase=复购  brand=品牌形象  wom=口碑传播  experience=体验满意  retention=留存 */
+const EFFECTS = [
+    {key:'conv',       name:'转化',   color:'#D97706', desc:'影响购买转化'},
+    {key:'repurchase', name:'复购',   color:'#059669', desc:'影响复购'},
+    {key:'brand',      name:'品牌形象',color:'#7C3AED', desc:'影响品牌形象'},
+    {key:'wom',        name:'口碑',   color:'#DB2777', desc:'影响口碑传播'},
+    {key:'experience', name:'体验',   color:'#2563EB', desc:'影响体验满意度'},
+    {key:'retention',  name:'留存',   color:'#0891B2', desc:'影响留存'}
+];
+const EFFECT_MAP = {
+    '新手':['conv','retention'], '资深':['experience','wom'], '产品讨论':['wom','brand'], '身体讨论':['brand'], '幻想投射':['brand'],
+    '解决生理需求':['conv','experience'], '替代真人':['experience'], '提升体验':['experience'],
+    '孤独缓解':['experience','retention'], '情感寄托':['experience','retention'], '自我探索':['experience'],
+    '社群推荐':['conv','wom'], '跟风购买':['conv','brand'], '话题参与':['brand','wom'],
+    'Body Swap':['brand'], '角色扮演':['brand','experience'], '场景模拟':['experience'],
+    '替换损坏产品':['conv'], '升级换代':['conv','repurchase'], '旧款不再满足':['repurchase','conv'],
+    '品牌切换':['conv','brand'], '折扣优惠':['conv'], '满减活动':['conv'], '限时大促':['conv'],
+    '优惠券':['conv'], '直播秒杀':['conv','wom'],
+    '日常使用':['experience','retention'], '训练提升':['experience'], '健康维护':['experience'], '性能测试':['experience'],
+    '收藏展示':['brand','experience'], '陪伴慰藉':['experience','retention'], '压力释放':['experience'], '自信建立':['experience','brand'],
+    '分享交流':['wom'], '社群认同':['wom','brand'], '内容创作':['wom','brand'],
+    '深夜独处':['experience'], '周末放松':['experience'], '出差旅行':['experience','retention'], '卧室私密':['experience'],
+    '浴室':['experience'], '酒店':['experience'], '家中':['experience'], '独处放松':['experience'], '伴侣互动':['experience','retention'],
+    '材质不适':['experience','retention'], '尺寸问题':['experience','retention'], '重量过重':['experience'], '清洁困难':['experience'],
+    '收纳不便':['experience'], '隐私担忧':['experience','retention'], '环境不便':['experience'], '携带困难':['experience','retention'],
+    '伴侣反对':['retention','experience'], '尴尬感':['experience','brand'], '信任问题':['retention'], '羞耻感':['experience','brand'],
+    '焦虑':['experience'], '负罪感':['experience','retention'],
+    '选择更合适型号':['experience','retention'], '增加配件':['experience'], '升级材质':['experience','retention'], '调整使用时间':['experience'],
+    '改善环境布置':['experience','retention'], '接纳自我':['experience','brand'], '降低预期':['experience'], '看评测':['conv','wom'], '问社群':['conv','wom'], '经验帖':['wom'],
+    '多次复购':['repurchase'], '推荐他人':['wom','repurchase'], '品牌偏好':['repurchase','brand'], '主动好评':['wom','brand'],
+    '晒单':['wom','brand'], '安利':['wom','brand'], '固定复购品牌':['repurchase','brand'], '对比后回归':['repurchase','brand'],
+    '外观优化':['brand','experience'], '人体工学':['experience'], '材质升级':['experience','retention'], '智能加热':['experience'], '静音设计':['experience','retention'],
+    'APP联动':['experience'], '开箱体验':['experience','brand'], '清洁便利':['experience','retention'], '收纳设计':['experience'],
+    '售后响应':['retention','brand'], '使用指导':['experience','retention'], '隐私保护':['experience','brand'],
+    '主宰 Autonomy':['experience'], '审美 Beauty':['brand','experience'], '目的 Purpose':['experience'], '刺激 Stimulation':['brand','experience'],
+    '道德 Morality':['brand'], '掌控感':['experience'], '胜任感':['experience'], '沉浸感':['experience'], '心流':['experience'],
+    '安全':['experience','retention'], '归属':['brand','wom'], '安稳':['experience','retention'], '保障':['experience','retention'],
+    '健康':['experience'], '生理刚需':['conv','experience']
+};
+function effectOf(t){ return EFFECT_MAP[t] || []; }
 /* Plutchik 情绪极性分（正面 +、负面 −） */
 const EMOTION_POLARITY = { joy:2, trust:2, anticipation:1, surprise:1, sadness:-2, disgust:-2, anger:-2, fear:-2 };
 function renderJourneyMap(allHits){
@@ -844,7 +893,7 @@ function renderJourneyMap(allHits){
     hits.forEach(h=>{ buckets[stageOf(h)].push(h); });
 
     let html = '<h3>🗺️ 用户旅程地图</h3>'+
-        '<div class="jm-sub">按用户旅程阶段（认知 → 评估 → 购买 → 使用 → 体验 → 复购）铺排<b>最小维度标签</b>，下方同步展示各阶段的 <b>情绪强度</b>：绿＝偏正面 · 红＝偏负面 · 色条越长情绪信号越强</div>';
+        '<div class="jm-sub">按用户旅程阶段（认知 → 评估 → 购买 → 使用 → 体验 → 复购）铺排<b>最小维度标签</b>，并同步展示每个阶段撬动的<b>效果影响</b>（🟠转化 🟢复购 🟣品牌形象 🔴口碑 🔵体验 🔷留存）与<b>情绪强度</b>（绿＝偏正面 · 红＝偏负面 · 色条越长越强）</div>';
     html += '<div class="jm-map">';
 
     /* 表头：阶段列 */
@@ -866,7 +915,26 @@ function renderJourneyMap(allHits){
         html += `<div class="jm-cell jm-cell--journey"><div class="jm-chips">${chips}</div></div>`;
     });
 
-    /* 图层二：情绪强度 */
+    /* 图层二：效果影响（业务产出聚合） */
+    const effTotal = {};
+    JOURNEY.forEach(j=>{
+        const eff = {};
+        buckets[j.key].forEach(h=>{
+            effectOf(h.t).forEach(k=>{ eff[k]=(eff[k]||0)+1; });
+        });
+        effTotal[j.key] = eff;
+    });
+    html += '<div class="jm-rowlabel jm-rowlabel--effect">📈<br>效果影响</div>';
+    JOURNEY.forEach(j=>{
+        const eff = effTotal[j.key];
+        const keys = Object.keys(eff);
+        const chips = keys.length
+            ? keys.sort((a,b)=>eff[b]-eff[a]).map(k=>{ const e=EFFECTS.find(x=>x.key===k); return `<span class="jm-eff" style="background:${hex2rgba(e.color,0.10)}; color:${e.color}; border-color:${hex2rgba(e.color,0.28)};">${e.name}${eff[k]>1?`<small>x${eff[k]}</small>`:''}</span>`; }).join('')
+            : '<span class="jm-empty">暂无明显效果信号</span>';
+        html += `<div class="jm-cell jm-cell--effect"><div class="jm-effs">${chips}</div></div>`;
+    });
+
+    /* 图层三：情绪强度 */
     const emoData = {};
     let maxIntensity = 1;
     JOURNEY.forEach(j=>{
