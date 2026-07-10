@@ -688,6 +688,8 @@ const RULES = [
     {m:'使用阻碍', d:'心理状态', t:'羞耻感', kw:['羞耻','丢人','见不得人'], conf:'high', neg:true},
     {m:'使用阻碍', d:'心理状态', t:'焦虑', kw:['焦虑','担心','怕出问题'], conf:'mid', neg:true},
     {m:'使用阻碍', d:'心理状态', t:'负罪感', kw:['负罪','愧疚','罪恶','不应该'], conf:'high', neg:true},
+    {m:'使用阻碍', d:'产品本身', t:'无法正常使用', kw:['无法使用','不能使用','用不了','没法用','无法操作','几乎无法','没法正常','无法正常','不能用','无法处理','做不了','没办法','unusable','cannot use',"can't use",'not work',"doesn't work",'broken','stopped working'], conf:'high', neg:true},
+    {m:'使用阻碍', d:'产品本身', t:'结构错位', kw:['错位','错乱','对不齐','没对齐','内部错位','歪了','歪斜','变形','misalign','misaligned','misalignment','crooked','deform','defect','defective'], conf:'high', neg:true},
 
     /* ---- Module 06 克服方式 ---- */
     {m:'克服方式', d:'产品改进', t:'选择更合适型号', kw:['换型号','选合适','换个','型号','换大','换小'], conf:'high'},
@@ -714,16 +716,20 @@ const RULES = [
     /* ---- Module 08 产品改进建议 ---- */
     {m:'产品改进建议', d:'产品设计', t:'外观优化', kw:['外观','颜值','好看','漂亮','设计感'], conf:'high'},
     {m:'产品改进建议', d:'产品设计', t:'人体工学', kw:['人体工学','贴合','握姿','手感'], conf:'high'},
-    {m:'产品改进建议', d:'产品设计', t:'材质升级', kw:['硅胶','材质','软','医用','更舒服的材质'], conf:'high'},
+    {m:'产品改进建议', d:'产品设计', t:'材质升级', kw:['硅胶','材质','软','医用','更舒服的材质','tpe','材料','cheap material','poor quality'], conf:'high'},
     {m:'产品改进建议', d:'功能增强', t:'智能加热', kw:['加热','温感'], conf:'high'},
     {m:'产品改进建议', d:'功能增强', t:'静音设计', kw:['静音','声音小','没声音','安静'], conf:'high'},
-    {m:'产品改进建议', d:'功能增强', t:'APP联动', kw:['APP','手机','智能','蓝牙'], conf:'high'},
+    {m:'产品改进建议', d:'功能增强', t:'APP联动', kw:['手机app','app控制','手机','智能','蓝牙'], conf:'high'},
     {m:'产品改进建议', d:'体验优化', t:'开箱体验', kw:['开箱','包装','盒子'], conf:'high'},
     {m:'产品改进建议', d:'体验优化', t:'清洁便利', kw:['好洗','容易清洗','清洁方便','好清理'], conf:'high'},
     {m:'产品改进建议', d:'体验优化', t:'收纳设计', kw:['收纳','好放','便携收纳'], conf:'high'},
     {m:'产品改进建议', d:'服务支持', t:'售后响应', kw:['售后','客服','退换','维修'], conf:'high'},
     {m:'产品改进建议', d:'服务支持', t:'使用指导', kw:['指导','说明','教程','怎么用'], conf:'high'},
     {m:'产品改进建议', d:'服务支持', t:'隐私保护', kw:['隐私','别印','保密','匿名','不写名字'], conf:'high'},
+    {m:'产品改进建议', d:'价值感知', t:'性价比偏低', kw:['不值','不值这个钱','不划算','性价比低','价格高','太贵','贵了','不值价','考虑到价格','令人失望','not worth','overpriced','too expensive','disappointing','disappointed','waste of money'], conf:'mid'},
+    {m:'产品改进建议', d:'预期管理', t:'图文不符', kw:['与图片','图片不符','货不对板','与实物','图文','不符','not as described','nothing like','different from picture','misleading'], conf:'high'},
+    {m:'产品改进建议', d:'预期管理', t:'预期落差', kw:['不尽如人意','不如意','达不到预期','低于预期','fell short','below expectation','not as expected'], conf:'mid'},
+    {m:'产品改进建议', d:'产品设计', t:'结构对齐', kw:['错位','对不齐','内部结构','没对齐','misalign','misaligned'], conf:'mid'},
 
     /* ---- Module 09 十三种需求（用于需求映射） ---- */
     {m:'十三种需求', d:'身份层', t:'主宰 Autonomy', kw:['掌控','自己做主','按我的','说了算'], conf:'mid'},
@@ -783,10 +789,11 @@ function hasNegationBefore(text, idx){
 function tagComment(text){
     const hits = [];
     const seen = new Set();
+    const low = text.toLowerCase();
     for(const r of RULES){
         if(!activeModules.has(r.m)) continue;
         for(const k of r.kw){
-            const idx = text.indexOf(k);
+            const idx = low.indexOf(k.toLowerCase());
             if(idx >= 0){
                 if(r.neg && hasNegationBefore(text, idx)) continue;
                 const key = r.m+'|'+r.t;
@@ -1699,6 +1706,8 @@ const EMOTION_MAP = {
     '收藏展示':['joy'], '陪伴慰藉':['trust','sadness'], '压力释放':['joy'], '自信建立':['trust'],
     '分享交流':['joy'], '社群认同':['trust'], '内容创作':['joy'],
     '材质不适':['disgust'], '尺寸问题':['disgust'], '重量过重':['disgust'], '清洁困难':['disgust'],
+    '无法正常使用':['disgust','anger'], '结构错位':['disgust','anger'],
+    '性价比偏低':['sadness','disgust'], '图文不符':['disgust','anger'], '预期落差':['sadness'], '结构对齐':['disgust'],
     '收纳不便':['disgust'], '隐私担忧':['fear'], '环境不便':['disgust'], '携带困难':['disgust'],
     '伴侣反对':['anger','sadness'], '尴尬感':['disgust'], '信任问题':['anger'],
     '羞耻感':['disgust','sadness'], '焦虑':['fear'], '负罪感':['sadness','disgust'],
