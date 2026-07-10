@@ -123,6 +123,7 @@ textarea::placeholder{color:var(--muted);}
 .modbar .track{flex:1; height:14px; background:var(--line); border-radius:999px; overflow:hidden;}
 .modbar .fill{height:100%; border-radius:999px; transition:width .6s ease;}
 .modbar .cnt{width:30px; flex-shrink:0; font-weight:700; color:var(--ink); text-align:left;}
+.modbar .cnt-prov{font-size:10px; color:#B45309; margin-left:2px; font-weight:700;}
 
 .need-map{margin-top:18px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; box-shadow:var(--shadow);}
 .need-map h3{font-size:15px; margin-bottom:14px;}
@@ -391,6 +392,22 @@ table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
 .ov-text .os-idx{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--brand-bg); color:var(--brand); font-size:12px; font-weight:800; margin-right:8px;}
 .ov-tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
 .ov-tag{display:inline-flex; align-items:center; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; line-height:1; cursor:default;}
+/* 推测标签（三级回退命中，置信度较低） */
+.ov-tag.prov{border:1px dashed currentColor; opacity:.92;}
+.ov-tag.prov::before{content:'⚠ '; font-size:11px;}
+.tchip2.prov{border:1px dashed currentColor !important; font-style:italic;}
+.tchip2.prov::before{content:'⚠'; margin-right:2px; opacity:.7;}
+
+/* 自进化候选池 */
+.cand-pool{background:linear-gradient(180deg,#fffbeb,#fff); border:1px solid #fde68a; border-radius:14px; padding:16px 18px; margin:14px 0; box-shadow:0 4px 16px rgba(245,158,11,.12);}
+.cand-pool h3{font-size:14px; margin-bottom:4px; display:flex; align-items:center; gap:6px;}
+.cand-pool .ov-sub{font-size:11px; color:#b45309; font-weight:500;}
+.cand-list{display:flex; flex-direction:column; gap:10px; margin-top:12px; max-height:420px; overflow:auto; padding-right:4px;}
+.cand-item{background:#fff; border:1px solid #fde68a; border-radius:10px; padding:10px 12px;}
+.cand-text{font-size:13px; color:#451a03; line-height:1.55; font-weight:600;}
+.cand-tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+.cand-tag{display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px; border:1px dashed currentColor;}
+.cand-empty{font-size:12px; color:#92400e; padding:6px 0;}
 .ov-cloud{display:flex; flex-wrap:wrap; gap:8px; align-content:flex-start; max-height:300px; overflow:auto;}
 @media(max-width:680px){
     .overview{grid-template-columns:1fr;}
@@ -495,6 +512,10 @@ table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
         <div class="res-meta" id="resMeta"></div>
     </div>
     <div class="res-summary" id="resSummary"></div>
+    <div class="cand-pool" id="candPool" style="display:none;">
+        <h3>🧬 自进化候选池 <span class="ov-sub">（二级命中 · 待补三级标签 — 把这里的原句丢给智能体即可生成新标签）</span></h3>
+        <div class="cand-list" id="candList"></div>
+    </div>
     <div id="cmtCards"></div>
 
     <div class="res-toolbar">
@@ -749,6 +770,65 @@ const RULES = [
     {m:'十三种需求', d:'必买层', t:'生理刚需', kw:['刚需','必须','离不开'], conf:'mid'}
 ];
 
+/* ===================== 三级回退宽泛词表 ===================== */
+/* level 1（板块）：最宽泛，仅当某评价 0 个精确标签时兜底归类到大类
+   注意：只放「板块指示性」词汇，避免 用/需要/因为/为了 等通用动词导致每条都误命中 */
+const MODULE_BROAD = {
+    '用户画像': ['第一次','刚买','刚入手','老用户','用过很多','社群','论坛','群里','身体','幻想','角色扮演','代入','讨论区'],
+    '购买动机': ['下单','想要','缓解','陪伴','推荐','种草','跟风','升级','换','折扣','优惠','打折','直播','安利'],
+    '购买目的': ['日常','训练','健康','收藏','陪伴','压力','放松','自信','分享','认同','创作','目的'],
+    '使用场景': ['深夜','半夜','晚上','周末','出差','旅行','卧室','浴室','酒店','家里','独处','伴侣','一个人','一起','拍摄','记录'],
+    '使用阻碍': ['硬','不舒服','太大','太小','尺寸','太重','沉','难洗','洗','收纳','隐私','怕','环境','携带','反对','不让','尴尬','羞耻','焦虑','负罪','愧疚','无法','不能','用不了','没法','错位','错乱','歪','变形','坏','质量','做工','材质','异味','噪音','贵','不值','钱','差','失望','垃圾','后悔','问题','不行'],
+    '克服方式': ['升级','改','调整','布置','接纳','降低','评测','测评','功课','问','经验','攻略'],
+    '用户忠诚度': ['回购','复购','又买','再买','推荐','安利','好评','晒','认','一直用','固定','老顾客','老粉','回归','比过'],
+    '产品改进建议': ['希望','建议','应该','可以','优化','提升','设计','材质','功能','体验','包装','售后','客服','指导','隐私','性价比','价格','贵','不值','图片','货','不符','预期','错位','对齐','改进','更好'],
+    '十三种需求': ['掌控','审美','目的','意义','刺激','新鲜','环保','沉浸','心流','安全','归属','安稳','保障','健康','刚需']
+};
+/* level 2（中分类）：半宽泛，仅当板块内没有精确三级标签时，把评价归到中类（t = 中类·待细分） */
+const DIM_BROAD = {
+    /* 使用阻碍 */
+    '使用阻碍|产品本身': ['质量','做工','损坏','故障','瑕疵','缺陷','散架','大','小','长','短','粗','沉','重','压','洗','清洁','收纳','塑料','刺激','软','硬','异味','材质','材料'],
+    '使用阻碍|使用场景': ['隐私','偷偷','合租','室友','被发现','地方小','携带','出门','环境'],
+    '使用阻碍|伴侣关系': ['对象','老婆','老公','伴侣','家里','反对','不让','尴尬','长辈'],
+    '使用阻碍|心理状态': ['羞耻','丢人','焦虑','担心','负罪','愧疚','罪恶','不应该'],
+    /* 产品改进建议 */
+    '产品改进建议|产品设计': ['外观','颜值','设计','人体工学','握姿','手感','结构','对齐'],
+    '产品改进建议|功能增强': ['加热','温感','静音','声音','智能','蓝牙'],
+    '产品改进建议|体验优化': ['开箱','包装','盒子','好洗','好清理','好放','收纳'],
+    '产品改进建议|服务支持': ['售后','客服','退换','维修','指导','教程','物流','快递','发货','寄','隐私'],
+    '产品改进建议|价值感知': ['不值','贵','价格','性价比','钱','便宜','划算'],
+    '产品改进建议|预期管理': ['图片','货','不符','预期','落差','描述'],
+    /* 购买动机 */
+    '购买动机|功能驱动': ['生理','需求','刚需','缓解','替代真人','提升体验'],
+    '购买动机|情感驱动': ['孤独','一个人','寂寞','独居','寄托','陪伴','慰藉','探索自己'],
+    '购买动机|社交驱动': ['博主','种草','安利','朋友','热门','爆款','话题','打卡'],
+    '购买动机|幻想驱动': ['body swap','互换','角色扮演','模拟'],
+    '购买动机|替代/升级驱动': ['坏了','坏掉','升级','换代','旧款','老款','换牌子','换个品牌'],
+    '购买动机|促销刺激': ['折扣','优惠','打折','降价','满减','券','直播','秒杀','双11','双十一','618'],
+    /* 购买目的 */
+    '购买目的|功能性目的': ['日常','训练','健康','保养','卫生','测试','收藏','展示','摆'],
+    '购买目的|情感性目的': ['陪伴','慰藉','压力','解压','放松','自信','接纳自己'],
+    '购买目的|社交性目的': ['分享','发给','聊给','认同','圈子','融入','拍','vlog','创作','记录'],
+    /* 使用场景 */
+    '使用场景|时间场景': ['深夜','半夜','晚上','凌晨','周末','出差','旅行','旅游','度假'],
+    '使用场景|空间场景': ['卧室','浴室','洗澡','泡澡','酒店','宾馆','家里','在家'],
+    '使用场景|情境场景': ['独处','一个人','放松','伴侣','对象','老公','老婆','两个人','一起'],
+    /* 克服方式 */
+    '克服方式|产品改进': ['换型号','选合适','换个','型号','换大','换小','配件','加个','升级材质','换硅胶'],
+    '克服方式|环境调整': ['改时间','半夜用','趁没人','布置','藏','收纳盒','遮'],
+    '克服方式|心理调适': ['接纳','想开','不强求','不指望'],
+    '克服方式|社群支持': ['评测','测评','功课','视频','群里问','请教','经验帖','帖子','攻略'],
+    /* 用户忠诚度 */
+    '用户忠诚度|复购行为': ['回购','复购','第几次','又买','再买','推荐给','安利给','介绍给','就认','只买','只认'],
+    '用户忠诚度|满意度表达': ['好评','评价好','晒','买家秀','晒图','强推','墙裂推荐'],
+    '用户忠诚度|品牌粘性': ['一直用','固定','老顾客','老粉','还是回归','还是它','比过'],
+    /* 十三种需求 */
+    '十三种需求|身份层': ['掌控','审美','目的','意义','刺激','新鲜','环保','道德','无害'],
+    '十三种需求|体验层': ['掌控','沉浸','入迷','上头','心流','忘我','胜任','搞定','会了'],
+    '十三种需求|功能层': ['安全','无毒','放心','归属','融入','安稳','踏实','保障','靠谱','可靠'],
+    '十三种需求|必买层': ['健康','身体','卫生','刚需','必须','离不开']
+};
+
 /* ===================== 渲染模块多选 ===================== */
 function renderModChips(){
     const row = document.getElementById('modRow');
@@ -787,9 +867,10 @@ function hasNegationBefore(text, idx){
     return /不|没|无|别|未|非|不太/.test(before);
 }
 function tagComment(text){
+    const low = text.toLowerCase();
     const hits = [];
     const seen = new Set();
-    const low = text.toLowerCase();
+    /* Pass 1：三级精确标签（强关键词命中） */
     for(const r of RULES){
         if(!activeModules.has(r.m)) continue;
         for(const k of r.kw){
@@ -799,7 +880,36 @@ function tagComment(text){
                 const key = r.m+'|'+r.t;
                 if(seen.has(key)) break;
                 seen.add(key);
-                hits.push({m:r.m, d:r.d, t:r.t, kw:k, conf:r.conf, color:MODULE_META[r.m].color});
+                hits.push({m:r.m, d:r.d, t:r.t, kw:k, conf:r.conf, color:MODULE_META[r.m].color, level:3, provisional:false});
+                break;
+            }
+        }
+    }
+    /* 已有精确命中 → 直接返回，不做回退（避免噪声） */
+    if(hits.length) return hits;
+    /* Pass 2：二级中分类（半宽泛）→ 推测命中 */
+    const fseen = new Set();
+    for(const dk in DIM_BROAD){
+        const parts = dk.split('|');
+        const m = parts[0], d = parts[1];
+        if(!activeModules.has(m)) continue;
+        for(const k of DIM_BROAD[dk]){
+            if(low.indexOf(k.toLowerCase()) >= 0){
+                const key = m+'|'+d;
+                if(fseen.has(key)) break;
+                fseen.add(key);
+                hits.push({m, d, t:d+'·待细分', kw:k, conf:'low', color:MODULE_META[m].color, level:2, provisional:true});
+                break;
+            }
+        }
+    }
+    if(hits.length) return hits;
+    /* Pass 3：一级板块（最宽泛）→ 推测命中 */
+    for(const m in MODULE_BROAD){
+        if(!activeModules.has(m)) continue;
+        for(const k of MODULE_BROAD[m]){
+            if(low.indexOf(k.toLowerCase()) >= 0){
+                hits.push({m, d:'未细分', t:m+'·未分类', kw:k, conf:'low', color:MODULE_META[m].color, level:1, provisional:true});
                 break;
             }
         }
@@ -1019,9 +1129,15 @@ function runTaggingWith(comments){
         R('pn2').className='pnode done'; R('pn3').className='pnode active';
         const all = comments.map(c=>tagComment(c));
         const totalTags = all.reduce((s,a)=>s+a.length,0);
-        R('pc3').innerHTML = `共命中 <b>${totalTags}</b> 个标签，正在聚合标签云与需求映射…`;
+        R('pc3').innerHTML = `共命中 <b>${totalTags}</b> 个标签（含推测标签），正在聚合标签云与需求映射…`;
         R('pipeBar').style.width = '100%';
         renderResults(comments, all);
+        /* 自进化候选池：二级命中但无三级精确标签的评价 */
+        try{
+            const cands = comments.map((c,i)=>({text:c, hits:all[i]||[]}))
+                .filter(x => x.hits.length>0 && !x.hits.some(h=>h.level===3));
+            renderCandidatePool(cands);
+        }catch(e){ console.error('cand pool', e); }
         R('pn3').className='pnode done';
         document.getElementById('results').classList.add('show');
         try{ document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){}
@@ -1050,7 +1166,7 @@ function renderTable(){
             const chips = row.hits.filter(h=>h.m===m);
             let cell = '<div class="cell-chips">';
             chips.forEach(h=>{
-                cell += `<span class="tchip2" style="background:${hex2rgba(h.color,0.12)};color:${h.color};border-color:${hex2rgba(h.color,0.35)};" title="依据：${escHtml(h.kw)}">${escHtml(h.t)}<span class="x" onclick="editTag(${ri},'${m}','${escHtml(h.t)}','remove')">✕</span></span>`;
+                cell += `<span class="tchip2${h.provisional?' prov':''}" style="background:${hex2rgba(h.color,0.12)};color:${h.color};border-color:${hex2rgba(h.color,0.35)};" title="${h.provisional?'推测标签 · ':''}依据：${escHtml(h.kw)}">${escHtml(h.t)}<span class="x" onclick="editTag(${ri},'${m}','${escHtml(h.t)}','remove')">✕</span></span>`;
             });
             cell += '</div>';
             const opts = MODULE_LABELS[m].filter(t=>!chips.some(c=>c.t===t))
@@ -1091,6 +1207,11 @@ function refreshAfterEdit(){
     recomputeAnalytics(comments, allHits);
     renderOverview(comments, allHits);
     updateToolbarInfo(comments, allHits);
+    try{
+        const cands = comments.map((c,i)=>({text:c, hits:allHits[i]||[]}))
+            .filter(x => x.hits.length>0 && !x.hits.some(h=>h.level===3));
+        renderCandidatePool(cands);
+    }catch(e){}
 }
 
 function updateToolbarInfo(comments, allHits){
@@ -1109,7 +1230,7 @@ function renderOverview(comments, allHits){
     sampEl.innerHTML = show.map((c,i)=>{
         const hits = allHits[i] || [];
         const tagChips = hits.map(h =>
-            `<span class="ov-tag" style="background:${hex2rgba(h.color,0.12)};color:${h.color};border:1px solid ${hex2rgba(h.color,0.35)};" title="命中词：${escHtml(h.kw)}">${escHtml(h.t)}</span>`
+            `<span class="ov-tag${h.provisional?' prov':''}" style="background:${hex2rgba(h.color,0.12)};color:${h.color};border:1px solid ${hex2rgba(h.color,0.35)};" title="${h.provisional?'推测标签 · ':''}命中词：${escHtml(h.kw)}">${escHtml(h.t)}</span>`
         ).join('');
         return `<div class="ov-card">
             <div class="ov-text"><span class="os-idx">${i+1}.</span>${escHtml(c)}</div>
@@ -1133,7 +1254,7 @@ function exportResultXlsx(){
             const byMod = {};
             MODULE_ORDER.forEach(m => byMod[m] = hits.filter(h=>h.m===m));
             const tagCells = MODULE_ORDER.flatMap(m=>[
-                byMod[m].map(h=>h.t).join('、'),
+                byMod[m].map(h=>h.t+(h.provisional?'（推测）':'')).join('、'),
                 byMod[m].map(h=>h.kw).join('、')
             ]);
             ws1Data.push([...r, ...tagCells]);
@@ -1144,7 +1265,7 @@ function exportResultXlsx(){
             const byMod = {};
             MODULE_ORDER.forEach(m => byMod[m] = row.hits.filter(h=>h.m===m));
             const tagCells = MODULE_ORDER.flatMap(m=>[
-                byMod[m].map(h=>h.t).join('、'),
+                byMod[m].map(h=>h.t+(h.provisional?'（推测）':'')).join('、'),
                 byMod[m].map(h=>h.kw).join('、')
             ]);
             ws1Data.push([row.text, ...tagCells]);
@@ -1188,7 +1309,7 @@ function csvCell(s){
 function renderResults(comments, allHits){
     TAG_STATE = comments.map((c,i)=>({
         id:i, text:c,
-        hits: allHits[i].map(h=>({m:h.m,d:h.d,t:h.t,kw:h.kw,conf:h.conf,color:h.color}))
+        hits: allHits[i].map(h=>({m:h.m,d:h.d,t:h.t,kw:h.kw,conf:h.conf,color:h.color,level:h.level,provisional:!!h.provisional}))
     }));
     if(CSV_MODE && CSV_ROWS.length){
         const cis = CSV_SELECTED_COLS.map(c => CSV_HEADER.indexOf(c)).filter(i => i >= 0);
@@ -1207,30 +1328,61 @@ function renderResults(comments, allHits){
     updateToolbarInfo(comments, allHits);
 }
 
+/* 自进化候选池：把「二级命中但无三级精确标签」的评价捞出来，供补新标签 */
+function renderCandidatePool(cands){
+    const pool = document.getElementById('candPool');
+    const list = document.getElementById('candList');
+    if(!pool || !list) return;
+    if(!cands.length){ pool.style.display = 'none'; list.innerHTML = ''; return; }
+    pool.style.display = '';
+    list.innerHTML = cands.map((x, i)=>{
+        const tags = x.hits.map(h=>{
+            const lvl = h.level===2 ? '中类' : '板块';
+            return `<span class="cand-tag" style="background:${hex2rgba(h.color,0.12)};color:${h.color};" title="退回层级：${lvl} · 命中词：${escHtml(h.kw)}">${escHtml(h.t)}</span>`;
+        }).join('');
+        return `<div class="cand-item">
+            <div class="cand-text">${escHtml(x.text)}</div>
+            <div class="cand-tags">${tags}</div>
+        </div>`;
+    }).join('');
+}
+
 /* 仅重算轻量分析（meta/summary/词云/模块/需求/旅程/四象限），不动表格 */
 function recomputeAnalytics(comments, allHits){
-    const totalTags = allHits.reduce((s,a)=>s+a.length,0);
+    const flat = allHits.flat();
+    const precise = flat.filter(h=>!h.provisional);
+    const prov = flat.filter(h=>h.provisional);
+    const preciseCount = precise.length;
+    const provCount = prov.length;
     const modSet = new Set();
-    allHits.flat().forEach(h=>modSet.add(h.m));
+    precise.forEach(h=>modSet.add(h.m));
     document.getElementById('resMeta').innerHTML =
         `<span class="m">评价 ${comments.length} 条</span>`+
-        `<span class="m">命中标签 ${totalTags} 个</span>`+
+        `<span class="m">精确标签 ${preciseCount} 个</span>`+
+        (provCount ? `<span class="m">推测标签 ${provCount} 个</span>` : '')+
         `<span class="m">覆盖模块 ${modSet.size}/${MODULE_ORDER.length}</span>`;
 
     const modCount = {};
-    allHits.flat().forEach(h=>{ modCount[h.m]=(modCount[h.m]||0)+1; });
+    precise.forEach(h=>{ modCount[h.m]=(modCount[h.m]||0)+1; });
+    const modCountProv = {};
+    prov.forEach(h=>{ modCountProv[h.m]=(modCountProv[h.m]||0)+1; });
+
+    // 候选池数量（二级命中但无三级精确标签）
+    const candCount = comments.filter((c,i)=>{ const a=allHits[i]||[]; return a.length>0 && !a.some(h=>h.level===3); }).length;
     const topMods = Object.entries(modCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
     const sumEl = document.getElementById('resSummary');
-    if(totalTags===0){
+    if(preciseCount===0 && provCount===0){
         sumEl.innerHTML = '这次输入的评价未命中任何规则标签。可尝试载入示例评价，或调整重点模块后重试。';
     } else {
         const editHint = CSV_MODE ? '如需逐条调整标签，可切回「粘贴评价」模式；完整结果请导出 Excel。' : '标签已按原文聚合展示，完整结果请导出 Excel；如需深度语义标注，点下方「找智能体聊真的」。';
-        sumEl.innerHTML = `这批评价最集中在 <b>${topMods.join('、')}</b> 三个模块。${editHint}`;
+        let s = preciseCount ? `这批评价最集中在 <b>${topMods.join('、')}</b> 三个模块。` : `这批评价暂无精确标签，已被初步归到板块/中类（见下方 ⚠ 推测标签）。`;
+        if(candCount>0) s += ` 另有 <b>${candCount}</b> 条仅命中二级/板块层级，已收入「🧬 自进化候选池」，可据此补充三级标签。`;
+        sumEl.innerHTML = s + ' ' + editHint;
     }
 
-    // tag cloud (cap 20)
+    // tag cloud (cap 20) — 仅精确标签
     const tagCount = {};
-    allHits.flat().forEach(h=>{
+    precise.forEach(h=>{
         const k = h.m+'|'+h.t;
         if(!tagCount[k]) tagCount[k] = {m:h.m, t:h.t, color:h.color, n:0};
         tagCount[k].n++;
@@ -1252,12 +1404,13 @@ function recomputeAnalytics(comments, allHits){
         cloud.appendChild(el);
     }); }
 
-    // module bars
-    renderModBars(modCount);
+    // module bars（精确 + 推测）
+    renderModBars(modCount, modCountProv);
 
-    // need map (module 09)
+    // need map / journey / analysis — 仅用精确标签（推测标签不进入深层分析）
+    const allHitsPrecise = allHits.map(a=>a.filter(h=>!h.provisional));
     const needPills = document.getElementById('needPills');
-    const needHits = allHits.flat().filter(h=>h.m==='十三种需求');
+    const needHits = allHitsPrecise.flat().filter(h=>h.m==='十三种需求');
     if(needHits.length===0){
         needPills.innerHTML = '<span class="cmt-empty">本次评价未直接命中十三种需求维度（需结合上下文由智能体进一步判断）。</span>';
     } else {
@@ -1271,15 +1424,16 @@ function recomputeAnalytics(comments, allHits){
             needPills.appendChild(el);
         });
     }
-    renderSubModules(allHits);
-    renderJourneyMap(allHits);
-    renderAnalysis(allHits);
+    renderSubModules(allHitsPrecise);
+    renderJourneyMap(allHitsPrecise);
+    renderAnalysis(allHitsPrecise);
 }
 
-function renderModBars(modCount){
+function renderModBars(modCount, modCountProv){
     const mb = document.getElementById('modBars');
     mb.innerHTML = '';
     window.__lastModCount = modCount;
+    window.__lastModCountProv = modCountProv || {};
     const maxMod = Math.max(1, ...Object.values(modCount));
     let order;
     if(MODBAR_SORT === 1) order = MODULE_ORDER.slice().sort((a,b)=>(modCount[b]||0)-(modCount[a]||0));
@@ -1287,12 +1441,14 @@ function renderModBars(modCount){
     else order = MODULE_ORDER.slice();
     order.forEach(m=>{
         const cnt = modCount[m]||0;
+        const pcnt = (modCountProv && modCountProv[m])||0;
         const color = MODULE_META[m].color;
         const row = document.createElement('div');
         row.className='modbar';
+        const cntTxt = pcnt ? `${cnt}<span class="cnt-prov" title="推测标签数">+${pcnt}</span>` : `${cnt}`;
         row.innerHTML = `<span class="nm">${m}</span>`+
             `<span class="track"><span class="fill" style="width:${cnt?Math.max(8,cnt/maxMod*100):0}%; background:${color};"></span></span>`+
-            `<span class="cnt">${cnt}</span>`;
+            `<span class="cnt">${cntTxt}</span>`;
         mb.appendChild(row);
     });
     updateModSortBtn();
