@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VOC 多框架分析报告 · 飞机杯（挂载/吸附类）</title>
+<style>
+:root{--bg:#f7f8fb;--card:#fff;--ink:#1f2430;--mut:#6b7280;--line:#e6e8ef;
+--c-blue:#2563EB;--c-violet:#7C3AED;--c-cyan:#0891B2;--c-teal:#059669;
+--c-amber:#D97706;--c-rose:#E11D48;--c-pink:#DB2777;--c-slate:#64748B;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+background:var(--bg);color:var(--ink);line-height:1.65;padding:0 0 64px}
+.wrap{max-width:980px;margin:0 auto;padding:0 18px}
+.hero{background:linear-gradient(135deg,#4f46e5,#0ea5e9);color:#fff;padding:30px 18px;margin-bottom:22px}
+.hero .inner{max-width:980px;margin:0 auto;padding:0 18px}
+.hero h1{font-size:23px;font-weight:600;margin-bottom:6px}
+.hero .sub{font-size:14px;opacity:.95}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.hero .pill{background:rgba(255,255,255,.18);padding:4px 11px;border-radius:999px;font-size:12px}
+.toc{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+border-bottom:1px solid var(--line);padding:10px 0;z-index:5;margin-bottom:8px}
+.toc .inner{max-width:980px;margin:0 auto;padding:0 18px;display:flex;flex-wrap:wrap;gap:8px}
+.toc a{font-size:12.5px;color:var(--mut);text-decoration:none;padding:4px 10px;border:1px solid var(--line);border-radius:999px}
+.toc a:hover{color:var(--c-blue);border-color:var(--c-blue)}
+.fw{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-top:16px;
+box-shadow:0 2px 10px rgba(31,36,48,.04);scroll-margin-top:56px}
+.fw-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid var(--line)}
+.fw-head .ico{font-size:20px}
+.fw-head .nm{font-size:17px;font-weight:600}
+.fw-head .ds{font-size:12.5px;color:var(--mut);margin-left:auto;text-align:right;max-width:50%}
+.job{font-size:15px;background:#eef2ff;border-left:4px solid var(--c-blue);padding:16px 18px;border-radius:10px;color:#312e81;margin-bottom:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.box,.qcard{border:1px solid var(--line);border-radius:10px;padding:14px}
+.box h4,.qcard h4{font-size:13.5px;font-weight:600;margin-bottom:8px}
+.box ul,.qcard ul{list-style:none;font-size:13px;color:var(--mut)}
+.box li,.qcard li{padding:3px 0}
+.sub{font-size:14px;font-weight:600;margin:16px 0 8px;color:var(--ink)}
+.row{display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.row:last-child{border-bottom:none}
+.row-k{color:var(--c-blue);font-weight:600;flex:none}
+.bar{flex:1;height:8px;background:#eef2f7;border-radius:99px;overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;background:var(--c-blue)}
+.lvl{font-size:11px;padding:2px 8px;border-radius:99px;flex:none}
+.lvl.high{background:#fee2e2;color:var(--c-rose)} .lvl.mid{background:#fef3c7;color:var(--c-amber)}
+.lvl.low{background:#e0f2fe;color:var(--c-blue)}
+.chip{display:inline-block;background:#f1f5f9;border:1px solid var(--line);border-radius:999px;
+padding:3px 9px;font-size:12px;margin:3px 4px 0 0;color:#334155}
+.insight{list-style:none;font-size:13px;color:#334155}
+.insight li{padding:4px 0 4px 16px;position:relative}
+.insight li:before{content:"▸";position:absolute;left:0;color:var(--c-blue)}
+.pill-big{display:inline-block;color:#fff;padding:8px 14px;border-radius:10px;font-weight:600;font-size:14px;margin:6px 0}
+.quadmap{position:relative;height:300px;background:#fafbff;border:1px solid var(--line);border-radius:12px;margin:10px 0}
+.quadmap .dot{position:absolute;width:14px;height:14px;border-radius:50%;transform:translate(-50%,-50%);
+border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.qm-cross-h{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line)}
+.qm-cross-v{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--line)}
+.qm-axis-y{position:absolute;left:6px;top:50%;transform:rotate(-90deg);font-size:11px;color:var(--mut)}
+.qm-axis-x{position:absolute;bottom:4px;right:10px;font-size:11px;color:var(--mut)}
+.qm-label{position:absolute;font-size:10.5px;color:var(--mut)}
+.qm-label.tl{left:8px;top:6px}.qm-label.tr{right:8px;top:6px;text-align:right}
+.qm-label.bl{left:8px;bottom:6px}.qm-label.br{right:8px;bottom:6px;text-align:right}
+.appx{font-size:12px;color:var(--mut)}
+.appx table{width:100%;border-collapse:collapse;margin-top:8px}
+.appx th,.appx td{border:1px solid var(--line);padding:6px 8px;text-align:left;font-size:12px}
+.appx th{background:#f8fafc}
+.foot{text-align:center;color:var(--mut);font-size:12px;margin-top:26px}
+@media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr}.fw-head .ds{display:none}}
+</style></head><body>
+<div class="hero"><div class="inner">
+  <h1>VOC 多框架深度分析报告</h1>
+  <div class="sub">基于真实 VOC 导入数据 · 7 框架确定性引擎（无大模型）· 与前端 FRAMEWORKS 对齐</div>
+  <div class="meta">
+    <span class="pill">分析目的：产品开发</span>
+    <span class="pill">产品类目：飞机杯（挂载/吸附类）</span>
+    <span class="pill">样本量：1731 条评价</span>
+    <span class="pill">覆盖框架：7 个</span>
+    <span class="pill">生成：2026-07-10 18:22</span>
+  </div>
+</div></div>
+<div class="toc"><div class="inner"><a href="#fw-jtbd">🎯 JTBD 待完成任务</a><a href="#fw-needs-analysis">🧭 十三种需求分析</a><a href="#fw-compass">🧩 产品创意罗盘</a><a href="#fw-extreme">🔬 极端/领先用户</a><a href="#fw-triz">⚙️ TRIZ 创新方法</a><a href="#fw-researcher">📊 4象限用户需求</a><a href="#fw-plutchik">🎭 Plutchik 情绪罗盘</a><a href="#fw-appendix">📎 附录</a></div></div>
+<div class="wrap"><section class="fw" id="fw-jtbd"><div class="fw-head"><span class="ico">🎯</span><span class="nm" style="color:#2563EB">JTBD 待完成任务</span><span class="ds">理解用户真正想要完成的任务（功能/情感/社会三层）</span></div>
+<div class="job">当用户处于【淋浴环境】等场景中需要使用产品时，ta 的核心诉求是【性价比需求】，以便避免「尺寸不合适（太小/太大/太紧/太松）」这类问题带来的糟糕体验，真正把产品用得安心、用得值。</div>
+<div class="grid3">
+  <div class="box"><h4 style="color:var(--c-blue)">功能任务</h4><ul><li>淋浴环境</li><li>潮湿使用环境</li><li>浴室瓷砖墙面</li><li>光滑硬质平面</li><li>浴室玻璃/镜面</li></ul></div>
+  <div class="box"><h4 style="color:var(--c-rose)">情感任务</h4><ul><li>因「性价比需求」未被满足而渴望被妥帖对待</li><li>因「物有所值」未被满足而渴望被妥帖对待</li><li>因「功能性需求」未被满足而渴望被妥帖对待</li><li>摆脱「非常不满」等负面感受</li></ul></div>
+  <div class="box"><h4 style="color:var(--c-teal)">社会任务</h4><ul><li>在送礼/社交场景中维持得体的形象</li></ul></div>
+</div>
+<h3 class="sub">任务情境地图</h3><div class="row"><div class="row-k" style="color:var(--c-blue)">淋浴/浴室环境</div><div><span class="chip">淋浴环境</span><span class="chip">潮湿使用环境</span><span class="chip">浴室瓷砖墙面</span><span class="chip">浴室玻璃/镜面</span><span class="chip">粗糙墙面（混凝土/砖墙）</span><span class="chip">淋浴隔断/玻璃门</span></div></div><div class="row"><div class="row-k" style="color:var(--c-blue)">光滑平面</div><div><span class="chip">光滑硬质平面</span><span class="chip">台面/桌面</span></div></div><div class="row"><div class="row-k" style="color:var(--c-blue)">粗糙/特殊面</div><div><span class="chip">木质表面</span></div></div><div class="row"><div class="row-k" style="color:var(--c-slate)">其他</div><div><span class="chip">干燥使用环境</span></div></div>
+<h3 class="sub">阻碍力量（按频次分级）</h3><div class="row"><div class="row-k" style="width:200px">尺寸不合适（太小/太大/太紧/太松） <span class="mut">×454</span></div><div class="bar"><i style="width:100%"></i></div><span class="lvl high">高强度</span></div><div class="row"><div class="row-k" style="width:200px">产品质量差/易损坏 <span class="mut">×356</span></div><div class="bar"><i style="width:78%"></i></div><span class="lvl high">高强度</span></div><div class="row"><div class="row-k" style="width:200px">价格偏高/性价比低 <span class="mut">×223</span></div><div class="bar"><i style="width:49%"></i></div><span class="lvl mid">中强度</span></div><div class="row"><div class="row-k" style="width:200px">震动效果差/无震动 <span class="mut">×168</span></div><div class="bar"><i style="width:37%"></i></div><span class="lvl mid">中强度</span></div><div class="row"><div class="row-k" style="width:200px">充电问题/电池不耐用 <span class="mut">×124</span></div><div class="bar"><i style="width:27%"></i></div><span class="lvl low">低强度</span></div><div class="row"><div class="row-k" style="width:200px">噪音过大 <span class="mut">×93</span></div><div class="bar"><i style="width:20%"></i></div><span class="lvl low">低强度</span></div><div class="row"><div class="row-k" style="width:200px">材质廉价/塑料感强 <span class="mut">×82</span></div><div class="bar"><i style="width:18%"></i></div><span class="lvl low">低强度</span></div><div class="row"><div class="row-k" style="width:200px">退货流程困难 <span class="mut">×73</span></div><div class="bar"><i style="width:16%"></i></div><span class="lvl low">低强度</span></div>
+<h3 class="sub">期望进程（阻碍 → 改进方向）</h3><div class="row"><div class="row-k" style="width:200px">尺寸不合适（太小/太大/太紧/太松） <span class="mut">×454</span></div><div style="flex:1;font-size:13px">提供多档尺寸 / 入口渐宽设计，覆盖更多体型</div></div><div class="row"><div class="row-k" style="width:200px">产品质量差/易损坏 <span class="mut">×356</span></div><div style="flex:1;font-size:13px">提升材质与整体工艺，建立出厂品控标准</div></div><div class="row"><div class="row-k" style="width:200px">价格偏高/性价比低 <span class="mut">×223</span></div><div style="flex:1;font-size:13px">优化成本结构或明示价值点，提升性价比感知</div></div><div class="row"><div class="row-k" style="width:200px">震动效果差/无震动 <span class="mut">×168</span></div><div style="flex:1;font-size:13px">针对「震动效果差/无震动」做专项产品迭代</div></div><div class="row"><div class="row-k" style="width:200px">充电问题/电池不耐用 <span class="mut">×124</span></div><div style="flex:1;font-size:13px">针对「充电问题/电池不耐用」做专项产品迭代</div></div>
+<h3 class="sub">JTBD 四力模型</h3><div class="grid2"><div class="qcard push"><h4>推力 · 现状痛点</h4><div>尺寸不合适（太小/太大/太紧/太松）</div></div><div class="qcard pull"><h4>拉力 · 理想吸引</h4><div>性价比需求</div></div><div class="qcard anx"><h4>焦虑 · 决策顾虑</h4><div><span class=chip>价格偏高/性价比低</span><span class=chip>非常不满</span></div></div><div class="qcard hab"><h4>习惯 · 现状惯性</h4><div><span class=chip>自用</span><span class=chip>多次使用</span><span class=chip>首次使用</span></div></div></div>
+<h3 class="sub">行动建议</h3><div class="grid3"><div class="qcard"><h4 style="color:var(--c-blue)">产品侧</h4><ul><li>提供多档尺寸 / 入口渐宽设计，覆盖更多体型</li><li>提升材质与整体工艺，建立出厂品控标准</li><li>优化成本结构或明示价值点，提升性价比感知</li></ul></div><div class="qcard"><h4 style="color:var(--c-teal)">营销侧</h4><ul><li>围绕「性价比需求」做核心卖点沟通</li><li>用真实实测消除「非常不满」顾虑</li></ul></div><div class="qcard"><h4 style="color:var(--c-violet)">创新侧</h4><ul><li>去敏感化外观/包装，降低购买心理门槛</li></ul></div></div></section><section class="fw" id="fw-needs-analysis"><div class="fw-head"><span class="ico">🧭</span><span class="nm" style="color:#7C3AED">十三种需求分析</span><span class="ds">从 13 种人类需求出发，定位需求层次与优先级</span></div>
+<div class="grid2">
+  <div><h3 class="sub">需求优先级（13 种人类需求映射）</h3><div class="row"><div class="row-k" style="width:120px">生理满足<span class="mut"> · 生存层</span></div><div class="bar"><i style="width:100%;background:var(--c-violet)"></i></div><div style="width:48px;text-align:right" class="mut">1971</div></div><div class="row"><div class="row-k" style="width:120px">安全<span class="mut"> · 生存层</span></div><div class="bar"><i style="width:34%;background:var(--c-violet)"></i></div><div style="width:48px;text-align:right" class="mut">675</div></div><div class="row"><div class="row-k" style="width:120px">舒适<span class="mut"> · 生存层</span></div><div class="bar"><i style="width:23%;background:var(--c-violet)"></i></div><div style="width:48px;text-align:right" class="mut">456</div></div><div class="row"><div class="row-k" style="width:120px">认知<span class="mut"> · 成长层</span></div><div class="bar"><i style="width:6%;background:var(--c-violet)"></i></div><div style="width:48px;text-align:right" class="mut">91</div></div><div class="row"><div class="row-k" style="width:120px">掌控<span class="mut"> · 成长层</span></div><div class="bar"><i style="width:6%;background:var(--c-violet)"></i></div><div style="width:48px;text-align:right" class="mut">5</div></div></div>
+  <div>
+    <h3 class="sub">需求层次分布</h3><div style="margin:8px 0"><span class="chip">生存层 3102</span><span class="chip">成长层 96</span></div>
+    <h3 class="sub">核心洞察</h3>
+    <ul class="insight">
+      <li>最凸显需求：<b>生理满足</b>（1971 次信号），处于 <b>生存层</b>。</li>
+      <li>前 3 需求：生理满足、安全、舒适，应作为产品定义的核心锚点。</li>
+      <li>需求层次偏向 <b>生存层</b>，说明用户当前诉求集中在生存/关系/成长的不同阶段。</li>
+    </ul>
+  </div>
+</div></section><section class="fw" id="fw-compass"><div class="fw-head"><span class="ico">🧩</span><span class="nm" style="color:#0891B2">产品创意罗盘</span><span class="ds">4 象限 × 20 种打法，系统化发散产品创意</span></div><div class="grid2"><div class="qcard"><h4 style="color:var(--c-cyan)">加 · 强化现有</h4><ul><li>升级材质廉价/塑料感强材质至医用级，消除廉价感与气味</li><li>强化尺寸不合适（太小/太大/太紧/太松）相关的吸盘吸附力不足结构，提升耐用度</li><li>提升性价比需求相关性能参数，拉开与竞品差距</li><li>增加淋浴环境场景下的握持/固定稳定性</li><li>把性价比需求做成可量化的体验指标对外沟通</li></ul></div><div class="qcard"><h4 style="color:var(--c-cyan)">减 · 做减法</h4><ul><li>针对尺寸不合适（太小/太大/太紧/太松）做静音/轻量化处理，降低使用门槛</li><li>简化淋浴环境场景下的安装/收纳步骤</li><li>去掉冗余配件，核心功能做减法聚焦</li><li>用免洗/可拆洗设计消除尺寸不合适（太小/太大/太紧/太松）清洁负担</li><li>弱化敏感外观，降低购买心理阻力</li></ul></div><div class="qcard"><h4 style="color:var(--c-cyan)">乘 · 组合扩展</h4><ul><li>将性价比需求与淋浴环境场景打包成套装方案</li><li>跨品类组合（如与润滑/清洁配套）提升客单</li><li>把尺寸不合适（太小/太大/太紧/太松）的解决方式做成可扩展模块生态</li><li>结合性价比需求做内容/社群运营放大口碑</li><li>用淋浴环境场景延展至旅行/礼品新人群</li></ul></div><div class="qcard"><h4 style="color:var(--c-cyan)">除 · 重构替代</h4><ul><li>用结构重构解决尺寸不合适（太小/太大/太紧/太松），而非修补表面</li><li>以服务/订阅模式替代一次性硬件投入</li><li>用新材料/新工艺替代传统材质廉价/塑料感强方案</li><li>用 APP/智能控制替代机械旋钮交互</li><li>重构价值主张，从卖产品转为卖性价比需求结果</li></ul></div></div></section><section class="fw" id="fw-extreme"><div class="fw-head"><span class="ico">🔬</span><span class="nm" style="color:#059669">极端/领先用户</span><span class="ds">基于 von Hippel 理论，从领先用户挖未来需求</span></div>
+<div class="grid2">
+  <div>
+    <h3 class="sub">极端痛点用户画像</h3><ul><li><span class="chip">尺寸不合适（太小/太大/太紧/太松）</span> ×454（高频极端痛点）</li><li><span class="chip">产品质量差/易损坏</span> ×356（高频极端痛点）</li><li><span class="chip">价格偏高/性价比低</span> ×223（高频极端痛点）</li></ul>
+    <h3 class="sub">领先用户行为线索</h3><div style="margin:6px 0"><span class="chip">自用</span><span class="chip">多次使用</span><span class="chip">首次使用</span><span class="chip">新手用户</span><span class="chip">送礼</span></div>
+    <h3 class="sub">进阶使用 / Workaround 信号</h3><div style="margin:6px 0"><span class="chip">容易掉下来</span></div>
+  </div>
+  <div>
+    <h3 class="sub">领先用户未被满足的需求</h3><ul><li><b>性价比需求</b> ×542 ✓ 已有对应阻碍→真实未满足</li><li><b>功能性需求</b> ×530 ✓ 已有对应阻碍→真实未满足</li><li><b>安全性需求</b> ×269 ✓ 已有对应阻碍→真实未满足</li><li><b>产品稳固</b> ×269 ✓ 已有对应阻碍→真实未满足</li></ul>
+    <h3 class="sub">创新机会（von Hippel：领先用户需求预测未来主流）</h3><ul class="insight"><li>为「性价比需求」提供超出当前主流的解决方案，领先用户今天的痛点就是大众明天的需求</li><li>为「功能性需求」提供超出当前主流的解决方案，领先用户今天的痛点就是大众明天的需求</li><li>为「安全性需求」提供超出当前主流的解决方案，领先用户今天的痛点就是大众明天的需求</li><li>针对极端痛点「尺寸不合适（太小/太大/太紧/太松）」做结构性突破，而非渐进修补</li></ul>
+  </div>
+</div></section><section class="fw" id="fw-triz"><div class="fw-head"><span class="ico">⚙️</span><span class="nm" style="color:#D97706">TRIZ 创新方法</span><span class="ds">40 个发明原理，系统化解决技术矛盾</span></div><div class="grid2"><div class="qcard">
+          <h4 style="color:var(--c-amber)">技术矛盾：吸附/固定</h4>
+          <div class="mut" style="font-size:13px;margin:4px 0 8px">吸附力提升与便携性之间存在矛盾：在『固定更牢』与『更轻更便携』之间</div>
+          <div><b>适用发明原理：</b><span class="chip">#1 分割</span><span class="chip">#7 嵌套</span><span class="chip">#15 动态性</span><span class="chip">#17 另一维度</span><span class="chip">#31 多孔材料</span></div>
+        </div><div class="qcard">
+          <h4 style="color:var(--c-amber)">技术矛盾：噪音</h4>
+          <div class="mut" style="font-size:13px;margin:4px 0 8px">强动力与低噪音存在矛盾：『动力更足』与『更安静』之间</div>
+          <div><b>适用发明原理：</b><span class="chip">#2 抽取</span><span class="chip">#19 周期性作用</span><span class="chip">#28 机械系统替代</span><span class="chip">#35 参数变化</span></div>
+        </div><div class="qcard">
+          <h4 style="color:var(--c-amber)">技术矛盾：清洁</h4>
+          <div class="mut" style="font-size:13px;margin:4px 0 8px">结构复杂与易清洁存在矛盾：『功能更多』与『更好打理』之间</div>
+          <div><b>适用发明原理：</b><span class="chip">#28 机械系统替代</span><span class="chip">#3 局部质量</span><span class="chip">#34 抛弃/修复</span><span class="chip">#25 自服务</span></div>
+        </div><div class="qcard">
+          <h4 style="color:var(--c-amber)">技术矛盾：材质/气味</h4>
+          <div class="mut" style="font-size:13px;margin:4px 0 8px">成本与体验存在矛盾：『更安全的材质』与『可控成本』之间</div>
+          <div><b>适用发明原理：</b><span class="chip">#40 复合材料</span><span class="chip">#39 惰性环境</span><span class="chip">#14 曲面替代</span></div>
+        </div><div class="qcard">
+          <h4 style="color:var(--c-amber)">技术矛盾：价格/价值</h4>
+          <div class="mut" style="font-size:13px;margin:4px 0 8px">高价值与低价格存在矛盾：『体验升级』与『价格敏感』之间</div>
+          <div><b>适用发明原理：</b><span class="chip">#27 低价/一次性</span><span class="chip">#16 不足/过度作用</span><span class="chip">#35 参数变化</span></div>
+        </div><div class="qcard">
+          <h4 style="color:var(--c-amber)">技术矛盾：体验/逼真</h4>
+          <div class="mut" style="font-size:13px;margin:4px 0 8px">真实感与隐私存在矛盾：『更逼真』与『更低调隐私』之间</div>
+          <div><b>适用发明原理：</b><span class="chip">#26 复制</span><span class="chip">#32 颜色改变</span><span class="chip">#36 同源</span></div>
+        </div></div></section><section class="fw" id="fw-researcher"><div class="fw-head"><span class="ico">📊</span><span class="nm" style="color:#DB2777">4象限用户需求</span><span class="ds">重要度-满意度矩阵，区分表达需求与真实需求</span></div>
+<div class="quadmap">
+  <div class="qm-axis-y">满意度 →</div>
+  <div class="qm-axis-x">重要度 →</div>
+  <div class="qm-cross-h"></div><div class="qm-cross-v"></div>
+  <span class="dot" title="性价比需求 (重要100/满意59)" style="left:96%;top:41%;background:var(--c-blue)"></span><span class="dot" title="物有所值 (重要100/满意87)" style="left:96%;top:13%;background:var(--c-blue)"></span><span class="dot" title="功能性需求 (重要98/满意66)" style="left:96%;top:34%;background:var(--c-blue)"></span><span class="dot" title="安全性需求 (重要50/满意65)" style="left:50%;top:35%;background:var(--c-blue)"></span><span class="dot" title="产品稳固 (重要50/满意33)" style="left:50%;top:67%;background:var(--c-blue)"></span><span class="dot" title="舒适性需求 (重要42/满意25)" style="left:42%;top:75%;background:var(--c-blue)"></span><span class="dot" title="体验舒适 (重要42/满意45)" style="left:42%;top:55%;background:var(--c-blue)"></span><span class="dot" title="售后保障需求 (重要34/满意83)" style="left:34%;top:17%;background:var(--c-blue)"></span><span class="dot" title="客服响应 (重要34/满意86)" style="left:34%;top:14%;background:var(--c-blue)"></span><span class="dot" title="信息透明需求 (重要17/满意85)" style="left:17%;top:15%;background:var(--c-blue)"></span><span class="dot" title="说明清晰 (重要17/满意81)" style="left:17%;top:19%;background:var(--c-blue)"></span><span class="dot" title="适配性需求 (重要15/满意25)" style="left:15%;top:75%;background:var(--c-blue)"></span><span class="dot" title="尺寸不合适（太小/太大/太紧/太松） (重要84/满意12)" style="left:84%;top:88%;background:var(--c-rose)"></span><span class="dot" title="产品质量差/易损坏 (重要66/满意19)" style="left:66%;top:81%;background:var(--c-rose)"></span><span class="dot" title="价格偏高/性价比低 (重要41/满意29)" style="left:41%;top:71%;background:var(--c-rose)"></span><span class="dot" title="震动效果差/无震动 (重要31/满意33)" style="left:31%;top:67%;background:var(--c-rose)"></span><span class="dot" title="充电问题/电池不耐用 (重要23/满意36)" style="left:23%;top:64%;background:var(--c-rose)"></span><span class="dot" title="噪音过大 (重要17/满意39)" style="left:17%;top:61%;background:var(--c-rose)"></span><span class="dot" title="材质廉价/塑料感强 (重要15/满意39)" style="left:15%;top:61%;background:var(--c-rose)"></span><span class="dot" title="退货流程困难 (重要13/满意40)" style="left:13%;top:60%;background:var(--c-rose)"></span><span class="dot" title="产品难以清洁 (重要13/满意40)" style="left:13%;top:60%;background:var(--c-rose)"></span><span class="dot" title="吸盘吸附力不足 (重要13/满意40)" style="left:13%;top:60%;background:var(--c-rose)"></span><span class="dot" title="结构松动/不稳定 (重要11/满意41)" style="left:11%;top:59%;background:var(--c-rose)"></span><span class="dot" title="产品易断裂/开裂 (重要9/满意42)" style="left:9%;top:58%;background:var(--c-rose)"></span>
+  <div class="qm-label tl">高重要·高满意（保持优势）</div>
+  <div class="qm-label tr">高重要·低满意（重点改进）</div>
+  <div class="qm-label bl">低重要·高满意（过度投入）</div>
+  <div class="qm-label br">低重要·低满意（低优先级）</div>
+</div>
+<h3 class="sub">象限归类（蓝=需求 / 红=阻碍）</h3>
+<div class="grid2"><div class="qcard"><h4 style="color:var(--c-rose)">重点改进区</h4><div style="margin-top:6px"><span class="chip">产品稳固 <span class="mut">50/33</span></span><span class="chip">舒适性需求 <span class="mut">42/25</span></span><span class="chip">体验舒适 <span class="mut">42/45</span></span><span class="chip">尺寸不合适（太小/太大/太紧/太松） <span class="mut">84/12</span></span><span class="chip">产品质量差/易损坏 <span class="mut">66/19</span></span><span class="chip">价格偏高/性价比低 <span class="mut">41/29</span></span></div></div><div class="qcard"><h4 style="color:var(--c-teal)">保持优势区</h4><div style="margin-top:6px"><span class="chip">性价比需求 <span class="mut">100/59</span></span><span class="chip">物有所值 <span class="mut">100/87</span></span><span class="chip">功能性需求 <span class="mut">98/66</span></span><span class="chip">安全性需求 <span class="mut">50/65</span></span><span class="chip">售后保障需求 <span class="mut">34/83</span></span><span class="chip">客服响应 <span class="mut">34/86</span></span></div></div><div class="qcard"><h4 style="color:var(--c-amber)">过度投入区</h4><div style="margin-top:6px"><span class="chip">信息透明需求 <span class="mut">17/85</span></span><span class="chip">说明清晰 <span class="mut">17/81</span></span></div></div><div class="qcard"><h4 style="color:var(--c-slate)">低优先级区</h4><div style="margin-top:6px"><span class="chip">适配性需求 <span class="mut">15/25</span></span><span class="chip">震动效果差/无震动 <span class="mut">31/33</span></span><span class="chip">充电问题/电池不耐用 <span class="mut">23/36</span></span><span class="chip">噪音过大 <span class="mut">17/39</span></span><span class="chip">材质廉价/塑料感强 <span class="mut">15/39</span></span><span class="chip">退货流程困难 <span class="mut">13/40</span></span><span class="chip">产品难以清洁 <span class="mut">13/40</span></span><span class="chip">吸盘吸附力不足 <span class="mut">13/40</span></span><span class="chip">结构松动/不稳定 <span class="mut">11/41</span></span><span class="chip">产品易断裂/开裂 <span class="mut">9/42</span></span></div></div></div></section><section class="fw" id="fw-plutchik"><div class="fw-head"><span class="ico">🎭</span><span class="nm" style="color:#BE185D">Plutchik 情绪罗盘</span><span class="ds">8 种基本情绪 + 强度，洞察情感驱动因素</span></div>
+<div class="grid2">
+  <div>
+    <h3 class="sub">8 种基本情绪分布</h3><div class="row"><div class="row-k" style="width:64px;color:#ef4444">愤怒</div><div class="bar"><i style="width:100%;background:#ef4444"></i></div><div style="width:44px;text-align:right" class="mut">1873</div></div><div style="margin:2px 0 8px 76px;font-size:12px"><span class="chip">非常不满×838</span><span class="chip">轻微不满×439</span><span class="chip">不满/负向×397</span></div><div class="row"><div class="row-k" style="width:64px;color:#22c55e">喜悦</div><div class="bar"><i style="width:5%;background:#22c55e"></i></div><div style="width:44px;text-align:right" class="mut">10</div></div><div style="margin:2px 0 8px 76px;font-size:12px"><span class="chip">满意/正向×10</span></div>
+  </div>
+  <div>
+    <h3 class="sub">情绪主导</h3>
+    <div class="pill-big" style="background:#ef4444">主导情绪极性：负向</div>
+    <ul class="insight">
+      <li>Top3 情绪：<b>愤怒(1873)、喜悦(10)</b></li>
+      <li>情绪主要由 阻碍/痛点（负向） 驱动。</li>
+      <li>情感设计建议：用「愤怒」做品牌情绪锚点，针对性消解「喜悦」。</li>
+    </ul>
+  </div>
+</div></section><section class="fw" id="fw-appendix"><div class="fw-head"><span class="ico">📎</span><span class="nm">数据附录 · 标签来源</span><span class="ds">所有结论均可溯源到下列真实标签频次</span></div><div class="appx"><table><tr><th>模块</th><th colspan="10">Top 标签（频次）</th></tr><tr><th>使用场景</th><td>淋浴环境 ×26</td><td>潮湿使用环境 ×26</td><td>浴室瓷砖墙面 ×15</td><td>光滑硬质平面 ×6</td><td>浴室玻璃/镜面 ×5</td><td>粗糙墙面（混凝土/砖墙） ×2</td><td>木质表面 ×2</td><td>淋浴隔断/玻璃门 ×1</td><td>台面/桌面 ×1</td><td>干燥使用环境 ×1</td></tr><tr><th>使用阻碍</th><td>尺寸不合适（太小/太大/太紧/太松） ×454</td><td>产品质量差/易损坏 ×356</td><td>价格偏高/性价比低 ×223</td><td>震动效果差/无震动 ×168</td><td>充电问题/电池不耐用 ×124</td><td>噪音过大 ×93</td><td>材质廉价/塑料感强 ×82</td><td>退货流程困难 ×73</td><td>产品难以清洁 ×72</td><td>吸盘吸附力不足 ×71</td></tr><tr><th>问题类型</th><td>体验型问题（使用后暴露） ×1198</td><td>预期型问题（使用前可预知） ×238</td></tr><tr><th>需求动机</th><td>性价比需求 ×542</td><td>物有所值 ×542</td><td>功能性需求 ×530</td><td>安全性需求 ×269</td><td>产品稳固 ×269</td><td>舒适性需求 ×228</td><td>体验舒适 ×228</td><td>售后保障需求 ×186</td><td>客服响应 ×186</td><td>信息透明需求 ×91</td></tr><tr><th>情绪</th><td>非常不满 ×838</td><td>轻微不满 ×439</td><td>不满/负向 ×397</td><td>中性/无情绪 ×42</td><td>满意/正向 ×10</td></tr><tr><th>用户画像</th><td>自用 ×517</td><td>多次使用 ×238</td><td>首次使用 ×140</td><td>新手用户 ×35</td><td>送礼 ×19</td><td>长期使用 ×10</td></tr><tr><th>解放双手场景问题</th><td>容易掉下来 ×4</td></tr></table></div></section>
+<div class="foot">本报告由 VOC 分析机器人（确定性多框架引擎）自动生成 · C 混合路线</div>
+</div></body></html>
