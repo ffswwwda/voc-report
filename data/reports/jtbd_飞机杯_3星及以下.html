@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JTBD 分析报告 · 飞机杯（挂载/吸附类）</title>
+<style>
+:root{--bg:#f7f8fb;--card:#fff;--ink:#1f2430;--mut:#6b7280;--line:#e6e8ef;
+--brand:#4f46e5;--brand2:#0ea5e9;--rose:#e11d48;--amber:#d97706;--teal:#0f766e;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+background:var(--bg);color:var(--ink);line-height:1.65;padding:32px 18px 64px}
+.wrap{max-width:880px;margin:0 auto}
+.hero{background:linear-gradient(135deg,#4f46e5,#0ea5e9);color:#fff;border-radius:18px;
+padding:28px 30px;box-shadow:0 10px 30px rgba(79,70,229,.18)}
+.hero h1{font-size:22px;font-weight:600;margin-bottom:6px}
+.hero .meta{font-size:13px;opacity:.92;margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+.hero .pill{background:rgba(255,255,255,.18);padding:3px 10px;border-radius:999px;font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-top:18px;
+box-shadow:0 2px 10px rgba(31,36,48,.04)}
+.card h2{font-size:16px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card h2 .n{width:24px;height:24px;border-radius:7px;background:var(--brand);color:#fff;
+font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+.job{font-size:15px;background:#eef2ff;border-left:4px solid var(--brand);padding:16px 18px;border-radius:10px;color:#312e81}
+.layers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.layer{border:1px solid var(--line);border-radius:10px;padding:14px}
+.layer h3{font-size:13px;font-weight:600;margin-bottom:8px;color:var(--brand)}
+.layer.em h3{color:var(--rose)} .layer.so h3{color:var(--teal)}
+.layer ul{list-style:none;font-size:13px;color:var(--mut)} .layer li{padding:3px 0}
+.chip{display:inline-block;background:#f1f5f9;border:1px solid var(--line);border-radius:999px;
+padding:3px 10px;font-size:12px;margin:3px 4px 0 0;color:#334155}
+.circ-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.circ-row:last-child{border-bottom:none}
+.circ-name{width:140px;color:var(--brand);font-weight:600;flex:none}
+.obs{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.obs:last-child{border-bottom:none}
+.obs .t{width:200px;font-size:13px}
+.obs .bar{flex:1;height:8px;background:#eef2f7;border-radius:99px;overflow:hidden}
+.obs .bar i{display:block;height:100%;background:var(--brand)}
+.lvl{font-size:11px;padding:2px 8px;border-radius:99px}
+.lvl.high{background:#fee2e2;color:var(--rose)} .lvl.mid{background:#fef3c7;color:var(--amber)}
+.lvl.low{background:#e0f2fe;color:var(--brand2)}
+.forces{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.force{border:1px solid var(--line);border-radius:10px;padding:14px}
+.force h3{font-size:13px;font-weight:600;margin-bottom:8px}
+.force.push h3{color:var(--rose)} .force.pull h3{color:var(--brand)}
+.force.anx h3{color:var(--amber)} .force.hab h3{color:var(--teal)}
+.recs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.rec{border-top:3px solid var(--brand);border-radius:10px;padding:14px;background:#fafbff}
+.rec.mkt{border-color:var(--brand2)} .rec.inn{border-color:var(--teal)}
+.rec h3{font-size:13px;font-weight:600;margin-bottom:8px}
+.rec ul{list-style:none;font-size:13px;color:var(--mut)} .rec li{padding:3px 0;padding-left:14px;position:relative}
+.rec li:before{content:"·";position:absolute;left:2px;color:var(--brand)}
+.appx{font-size:12px;color:var(--mut)}
+.appx table{width:100%;border-collapse:collapse;margin-top:8px}
+.appx th,.appx td{border:1px solid var(--line);padding:6px 8px;text-align:left;font-size:12px}
+.appx th{background:#f8fafc}
+.foot{text-align:center;color:var(--mut);font-size:12px;margin-top:24px}
+@media(max-width:680px){.layers,.recs{grid-template-columns:1fr}.forces{grid-template-columns:1fr}
+.circ-name{width:110px}}
+</style></head><body><div class="wrap">
+<div class="hero">
+  <h1>JTBD 待完成任务 · 深度分析报告</h1>
+  <div style="font-size:14px;opacity:.95">基于真实 VOC 导入数据 · 确定性引擎（无大模型）</div>
+  <div class="meta">
+    <span class="pill">分析目的：产品开发</span>
+    <span class="pill">产品类目：飞机杯（挂载/吸附类）</span>
+    <span class="pill">样本量：1731 条评价</span>
+    <span class="pill">生成：2026-07-10 17:50</span>
+  </div>
+</div>
+
+<div class="card"><h2><span class="n">★</span>CORE JOB · 核心任务陈述</h2>
+  <div class="job">当用户处于【淋浴环境】等场景中需要使用产品时，ta 的核心诉求是【性价比需求】，以便避免「尺寸不合适（太小/太大/太紧/太松）」这类问题带来的糟糕体验，真正把产品用得安心、用得值。</div></div>
+
+<div class="card"><h2><span class="n">1</span>三层任务结构</h2>
+  <div class="layers">
+    <div class="layer fn"><h3>功能任务</h3><ul><li>淋浴环境</li><li>潮湿使用环境</li><li>浴室瓷砖墙面</li><li>光滑硬质平面</li><li>浴室玻璃/镜面</li></ul></div>
+    <div class="layer em"><h3>情感任务</h3><ul><li>因「性价比需求」未被满足而渴望被妥帖对待</li><li>因「物有所值」未被满足而渴望被妥帖对待</li><li>因「功能性需求」未被满足而渴望被妥帖对待</li><li>摆脱「非常不满」等负面感受</li></ul></div>
+    <div class="layer so"><h3>社会任务</h3><ul><li>在送礼/社交场景中维持得体的形象</li></ul></div>
+  </div></div>
+
+<div class="card"><h2><span class="n">2</span>任务情境地图</h2><div class="circ-row"><div class="circ-name">淋浴/浴室环境</div><div><span class="chip">淋浴环境</span> <span class="chip">潮湿使用环境</span> <span class="chip">浴室瓷砖墙面</span> <span class="chip">浴室玻璃/镜面</span> <span class="chip">粗糙墙面（混凝土/砖墙）</span> <span class="chip">淋浴隔断/玻璃门</span></div></div><div class="circ-row"><div class="circ-name">光滑平面</div><div><span class="chip">光滑硬质平面</span> <span class="chip">台面/桌面</span></div></div><div class="circ-row"><div class="circ-name">粗糙/特殊面</div><div><span class="chip">木质表面</span></div></div><div class="circ-row"><div class="circ-name">其他</div><div><span class="chip">干燥使用环境</span></div></div></div>
+
+<div class="card"><h2><span class="n">3</span>阻碍力量（按出现频次分级）</h2><div class="obs"><div class="t">尺寸不合适（太小/太大/太紧/太松） <span class="appx">×454</span></div><div class="bar"><i style="width:100%"></i></div><span class="lvl high">高强度</span></div><div class="obs"><div class="t">产品质量差/易损坏 <span class="appx">×356</span></div><div class="bar"><i style="width:78%"></i></div><span class="lvl high">高强度</span></div><div class="obs"><div class="t">价格偏高/性价比低 <span class="appx">×223</span></div><div class="bar"><i style="width:49%"></i></div><span class="lvl mid">中强度</span></div><div class="obs"><div class="t">震动效果差/无震动 <span class="appx">×168</span></div><div class="bar"><i style="width:37%"></i></div><span class="lvl mid">中强度</span></div><div class="obs"><div class="t">充电问题/电池不耐用 <span class="appx">×124</span></div><div class="bar"><i style="width:27%"></i></div><span class="lvl low">低强度</span></div><div class="obs"><div class="t">噪音过大 <span class="appx">×93</span></div><div class="bar"><i style="width:20%"></i></div><span class="lvl low">低强度</span></div><div class="obs"><div class="t">材质廉价/塑料感强 <span class="appx">×82</span></div><div class="bar"><i style="width:18%"></i></div><span class="lvl low">低强度</span></div><div class="obs"><div class="t">退货流程困难 <span class="appx">×73</span></div><div class="bar"><i style="width:16%"></i></div><span class="lvl low">低强度</span></div></div>
+
+<div class="card"><h2><span class="n">4</span>期望进程（阻碍 → 改进方向）</h2><div class="obs"><div class="t">尺寸不合适（太小/太大/太紧/太松） <span class="appx">×454</span></div><div style="flex:1;font-size:13px;color:#334155">针对「尺寸不合适（太小/太大/太紧/太松）」做专项产品迭代</div></div><div class="obs"><div class="t">产品质量差/易损坏 <span class="appx">×356</span></div><div style="flex:1;font-size:13px;color:#334155">提升材质与整体工艺，建立出厂品控标准</div></div><div class="obs"><div class="t">价格偏高/性价比低 <span class="appx">×223</span></div><div style="flex:1;font-size:13px;color:#334155">优化成本结构或明示价值点，提升性价比感知</div></div><div class="obs"><div class="t">震动效果差/无震动 <span class="appx">×168</span></div><div style="flex:1;font-size:13px;color:#334155">针对「震动效果差/无震动」做专项产品迭代</div></div><div class="obs"><div class="t">充电问题/电池不耐用 <span class="appx">×124</span></div><div style="flex:1;font-size:13px;color:#334155">针对「充电问题/电池不耐用」做专项产品迭代</div></div></div>
+
+<div class="card"><h2><span class="n">5</span>JTBD 四力模型</h2><div class="forces">
+    <div class="force push"><h3>推力 · 现状痛点</h3><div><span class="chip">尺寸不合适（太小/太大/太紧/太松）</span></div></div>
+    <div class="force pull"><h3>拉力 · 理想吸引</h3><div><span class="chip">性价比需求</span></div></div>
+    <div class="force anx"><h3>焦虑 · 决策顾虑</h3><div><span class="chip">非常不满</span></div></div>
+    <div class="force hab"><h3>习惯 · 现状惯性</h3><div><span class="chip">自用</span><span class="chip">多次使用</span><span class="chip">首次使用</span></div></div></div></div>
+
+<div class="card"><h2><span class="n">6</span>行动建议</h2><div class="recs">
+    <div class="rec"><h3>产品侧</h3><ul><li>针对「尺寸不合适（太小/太大/太紧/太松）」做专项产品迭代</li><li>提升材质与整体工艺，建立出厂品控标准</li><li>优化成本结构或明示价值点，提升性价比感知</li></ul></div>
+    <div class="rec mkt"><h3>营销侧</h3><ul><li>围绕「性价比需求」做核心卖点沟通</li><li>用真实实测消除「非常不满」顾虑</li></ul></div>
+    <div class="rec inn"><h3>创新侧</h3><ul><li>去敏感化外观/包装，降低购买心理门槛</li></ul></div></div></div>
+
+<div class="card appx"><h2><span class="n">7</span>数据附录 · 标签来源</h2>
+  <div>下列结论均由下方真实标签频次聚合得出，可溯源。</div>
+  <table><tr><th>模块</th><th colspan="8">Top 标签（频次）</th></tr><tr><th>使用场景</th><td>淋浴环境 ×26</td><td>潮湿使用环境 ×26</td><td>浴室瓷砖墙面 ×15</td><td>光滑硬质平面 ×6</td><td>浴室玻璃/镜面 ×5</td><td>粗糙墙面（混凝土/砖墙） ×2</td><td>木质表面 ×2</td><td>淋浴隔断/玻璃门 ×1</td></tr><tr><th>使用阻碍</th><td>尺寸不合适（太小/太大/太紧/太松） ×454</td><td>产品质量差/易损坏 ×356</td><td>价格偏高/性价比低 ×223</td><td>震动效果差/无震动 ×168</td><td>充电问题/电池不耐用 ×124</td><td>噪音过大 ×93</td><td>材质廉价/塑料感强 ×82</td><td>退货流程困难 ×73</td></tr><tr><th>需求动机</th><td>性价比需求 ×542</td><td>物有所值 ×542</td><td>功能性需求 ×530</td><td>安全性需求 ×269</td><td>产品稳固 ×269</td><td>舒适性需求 ×228</td><td>体验舒适 ×228</td><td>售后保障需求 ×186</td></tr><tr><th>情绪</th><td>非常不满 ×838</td><td>轻微不满 ×439</td><td>不满/负向 ×397</td><td>中性/无情绪 ×42</td><td>满意/正向 ×10</td></tr><tr><th>用户画像</th><td>自用 ×517</td><td>多次使用 ×238</td><td>首次使用 ×140</td><td>新手用户 ×35</td><td>送礼 ×19</td><td>长期使用 ×10</td></tr></table></div>
+
+<div class="foot">本报告由 VOC JTBD 分析机器人（确定性引擎）自动生成 · C 混合路线样本</div>
+</div></body></html>

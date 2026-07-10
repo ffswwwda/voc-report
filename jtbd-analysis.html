@@ -261,43 +261,7 @@ h1,h2,h3{letter-spacing:-.01em;line-height:1.25;}
 .foot{margin-top:48px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;text-align:center;}
 .foot b{color:var(--slate);}
 
-/* ============ 夜晚模式：深空全息 premium 玻璃（复用 radium 变量 + 自有质感） ============ */
-body[data-theme="dark"] .topbar{background:rgba(10,14,26,.72);}
-body[data-theme="dark"] .job-statement{
-  background:
-    linear-gradient(135deg, rgba(37,99,235,.16) 0%, rgba(255,255,255,.02) 60%, rgba(0,240,255,.05) 100%),
-    var(--glass-bg);
-  backdrop-filter:blur(22px) saturate(190%);-webkit-backdrop-filter:blur(22px) saturate(190%);
-  border:1px solid rgba(255,255,255,.15);
-}
-body[data-theme="dark"] .layer,
-body[data-theme="dark"] .ctx,
-body[data-theme="dark"] .ob,
-body[data-theme="dark"] .pcard,
-body[data-theme="dark"] .force,
-body[data-theme="dark"] .rec,
-body[data-theme="dark"] .appendix,
-body[data-theme="dark"] .pctx .pc{
-  background:
-    linear-gradient(135deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.02) 50%, rgba(0,240,255,.05) 100%),
-    var(--glass-bg);
-  backdrop-filter:blur(22px) saturate(190%);-webkit-backdrop-filter:blur(22px) saturate(190%);
-  border:1px solid rgba(255,255,255,.15);
-  box-shadow:0 20px 60px rgba(0,0,0,.45);
-}
-body[data-theme="dark"] .appendix .ak{background:rgba(255,255,255,.04);border-right-color:rgba(255,255,255,.10);}
-body[data-theme="dark"] .app-row{border-bottom-color:rgba(255,255,255,.08);}
-body[data-theme="dark"] .app-row .av .t,
-body[data-theme="dark"] .ev .chip,
-body[data-theme="dark"] .pctx .pc{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);}
-body[data-theme="dark"] .back-link,
-body[data-theme="dark"] .theme-toggle{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14);}
-body[data-theme="dark"] h1,body[data-theme="dark"] h2,body[data-theme="dark"] .section-head h2{color:#fff;}
-body[data-theme="dark"] .appendix .ak{color:#E6EDF6;}
-@keyframes jtbdFade{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
-.layer,.ctx,.ob,.pcard,.force,.rec,.job-statement{animation:jtbdFade .5s ease both;}
-.layer:nth-child(2){animation-delay:.06s;}
-.layer:nth-child(3){animation-delay:.12s;}
+/* 夜晚模式由 radium-dark.css 统一接管，此处不再覆盖 */
 
 @media (max-width:860px){
   .layers,.recs{grid-template-columns:1fr;}
