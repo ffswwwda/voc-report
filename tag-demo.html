@@ -547,7 +547,7 @@ table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
     <div class="res-toolbar">
         <div class="rt-info" id="rtInfo"></div>
         <button class="export-btn" id="exportBtn" onclick="exportResultXlsx()">⬇️ 导出打标结果 Excel</button>
-        <button class="export-btn" id="expExperienceBtn" onclick="exportToExperience()" title="把当前打标结果带入 VOC 一条龙体验页做深度分析">🚀 带入一条龙体验</button>
+        <button class="export-btn" id="expExperienceBtn" onclick="exportToExperience()" title="把当前打标结果带入 VOC 全流程分析页做深度分析">🚀 带入全流程分析</button>
     </div>
     <div class="tag-table-wrap"><div id="tagTable"></div></div>
 
@@ -1394,7 +1394,7 @@ function renderCandidatePool(cands){
     }).join('');
 }
 
-/* ===================== 导出 VOC 画像（带入一条龙体验页） ===================== */
+/* ===================== 导出 VOC 画像（带入全流程分析页） ===================== */
 /* 把当前打标的真实分析产物序列化成 JSON，供 experience.html 做深度框架分析（不依赖大模型） */
 function buildVOCProfile(){
     const comments = TAG_STATE.map(r=>r.text);
@@ -1415,7 +1415,7 @@ function buildVOCProfile(){
     precise.forEach(h=>{ const k=h.m+'|'+h.t; if(!tagCount[k]) tagCount[k]={m:h.m,d:h.d,t:h.t,color:h.color,n:0}; tagCount[k].n++; });
     const topTags = Object.values(tagCount).sort((a,b)=>b.n-a.n).slice(0,40);
 
-    // 模块 → 二级分类 → 三级标签 层级树（供一条龙体验页做下钻分析）
+    // 模块 → 二级分类 → 三级标签 层级树（供全流程分析页做下钻分析）
     const tagTree = {};
     precise.forEach(h=>{
         if(!tagTree[h.m]) tagTree[h.m] = { n:0, dims:{} };
