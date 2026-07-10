@@ -6399,8 +6399,30 @@
         const hintSegs = bs.split('。').filter(x=>x.trim()).map(x=>x.trim()+'。');
         const hintLineCount = hintSegs.reduce((n,s)=>n+Math.max(1,Math.ceil(s.length/32)),0);
         const hintH = 54 + hintLineCount*26 + (hintSegs.length>1 ? 12 : 0);
+        const fontStack = "-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC',sans-serif";
+
+        // 已选需求 chip 布局（自动换行 + 精确字符宽度）
+        const chipH = 28, chipGap = 10, chipRowGap = 10, chipTopPad = 11;
+        const maxRowW = W - pad*2;
+        const rows = [];
+        let row = [], rowW = 0;
+        selected.forEach(cn=>{
+            const tw = measureChipText(cn);
+            if (row.length > 0 && rowW + chipGap + tw > maxRowW){
+                rows.push(row);
+                row = [];
+                rowW = 0;
+            }
+            row.push({label: cn, width: tw});
+            rowW += (row.length > 1 ? chipGap : 0) + tw;
+        });
+        if (row.length) rows.push(row);
+        const grayBarH = chipTopPad*2 + rows.length*chipH + (rows.length-1)*chipRowGap;
+        const chipsEndY = 70 + grayBarH;
+
         const cardH = 118;
-        const H = 70 + 50 + 24 + cardH + 16 + hintH + 54;
+        const H = 70 + grayBarH + 24 + cardH + 16 + hintH + 54;
+
         let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">';
         svg += '<defs>';
         svg += '<linearGradient id="nshd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#312e81"/><stop offset="0.55" stop-color="#4338ca"/><stop offset="1" stop-color="#6d28d9"/></linearGradient>';
@@ -6412,41 +6434,53 @@
         svg += '<path d="M0,24 Q0,0 24,0 H'+(W-24)+' Q'+W+',0 '+W+',24 V70 H0 Z" fill="url(#nshd)"/>';
         svg += '<circle cx="115" cy="14" r="90" fill="#ec4899" opacity="0.22"/>';
         svg += '<circle cx="740" cy="64" r="80" fill="#6366f1" opacity="0.20"/>';
-        svg += '<text x="'+pad+'" y="46" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="22" font-weight="800" fill="#FFFFFF">价值主张 · 十三种需求合成</text>';
-        svg += '<rect x="0" y="70" width="'+W+'" height="50" fill="#f8fafc"/>';
-        svg += '<line x1="0" y1="120" x2="'+W+'" y2="120" stroke="#e2e8f0" stroke-width="1"/>';
-        let cxp = pad, cyp = 81;
-        selected.forEach(cn=>{
-            const label = cn; const tw = 20 + label.length*15;
-            svg += '<rect x="'+cxp+'" y="'+cyp+'" width="'+tw+'" height="28" rx="14" fill="#fff" stroke="#e2e8f0"/>';
-            svg += '<circle cx="'+(cxp+14)+'" cy="'+(cyp+14)+'" r="3" fill="#ec4899"/>';
-            svg += '<text x="'+(cxp+24)+'" y="'+(cyp+19)+'" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#4338ca">'+escapeXml(label)+'</text>';
-            cxp += tw + 10;
+        svg += '<text x="'+pad+'" y="35" dy=".35em" font-family="'+fontStack+'" font-size="22" font-weight="800" fill="#FFFFFF">价值主张 · 十三种需求合成</text>';
+        svg += '<rect x="0" y="70" width="'+W+'" height="'+grayBarH+'" fill="#f8fafc"/>';
+        svg += '<line x1="0" y1="'+chipsEndY+'" x2="'+W+'" y2="'+chipsEndY+'" stroke="#e2e8f0" stroke-width="1"/>';
+        rows.forEach((row, ri)=>{
+            const rowCenterY = 70 + chipTopPad + chipH/2 + ri*(chipH+chipRowGap);
+            let cxp = pad;
+            row.forEach(({label, width})=>{
+                svg += '<rect x="'+cxp+'" y="'+(rowCenterY - chipH/2)+'" width="'+width+'" height="'+chipH+'" rx="14" fill="#fff" stroke="#e2e8f0"/>';
+                svg += '<circle cx="'+(cxp+14)+'" cy="'+rowCenterY+'" r="3" fill="#ec4899"/>';
+                svg += '<text x="'+(cxp+24)+'" y="'+rowCenterY+'" dy=".35em" font-family="'+fontStack+'" font-size="13" font-weight="700" fill="#4338ca">'+escapeXml(label)+'</text>';
+                cxp += width + chipGap;
+            });
         });
         const colW = (W - pad*2 - 16)/2;
-        const by = 144;
-        svg += needCardSvg(pad, by, colW, cardH, '01', '价值层', vl);
-        svg += needCardSvg(pad+colW+16, by, colW, cardH, '02', '给用户的感觉', feel);
+        const by = chipsEndY + 24;
+        svg += needCardSvg(pad, by, colW, cardH, '01', '价值层', vl, fontStack);
+        svg += needCardSvg(pad+colW+16, by, colW, cardH, '02', '给用户的感觉', feel, fontStack);
         const hy = by + cardH + 16;
         svg += '<rect x="'+pad+'" y="'+hy+'" width="'+(W-pad*2)+'" height="'+hintH+'" rx="14" fill="url(#nshint)" stroke="#e0e7ff"/>';
         svg += '<rect x="'+pad+'" y="'+hy+'" width="4" height="'+hintH+'" rx="2" fill="url(#nsbar)"/>';
-        svg += '<text x="'+(pad+16)+'" y="'+(hy+26)+'" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="13" font-weight="800" fill="#4338ca">底座提示</text>';
+        svg += '<text x="'+(pad+16)+'" y="'+(hy+26)+'" dy=".35em" font-family="'+fontStack+'" font-size="13" font-weight="800" fill="#4338ca">底座提示</text>';
         let ty = hy + 50;
         hintSegs.forEach(seg=>{
-            wrapText(seg, 32).forEach(w=>{ svg += '<text x="'+(pad+16)+'" y="'+ty+'" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="13.5" fill="#475569">'+escapeXml(w)+'</text>'; ty += 26; });
+            wrapText(seg, 32).forEach(w=>{ svg += '<text x="'+(pad+16)+'" y="'+ty+'" dy=".35em" font-family="'+fontStack+'" font-size="13.5" fill="#475569">'+escapeXml(w)+'</text>'; ty += 26; });
             ty += 4;
         });
-        svg += '<text x="'+pad+'" y="'+(H-20)+'" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#94A3B8">VOC 分析平台 · 十三种需求核心模型</text>';
+        svg += '<text x="'+pad+'" y="'+(H-20)+'" dy=".35em" font-family="'+fontStack+'" font-size="12" fill="#94A3B8">VOC 分析平台 · 十三种需求核心模型</text>';
         svg += '</svg>';
         return svg;
     }
-    function needCardSvg(x, y, w, h, num, title, body){
+    function measureChipText(label){
+        // 13px 字号下：全角/CJK 约 16px，半角/Latin 约 7.5px
+        let w = 0;
+        for (const ch of String(label)){
+            const c = ch.charCodeAt(0);
+            const full = (c >= 0x4E00 && c <= 0x9FFF) || (c >= 0x3400 && c <= 0x4DBF) || (c >= 0xFF00 && c <= 0xFFEF) || (c >= 0x3040 && c <= 0x309F) || (c >= 0x30A0 && c <= 0x30FF) || (c >= 0xAC00 && c <= 0xD7AF) || (c >= 0x3000 && c <= 0x303F);
+            w += full ? 16 : 7.5;
+        }
+        return Math.round(24 + w + 14); // 左侧 dot/gap 24 + 文本 + 右侧内边距 14
+    }
+    function needCardSvg(x, y, w, h, num, title, body, fontStack){
         let s = '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="16" fill="#fff" stroke="#e2e8f0" filter="url(#nssh)"/>';
         s += '<rect x="'+x+'" y="'+y+'" width="4" height="'+h+'" rx="2" fill="url(#nsbar)"/>';
-        s += '<text x="'+(x+18)+'" y="'+(y+30)+'" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="46" font-weight="800" fill="#f8fafc">'+num+'</text>';
-        s += '<text x="'+(x+18)+'" y="'+(y+30)+'" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="14" font-weight="800" fill="#312e81">'+escapeXml(title)+'</text>';
+        s += '<text x="'+(x+18)+'" y="'+(y+30)+'" dy=".35em" font-family="'+fontStack+'" font-size="46" font-weight="800" fill="#f8fafc">'+num+'</text>';
+        s += '<text x="'+(x+18)+'" y="'+(y+30)+'" dy=".35em" font-family="'+fontStack+'" font-size="14" font-weight="800" fill="#312e81">'+escapeXml(title)+'</text>';
         let ty = y + 54;
-        wrapText(body, Math.floor((w-36)/15)).forEach(wl=>{ s += '<text x="'+(x+18)+'" y="'+ty+'" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#475569">'+escapeXml(wl)+'</text>'; ty += 24; });
+        wrapText(body, Math.floor((w-36)/15)).forEach(wl=>{ s += '<text x="'+(x+18)+'" y="'+ty+'" dy=".35em" font-family="'+fontStack+'" font-size="14" fill="#475569">'+escapeXml(wl)+'</text>'; ty += 24; });
         return s;
     }
     function escapeXml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
