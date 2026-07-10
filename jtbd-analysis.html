@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JTBD 待完成任务 · 深度分析报告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="radium-dark.css">
+<style>
+/* ============ 设计令牌：白天默认（干净亮色 + 克制） ============ */
+:root{
+  --bg:#f5f7fb;
+  --bg-2:#eef2f8;
+  --card:#ffffff;
+  --card-2:#f8fafc;
+  --ink:#0f1b2d;
+  --slate:#475569;
+  --muted:#94a3b8;
+  --line:rgba(15,27,45,.10);
+  --line-soft:rgba(15,27,45,.06);
+  --brand:#2563EB;        /* JTBD 主色 */
+  --brand-bg:rgba(37,99,235,.10);
+  --indigo:#4d8bff;
+  --green:#16a34a;
+  --green-bg:rgba(22,163,74,.10);
+  --pink:#db2777;
+  --amber:#d97706;
+  --cyan:#0891b2;
+  --purple:#7c3aed;
+  --red:#dc2626;
+  --shadow:0 12px 34px rgba(15,27,45,.08);
+  --shadow-sm:0 4px 14px rgba(15,27,45,.06);
+  --radius:18px;
+  --radius-sm:12px;
+  --font:'Inter','SF Pro Display',-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+  --mono:'JetBrains Mono','SF Mono',ui-monospace,monospace;
+  --display:'Orbitron','Inter',sans-serif;
+}
+/* ============ 基础 ============ */
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  padding-bottom:60px;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px;}
+h1,h2,h3{letter-spacing:-.01em;line-height:1.25;}
+.eyebrow,.brand,.grad{font-family:var(--display);letter-spacing:.04em;}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+
+/* ============ 顶栏 ============ */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;padding:14px 22px;
+  background:color-mix(in srgb, var(--card) 86%, transparent);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.topbar .left{display:flex;align-items:center;gap:14px;min-width:0;}
+.back-link{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:600;color:var(--slate);
+  text-decoration:none;padding:7px 12px;border-radius:10px;
+  border:1px solid var(--line);background:var(--card-2);
+  transition:.18s;white-space:nowrap;
+}
+.back-link:hover{color:var(--brand);border-color:var(--brand);}
+.brand{font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;min-width:0;}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--brand);box-shadow:0 0 12px var(--brand);}
+.brand small{font-family:var(--font);font-weight:500;color:var(--muted);font-size:12px;letter-spacing:0;}
+.theme-toggle{
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  border:1px solid var(--line);background:var(--card-2);
+  color:var(--slate);font-size:13px;font-weight:600;
+  padding:8px 13px;border-radius:11px;transition:.18s;white-space:nowrap;
+}
+.theme-toggle:hover{border-color:var(--brand);color:var(--brand);}
+.theme-toggle .ti{font-size:15px;}
+
+/* ============ Hero ============ */
+.hero{padding:46px 0 26px;}
+.hero .kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--display);font-size:12px;letter-spacing:.08em;
+  color:var(--brand);background:var(--brand-bg);
+  padding:6px 13px;border-radius:999px;font-weight:600;margin-bottom:18px;
+}
+.hero h1{font-size:38px;font-weight:800;margin-bottom:10px;}
+.hero h1 .accent{color:var(--brand);}
+.hero .sub{color:var(--slate);font-size:15px;max-width:680px;}
+.pctx{
+  display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;
+}
+.pctx .pc{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:13px;color:var(--slate);
+  background:var(--card);border:1px solid var(--line);
+  padding:8px 13px;border-radius:11px;box-shadow:var(--shadow-sm);
+}
+.pctx .pc b{color:var(--ink);font-weight:600;}
+.pctx .pc .ic{font-size:14px;}
+
+/* 核心任务陈述大字 */
+.job-statement{
+  margin-top:26px;
+  background:linear-gradient(135deg,var(--brand-bg),transparent 70%),var(--card);
+  border:1px solid var(--line);
+  border-left:4px solid var(--brand);
+  border-radius:var(--radius);
+  padding:26px 28px;
+  box-shadow:var(--shadow);
+  position:relative;overflow:hidden;
+}
+.job-statement .lbl{
+  font-family:var(--display);font-size:11px;letter-spacing:.1em;
+  color:var(--brand);font-weight:600;margin-bottom:10px;
+}
+.job-statement .stmt{font-size:23px;font-weight:700;line-height:1.5;color:var(--ink);}
+.job-statement .stmt .sit{color:var(--slate);font-weight:600;}
+.job-statement .stmt .act{color:var(--brand);}
+.job-statement .stmt .out{color:var(--green);}
+.job-statement .meta{margin-top:14px;font-size:13px;color:var(--muted);}
+
+/* ============ Section ============ */
+.section{margin-top:40px;}
+.section-head{display:flex;align-items:baseline;gap:12px;margin-bottom:18px;}
+.section-head .num{
+  font-family:var(--mono);font-size:13px;font-weight:700;color:var(--brand);
+  background:var(--brand-bg);padding:3px 9px;border-radius:8px;
+}
+.section-head h2{font-size:22px;font-weight:800;}
+.section-head .desc{color:var(--muted);font-size:13px;margin-left:auto;}
+
+/* 三层任务卡 */
+.layers{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.layer{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
+  transition:.2s;
+}
+.layer:hover{transform:translateY(-3px);box-shadow:var(--shadow);}
+.layer::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;}
+.layer.func::before{background:linear-gradient(90deg,var(--brand),var(--indigo));}
+.layer.emo::before{background:linear-gradient(90deg,var(--pink),var(--purple));}
+.layer.soc::before{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.layer .lic{font-size:26px;margin-bottom:10px;display:block;}
+.layer .lt{font-size:15px;font-weight:700;margin-bottom:4px;}
+.layer .lt-en{font-family:var(--display);font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:12px;}
+.layer .lbody{font-size:14px;color:var(--slate);line-height:1.65;}
+.layer .ev{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;}
+.ev .chip{
+  font-size:12px;color:var(--slate);background:var(--card-2);
+  border:1px solid var(--line);padding:4px 9px;border-radius:8px;
+}
+.layer.func .ev .chip{color:var(--brand);border-color:color-mix(in srgb,var(--brand) 30%,transparent);}
+.layer.emo .ev .chip{color:var(--pink);border-color:color-mix(in srgb,var(--pink) 30%,transparent);}
+.layer.soc .ev .chip{color:var(--green);border-color:color-mix(in srgb,var(--green) 30%,transparent);}
+
+/* 情境地图 */
+.context-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+.ctx{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:16px 18px;box-shadow:var(--shadow-sm);
+}
+.ctx .ch{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;margin-bottom:8px;}
+.ctx .ch .ci{font-size:18px;}
+.ctx .ct{font-size:13px;color:var(--slate);}
+.ctx .cc{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;}
+.ctx.empty{opacity:.55;}
+
+/* 阻碍力量 */
+.obstacles{display:flex;flex-direction:column;gap:12px;}
+.ob{
+  display:flex;align-items:flex-start;gap:14px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:15px 18px;box-shadow:var(--shadow-sm);
+}
+.ob .sev{
+  flex:0 0 auto;width:46px;height:46px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:700;font-size:15px;color:#fff;
+}
+.sev.hi{background:linear-gradient(135deg,#ef4444,#dc2626);}
+.sev.mid{background:linear-gradient(135deg,#f59e0b,#d97706);}
+.sev.lo{background:linear-gradient(135deg,#64748b,#475569);}
+.ob .ob-body{flex:1;}
+.ob .ob-t{font-weight:700;font-size:14px;}
+.ob .ob-d{font-size:13px;color:var(--slate);margin-top:3px;}
+.ob .ob-tag{font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--mono);}
+
+/* 期望进程 */
+.progress-list{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.pcard{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:16px 18px;box-shadow:var(--shadow-sm);display:flex;gap:12px;align-items:flex-start;
+}
+.pcard .pn{font-family:var(--mono);font-weight:700;color:var(--green);font-size:14px;flex:0 0 auto;}
+.pcard .pt{font-size:14px;color:var(--ink);font-weight:600;}
+.pcard .pd{font-size:12px;color:var(--slate);margin-top:3px;}
+
+/* 四力模型 */
+.forces{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.force{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px;box-shadow:var(--shadow-sm);position:relative;
+}
+.force .fi{font-size:24px;margin-bottom:8px;}
+.force .ft{font-weight:700;font-size:14px;margin-bottom:6px;}
+.force .fd{font-size:12.5px;color:var(--slate);line-height:1.55;}
+.force.push{border-top:3px solid var(--red);}
+.force.pull{border-top:3px solid var(--green);}
+.force.anx{border-top:3px solid var(--amber);}
+.force.habit{border-top:3px solid var(--purple);}
+
+/* 行动建议 */
+.recs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.rec{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;box-shadow:var(--shadow-sm);
+}
+.rec .rh{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;margin-bottom:12px;}
+.rec .rh .ri{font-size:20px;}
+.rec ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.rec li{font-size:13.5px;color:var(--slate);padding-left:20px;position:relative;line-height:1.55;}
+.rec li::before{content:'▹';position:absolute;left:0;top:0;color:var(--brand);font-weight:700;}
+.rec.product .rh .ri{color:var(--brand);}
+.rec.market .rh .ri{color:var(--pink);}
+.rec.innov .rh .ri{color:var(--purple);}
+
+/* 数据附录 */
+.appendix{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);}
+.app-row{display:grid;grid-template-columns:190px 1fr;border-bottom:1px solid var(--line-soft);}
+.app-row:last-child{border-bottom:none;}
+.app-row .ak{
+  padding:14px 18px;font-weight:700;font-size:13px;color:var(--ink);
+  background:var(--card-2);border-right:1px solid var(--line-soft);
+}
+.app-row .av{padding:14px 18px;font-size:13px;color:var(--slate);display:flex;flex-wrap:wrap;gap:6px;}
+.app-row .av .t{background:var(--card-2);border:1px solid var(--line);padding:3px 9px;border-radius:7px;font-size:12px;}
+.app-row .av .t .c{font-family:var(--mono);color:var(--muted);margin-left:5px;}
+
+/* 空状态 */
+.empty-state{text-align:center;padding:70px 20px;}
+.empty-state .eic{font-size:54px;margin-bottom:18px;}
+.empty-state h2{font-size:22px;margin-bottom:10px;}
+.empty-state p{color:var(--slate);max-width:460px;margin:0 auto 22px;}
+.empty-state .ebtn{
+  display:inline-block;background:var(--brand);color:#fff;font-weight:600;
+  padding:12px 22px;border-radius:12px;text-decoration:none;font-size:14px;
+}
+
+/* 页脚 */
+.foot{margin-top:48px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;text-align:center;}
+.foot b{color:var(--slate);}
+
+/* ============ 夜晚模式：深空全息 premium 玻璃（复用 radium 变量 + 自有质感） ============ */
+body[data-theme="dark"] .topbar{background:rgba(10,14,26,.72);}
+body[data-theme="dark"] .job-statement{
+  background:
+    linear-gradient(135deg, rgba(37,99,235,.16) 0%, rgba(255,255,255,.02) 60%, rgba(0,240,255,.05) 100%),
+    var(--glass-bg);
+  backdrop-filter:blur(22px) saturate(190%);-webkit-backdrop-filter:blur(22px) saturate(190%);
+  border:1px solid rgba(255,255,255,.15);
+}
+body[data-theme="dark"] .layer,
+body[data-theme="dark"] .ctx,
+body[data-theme="dark"] .ob,
+body[data-theme="dark"] .pcard,
+body[data-theme="dark"] .force,
+body[data-theme="dark"] .rec,
+body[data-theme="dark"] .appendix,
+body[data-theme="dark"] .pctx .pc{
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.02) 50%, rgba(0,240,255,.05) 100%),
+    var(--glass-bg);
+  backdrop-filter:blur(22px) saturate(190%);-webkit-backdrop-filter:blur(22px) saturate(190%);
+  border:1px solid rgba(255,255,255,.15);
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+}
+body[data-theme="dark"] .appendix .ak{background:rgba(255,255,255,.04);border-right-color:rgba(255,255,255,.10);}
+body[data-theme="dark"] .app-row{border-bottom-color:rgba(255,255,255,.08);}
+body[data-theme="dark"] .app-row .av .t,
+body[data-theme="dark"] .ev .chip,
+body[data-theme="dark"] .pctx .pc{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);}
+body[data-theme="dark"] .back-link,
+body[data-theme="dark"] .theme-toggle{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14);}
+body[data-theme="dark"] h1,body[data-theme="dark"] h2,body[data-theme="dark"] .section-head h2{color:#fff;}
+body[data-theme="dark"] .appendix .ak{color:#E6EDF6;}
+@keyframes jtbdFade{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+.layer,.ctx,.ob,.pcard,.force,.rec,.job-statement{animation:jtbdFade .5s ease both;}
+.layer:nth-child(2){animation-delay:.06s;}
+.layer:nth-child(3){animation-delay:.12s;}
+
+@media (max-width:860px){
+  .layers,.recs{grid-template-columns:1fr;}
+  .forces{grid-template-columns:1fr 1fr;}
+  .progress-list{grid-template-columns:1fr;}
+  .hero h1{font-size:30px;}
+  .job-statement .stmt{font-size:19px;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="left">
+    <a class="back-link" href="experience.html">← 返回一条龙</a>
+    <div class="brand"><span class="dot"></span>JTBD 待完成任务 <small>深度分析报告</small></div>
+  </div>
+  <button class="theme-toggle" id="themeToggle" data-active="light"><span class="ti">☀️</span><span class="tt">白天</span></button>
+</div>
+
+<div class="wrap" id="app"><!-- 动态渲染 --></div>
+
+<script>
+/* ===================== 跨页主题切换（与站点一致：voc_theme） ===================== */
+(function(){
+  function applyTheme(isDark){
+    document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    var btn = document.getElementById('themeToggle');
+    if(!btn) return;
+    btn.setAttribute('data-active', isDark ? 'dark' : 'light');
+    btn.innerHTML = isDark
+      ? '<span class="ti">🌙</span><span class="tt">夜晚</span>'
+      : '<span class="ti">☀️</span><span class="tt">白天</span>';
+  }
+  var saved = localStorage.getItem('voc_theme');
+  applyTheme(saved === 'dark');
+  var btn = document.getElementById('themeToggle');
+  if(btn) btn.addEventListener('click', function(){
+    var next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('voc_theme', next);
+    applyTheme(next === 'dark');
+  });
+})();
+
+/* ===================== 数据读取 ===================== */
+const LS_KEY = 'voc_tag_profile';
+const PRODUCT_KEY = 'voc_product_context';
+
+function loadProfile(){
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch(e){ return null; }
+}
+function loadProduct(){
+  try { return JSON.parse(localStorage.getItem(PRODUCT_KEY) || 'null'); } catch(e){ return null; }
+}
+function safeProf(p){
+  if(!p || typeof p !== 'object') return null;
+  if(!p.meta && !p.modules && !p.topTags) return null;
+  return {
+    meta: p.meta || { totalComments:0, preciseCount:0, provCount:0, coveredModules:0 },
+    modules: p.modules || {},
+    topTags: p.topTags || [],
+    needPriority: p.needPriority || [],
+    emotions: p.emotions || [],
+    motMix: p.motMix || [],
+    candidatePool: p.candidatePool || [],
+    tagTree: p.tagTree || {}
+  };
+}
+
+/* ===================== 通用工具 ===================== */
+function topByModule(p, m, n){
+  if(!p || !p.topTags) return [];
+  return p.topTags.filter(t => t.m === m).sort((a,b)=>b.n-a.n).slice(0, n||5).map(t=>({t:t.t, n:t.n}));
+}
+function modTotal(p, m){
+  const o = p && p.modules && p.modules[m];
+  return o ? ((o.precise||0)+(o.prov||0)) : 0;
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* 关键词→情境分类映射（确定性） */
+const CTX_RULES = [
+  {key:'居家生活', icon:'🏠', kw:['居家','家里','家庭','卧室','客厅','厨房','浴室','床上','居家']},
+  {key:'移动通勤', icon:'🚇', kw:['通勤','出差','旅行','旅游','户外','路上','车载','飞机','高铁','地铁','行李']},
+  {key:'工作办公', icon:'💼', kw:['工作','办公','职场','会议','电脑','桌面','工位','公司']},
+  {key:'健身运动', icon:'🏃', kw:['健身','运动','跑步','瑜伽','训练','锻炼','户外']},
+  {key:'社交送礼', icon:'🎁', kw:['送礼','礼物','聚会','社交','朋友','生日','节日','送人']},
+  {key:'母婴亲子', icon:'🍼', kw:['宝宝','婴儿','孩子','母婴','育儿','宠物','猫','狗']},
+  {key:'睡眠休息', icon:'😴', kw:['睡眠','睡觉','休息','午休','助眠']}
+];
+function classifyContext(scene){
+  for(const r of CTX_RULES){ if(r.kw.some(k=>scene.includes(k))) return r.key; }
+  return '通用场景';
+}
+function ctxMeta(key){ return CTX_RULES.find(r=>r.key===key) || {key, icon:'🧩', kw:[]}; }
+
+/* 情绪→情感任务映射（确定性） */
+const EMO_MAP = {
+  '信任':{feel:'安心、可信赖',hint:'怕被骗/怕劣质'},
+  '满意':{feel:'满足',hint:'物有所值'},
+  '喜悦':{feel:'愉悦',hint:'使用有乐趣'},
+  '期待':{feel:'憧憬',hint:'开箱/使用前兴奋'},
+  '平静':{feel:'放松',hint:'缓解焦虑'},
+  '惊喜':{feel:'被取悦',hint:'超出预期'},
+  '爱':{feel:'依赖与喜爱',hint:'成为日常必备'},
+  '愤怒':{feel:'被尊重',hint:'反感被敷衍'},
+  '恐惧':{feel:'安全',hint:'怕伤人/怕故障'},
+  '悲伤':{feel:'被关怀',hint:'怕孤独/怕不便'},
+  '厌恶':{feel:'清爽体面',hint:'怕脏/怕廉价'},
+  '焦虑':{feel:'从容',hint:'怕不确定'}
+};
+function emoFeel(name){
+  for(const k in EMO_MAP){ if(name.includes(k)) return EMO_MAP[k]; }
+  return {feel:'被理解、被满足', hint:'体验顺滑'};
+}
+
+/* ===================== JTBD 确定性引擎 ===================== */
+const Engine = {
+  /* 核心任务陈述：When [情境], I want [动作], so I can [进步] */
+  mainJob(p, prod){
+    const scenes = topByModule(p,'使用场景',2).map(x=>x.t);
+    const motives = topByModule(p,'购买动机',2).map(x=>x.t);
+    const needs = (p.needPriority||[]).slice(0,1).map(x=>x.t);
+    const sit = scenes[0] || (prod && prod.categoryName ? `使用${prod.categoryName}` : '使用产品');
+    const act = motives[0] || needs[0] || '获得核心价值';
+    const out = needs[0] || motives[1] || '改善生活体验';
+    return {
+      sit, act, out,
+      rawScene: scenes, rawMotive: motives,
+      text: `当我想<span class="sit">${esc(sit)}</span>时，我希望能<span class="act">${esc(act)}</span>，从而<span class="out">${esc(out)}</span>。`
+    };
+  },
+
+  /* 三层任务 */
+  layers(p, prod){
+    const scenes = topByModule(p,'使用场景',4).map(x=>x.t);
+    const motives = topByModule(p,'购买动机',4).map(x=>x.t);
+    const obstacles = topByModule(p,'使用阻碍',4).map(x=>x.t);
+    const pos = (p.emotions||[]).filter(e=>e.polarity>0).sort((a,b)=>b.count-a.count).slice(0,3);
+    const profile = topByModule(p,'用户画像',3).map(x=>x.t);
+    const loyalty = topByModule(p,'用户忠诚度',2).map(x=>x.t);
+
+    // 功能任务：场景 + 阻碍 → 要可靠完成的具体任务
+    const funcCore = scenes[0] || (prod && prod.categoryName ? `用好${prod.categoryName}` : '完成核心使用任务');
+    const funcBlock = obstacles[0] ? `，即使遇到「${obstacles[0]}」` : '';
+    const funcBody = `用户需要稳定、可靠地完成「${funcCore}」${funcBlock}，并且结果可预期、少折腾。`;
+
+    // 情感任务：正向情绪 + 购买动机中的情感词
+    const emoFeels = pos.length ? pos.map(e=>emoFeel(e.name).feel) : (motives.slice(0,2).length?['被理解','被满足']:['安心、顺手']);
+    const emoBody = `在使用过程中，用户希望感到${emoFeels.join('、')}；购买动机里反复出现的「${motives[0]||'核心价值'}」本质上是一种情感诉求。`;
+
+    // 社会任务：用户画像 + 私密/体面信号
+    const socSignal = obstacles.some(o=>/隐私|尴尬|羞耻|社死|廉价|掉价/.test(o)) ? '体面、不被评判地拥有' : '被看作懂行、有品位';
+    const socBody = profile.length
+      ? `面向「${profile.join('、')}」这类人群，用户希望被他人看作「${socSignal}」；忠诚用户（${loyalty[0]||'复购者'}）更在意圈层认同。`
+      : `用户希望被他人看作「${socSignal}」，产品是其身份与品味的延伸。`;
+
+    return [
+      {cls:'func', ic:'⚙️', t:'功能任务', en:'FUNCTIONAL JOB', body:funcBody, ev:[funcCore,...obstacles.slice(0,2)]},
+      {cls:'emo', ic:'💗', t:'情感任务', en:'EMOTIONAL JOB', body:emoBody, ev:[...pos.map(e=>e.name),...motives.slice(0,2)]},
+      {cls:'soc', ic:'👥', t:'社会任务', en:'SOCIAL JOB', body:socBody, ev:[...profile.slice(0,2), socSignal]}
+    ];
+  },
+
+  /* 任务情境地图 */
+  circumstances(p){
+    const scenes = topByModule(p,'使用场景',8).map(x=>x.t);
+    const buckets = {};
+    scenes.forEach(s=>{
+      const k = classifyContext(s);
+      buckets[k] = buckets[k] || {items:[], n:0};
+      buckets[k].items.push(s); buckets[k].n++;
+    });
+    // 没有场景标签时回退到模块覆盖
+    if(!scenes.length){
+      return {empty:true, items:[]};
+    }
+    const items = Object.entries(buckets).map(([k,v])=>({key:k, ...ctxMeta(k), items:v.items, n:v.n})).sort((a,b)=>b.n-a.n);
+    return {empty:false, items};
+  },
+
+  /* 阻碍力量（阻止任务完成的障碍，按强度分级） */
+  obstacles(p){
+    const obs = topByModule(p,'使用阻碍',6).map(x=>x.t);
+    const expGap = (p.needPriority||[]).filter(x=>(x.imp||0) < .25).map(x=>x.t);
+    const list = [];
+    obs.forEach((o,i)=>{
+      const n = (topByModule(p,'使用阻碍',20).find(x=>x.t===o)||{}).n || 0;
+      const sev = n>=15?'hi':(n>=6?'mid':'lo');
+      list.push({t:o, sev, d:obstacleDesc(o), tag:`出现 ${n} 次`});
+    });
+    expGap.forEach(g=>{ if(!list.some(l=>l.t===g)) list.push({t:g, sev:'mid', d:'需求重要但未满足，形成隐性落差', tag:'需求优先级偏低'}); });
+    return list;
+  },
+
+  /* 期望进程 / 待达成结果 */
+  progress(p){
+    const improves = topByModule(p,'产品改进建议',5).map(x=>x.t);
+    const needs = (p.needPriority||[]).slice(0,5).map(x=>x.t);
+    const out = [];
+    let i=1;
+    improves.forEach(t=>out.push({n:('0'+i++).slice(-2), t, d:'来自用户主动提出的改进建议'}));
+    needs.forEach(t=>{ if(!out.some(o=>o.t===t)) out.push({n:('0'+i++).slice(-2), t, d:'来自需求优先级排序'}); });
+    return out.slice(0,8);
+  },
+
+  /* JTBD 四力模型（切换/采用动力） */
+  forces(p, prod){
+    const neg = (p.emotions||[]).filter(e=>e.polarity<0).sort((a,b)=>b.count-a.count).slice(0,2).map(e=>e.name);
+    const obstacles = topByModule(p,'使用阻碍',3).map(x=>x.t);
+    const motives = topByModule(p,'购买动机',3).map(x=>x.t);
+    const improves = topByModule(p,'产品改进建议',3).map(x=>x.t);
+    const loyalty = topByModule(p,'用户忠诚度',2).map(x=>x.t);
+
+    return [
+      {cls:'push', fi:'🔥', t:'推力（现状逼迫）', d: neg.length?`负面体验「${neg.join('、')}」与阻碍「${obstacles[0]||'不便'}」把用户推出旧方案。`:`现有方案的痛点与不便是切换起点。`},
+      {cls:'pull', fi:'🧲', t:'拉力（新方案吸引）', d: motives.length?`购买动机「${motives.join('、')}」与改进期待「${improves[0]||'更好体验'}」把用户拉向新方案。`:`对更好体验的期待形成吸引。`},
+      {cls:'anx', fi:'⚠️', t:'焦虑（对新方案担忧）', d: obstacles.some(o=>/质量|售后|安装|续航|材质|假/.test(o))?`用户对「${obstacles.find(o=>/质量|售后|安装|续航|材质|假/.test(o))}」存在信任焦虑，是最大采用阻力。`:`不确定性（效果/适配/售后）带来采用焦虑。`},
+      {cls:'habit', fi:'🔁', t:'习惯（旧方案惯性）', d: loyalty.length?`忠诚用户「${loyalty.join('、')}」已形成使用惯性，需强理由才迁移。`:`已有习惯与替代方案构成惯性阻力。`}
+    ];
+  },
+
+  /* 行动建议（产品/营销/创新） */
+  recommendations(p, prod, job){
+    const obstacles = topByModule(p,'使用阻碍',3).map(x=>x.t);
+    const improves = topByModule(p,'产品改进建议',3).map(x=>x.t);
+    const motives = topByModule(p,'购买动机',3).map(x=>x.t);
+    const emo = (p.emotions||[]).filter(e=>e.polarity>0).slice(0,2).map(e=>e.name);
+    const profile = topByModule(p,'用户画像',2).map(x=>x.t);
+    const workarounds = topByModule(p,'克服方式',3).map(x=>x.t);
+
+    const product = [];
+    if(obstacles[0]) product.push(`优先消除头号阻碍「${obstacles[0]}」，把它列为下个版本 P0。`);
+    if(improves[0]) product.push(`落地改进建议「${improves[0]}」，这是用户用脚投票的高频诉求。`);
+    if(job.out) product.push(`围绕核心收益「${job.out}」重构卖点与功能优先级，确保任务可被完成。`);
+    if(!product.length) product.push('导入真实标签后，此处将自动生成本产品的具体改进项。');
+
+    const market = [];
+    if(motives[0]) market.push(`传播聚焦购买动机「${motives[0]}」，用真实评价原话做信任背书。`);
+    if(emo[0]) market.push(`情感诉求打「${emoFeel(emo[0]).feel}」，场景化素材对准${job.sit||'核心场景'}。`);
+    if(profile[0]) market.push(`目标人群锚定「${profile.join('、')}」，渠道与 KOL 与之匹配。`);
+    if(!market.length) market.push('导入真实标签后，此处将自动生成面向人群的营销话术。');
+
+    const innov = [];
+    if(workarounds[0]) innov.push(`workaround「${workarounds[0]}」本身就是创新线索——用户在教我们怎么做产品。`);
+    if(obstacles[1]) innov.push(`未被满足的「${obstacles[1]}」是差异化突破口，可做成独占卖点。`);
+    innov.push('把社会任务（被看作懂行/体面）做成可分享、可晒的设计语言，放大口碑。');
+    if(!workarounds.length) innov.push('导入克服方式标签后，此处将揭示用户自发创新机会。');
+
+    return {product, market, innov};
+  },
+
+  /* 数据附录：哪些标签喂给了结论 */
+  appendix(p){
+    const mods = ['购买动机','使用场景','使用阻碍','产品改进建议','用户画像','用户忠诚度','克服方式','预期符合度'];
+    return mods.map(m=>{
+      const items = topByModule(p, m, 6);
+      return {m, items};
+    }).filter(x=>x.items.length);
+  }
+};
+
+function obstacleDesc(o){
+  if(/质量|做工|材质|廉价|坏/.test(o)) return '品质与耐用性未达预期，削弱功能任务完成度。';
+  if(/安装|操作|复杂|难用|说明/.test(o)) return '上手成本高，中断了任务的顺畅完成。';
+  if(/续航|耗电|速度|卡/.test(o)) return '性能/能耗表现拖慢任务节奏。';
+  if(/售后|物流|退/.test(o)) return '服务链条的断层放大了采用焦虑。';
+  if(/尺寸|适合|适配/.test(o)) return '适配不确定性导致不敢下单。';
+  if(/隐私|尴尬|羞耻/.test(o)) return '社会任务受阻，用户不愿外露。';
+  return '该阻碍直接拉低了任务完成体验。';
+}
+
+/* ===================== 渲染 ===================== */
+function render(){
+  const app = document.getElementById('app');
+  const p = safeProf(loadProfile());
+  const prod = loadProduct();
+
+  if(!p){
+    app.innerHTML = `
+      <div class="empty-state">
+        <div class="eic">🎯</div>
+        <h2>还没有可分析的 VOC 数据</h2>
+        <p>JTBD 报告需要真实的打标数据。请先在 <b>VOC 打标页</b> 完成打标并「🚀 带入一条龙体验」，或在 <b>experience 页面</b> 导入/粘贴标签数据，本页会自动读取并生成分析。</p>
+        <a class="ebtn" href="experience.html">前往一条龙体验 →</a>
+      </div>`;
+    return;
+  }
+
+  const job = Engine.mainJob(p, prod);
+  const layers = Engine.layers(p, prod);
+  const ctx = Engine.circumstances(p);
+  const obstacles = Engine.obstacles(p);
+  const progress = Engine.progress(p);
+  const forces = Engine.forces(p, prod);
+  const recs = Engine.recommendations(p, prod, job);
+  const appendix = Engine.appendix(p);
+
+  const total = p.meta.totalComments || 0;
+  const precise = p.meta.preciseCount || 0;
+  const covered = p.meta.coveredModules || Object.keys(p.modules||{}).length;
+
+  const pctxHtml = (()=>{
+    const arr = [];
+    if(prod){
+      if(prod.purposeName) arr.push(`<span class="pc"><span class="ic">🎯</span><b>目的</b> ${esc(prod.purposeName)}</span>`);
+      if(prod.categoryName) arr.push(`<span class="pc"><span class="ic">📦</span><b>类目</b> ${esc(prod.categoryName)}</span>`);
+      if(prod.desc) arr.push(`<span class="pc"><span class="ic">📝</span>${esc(prod.desc.slice(0,40))}${prod.desc.length>40?'…':''}</span>`);
+    }
+    arr.push(`<span class="pc"><span class="ic">💬</span><b>评价</b> ${total} 条 · ${precise} 精确标签</span>`);
+    arr.push(`<span class="pc"><span class="ic">🧩</span><b>覆盖</b> ${covered} 个模块</span>`);
+    return arr.join('');
+  })();
+
+  const layersHtml = layers.map(L=>`
+    <div class="layer ${L.cls}">
+      <span class="lic">${L.ic}</span>
+      <div class="lt">${esc(L.t)}</div>
+      <div class="lt-en">${L.en}</div>
+      <div class="lbody">${esc(L.body)}</div>
+      <div class="ev">${L.ev.filter(Boolean).slice(0,5).map(e=>`<span class="chip">${esc(e)}</span>`).join('')}</div>
+    </div>`).join('');
+
+  const ctxHtml = ctx.empty
+    ? `<div class="ctx empty"><div class="ch"><span class="ci">🧩</span>暂无场景标签</div><div class="ct">导入含「使用场景」维度的数据后，此处自动聚类出任务情境地图。</div></div>`
+    : ctx.items.map(c=>`
+      <div class="ctx">
+        <div class="ch"><span class="ci">${c.icon}</span>${esc(c.key)}</div>
+        <div class="ct">${c.items.slice(0,3).map(esc).join('、')}${c.items.length>3?' 等':''}</div>
+        <div class="cc">${c.n} 个场景提及</div>
+      </div>`).join('');
+
+  const obstHtml = obstacles.length ? obstacles.map(o=>`
+    <div class="ob">
+      <div class="sev ${o.sev}">${o.sev==='hi'?'高':o.sev==='mid'?'中':'低'}</div>
+      <div class="ob-body">
+        <div class="ob-t">${esc(o.t)}</div>
+        <div class="ob-d">${esc(o.d)}</div>
+        <div class="ob-tag">${esc(o.tag)}</div>
+      </div>
+    </div>`).join('') : `<div class="ctx empty"><div class="ct">未检测到「使用阻碍」标签，任务完成阻力较低。</div></div>`;
+
+  const progHtml = progress.length ? progress.map(pc=>`
+    <div class="pcard">
+      <div class="pn">${pc.n}</div>
+      <div><div class="pt">${esc(pc.t)}</div><div class="pd">${esc(pc.d)}</div></div>
+    </div>`).join('') : `<div class="ctx empty"><div class="ct">导入「产品改进建议 / 需求优先级」后，此处列出用户期望达成的进程。</div></div>`;
+
+  const forcesHtml = forces.map(f=>`
+    <div class="force ${f.cls}">
+      <div class="fi">${f.fi}</div>
+      <div class="ft">${esc(f.t)}</div>
+      <div class="fd">${esc(f.d)}</div>
+    </div>`).join('');
+
+  const recsHtml = `
+    <div class="rec product"><div class="rh"><span class="ri">🛠️</span>产品侧</div><ul>${recs.product.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+    <div class="rec market"><div class="rh"><span class="ri">📣</span>营销侧</div><ul>${recs.market.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+    <div class="rec innov"><div class="rh"><span class="ri">💡</span>创新侧</div><ul>${recs.innov.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+
+  const appxHtml = appendix.length ? appendix.map(a=>`
+    <div class="app-row">
+      <div class="ak">${esc(a.m)}</div>
+      <div class="av">${a.items.map(it=>`<span class="t">${esc(it.t)}<span class="c">${it.n}</span></span>`).join('')}</div>
+    </div>`).join('') : '';
+
+  app.innerHTML = `
+    <section class="hero">
+      <span class="kicker">🎯 JTBD · Jobs To Be Done</span>
+      <h1>用户真正想<span class="accent">完成</span>的任务</h1>
+      <p class="sub">基于你导入的真实 VOC 标签数据，用 JTBD 框架确定性推导（无需大模型）：用户在什么情境下、想完成什么任务、期望获得什么进步，以及是什么阻碍了任务完成。</p>
+      <div class="pctx">${pctxHtml}</div>
+      <div class="job-statement">
+        <div class="lbl">CORE JOB · 核心任务陈述</div>
+        <div class="stmt">${job.text}</div>
+        <div class="meta">由「使用场景 / 购买动机 / 需求优先级」标签确定性合成 · ${job.rawScene.length?('情境信号：'+job.rawScene.join('、')):'（无场景标签，使用默认）'} · ${job.rawMotive.length?('动机信号：'+job.rawMotive.join('、')):'（无动机标签，使用默认）'}</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="num">01</span><h2>三层任务结构</h2>
+        <span class="desc">功能 / 情感 / 社会，由标签映射</span>
+      </div>
+      <div class="layers">${layersHtml}</div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="num">02</span><h2>任务情境地图</h2>
+        <span class="desc">使用场景聚类</span>
+      </div>
+      <div class="context-grid">${ctxHtml}</div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="num">03</span><h2>阻碍任务完成的力量</h2>
+        <span class="desc">按出现强度分级</span>
+      </div>
+      <div class="obstacles">${obstHtml}</div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="num">04</span><h2>用户期望达成的进程</h2>
+        <span class="desc">改进建议 + 需求优先级</span>
+      </div>
+      <div class="progress-list">${progHtml}</div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="num">05</span><h2>JTBD 四力模型</h2>
+        <span class="desc">采用 / 切换动力</span>
+      </div>
+      <div class="forces">${forcesHtml}</div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="num">06</span><h2>行动建议</h2>
+        <span class="desc">产品 / 营销 / 创新</span>
+      </div>
+      <div class="recs">${recsHtml}</div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="num">07</span><h2>数据附录</h2>
+        <span class="desc">本次结论的标签来源</span>
+      </div>
+      <div class="appendix">${appxHtml || '<div class="app-row"><div class="ak">无数据</div><div class="av">未检测到可展示的标签</div></div>'}</div>
+    </section>
+
+    <div class="foot">
+      本报告由 <b>JTBD 确定性引擎</b> 基于 localStorage 中的真实 VOC 标签生成，未调用大模型。<br>
+      数据来源：voc_tag_profile · 产品上下文：voc_product_context · 主题与站点（index / tag-demo / experience）跨页共享。
+    </div>`;
+}
+
+document.addEventListener('DOMContentLoaded', render);
+</script>
+</body>
+</html>

@@ -508,6 +508,7 @@ function loadSampleCase(key){
     document.querySelectorAll('.pcard').forEach(c=>c.classList.toggle('active', c.dataset.key===sc.purpose));
     setActiveCat(sc.category);
     document.getElementById('prodDesc').value = sc.desc;
+    saveProductContext();
 }
 
 /* ============ 状态 ============ */
@@ -515,6 +516,22 @@ let state = { purpose:null, category:null, imported:null, deepMode:false };
 
 /* ============ 第4板块：VOC 标签/痛点统计 导入 ============ */
 const LS_KEY = 'voc_tag_profile';
+const PRODUCT_KEY = 'voc_product_context';
+function saveProductContext(){
+    const pn = (state.purpose && PURPOSES[state.purpose]) ? PURPOSES[state.purpose].name : '';
+    const cn = (state.category && (CATEGORIES[state.category] || getCategory(state.category))) ? (getCategory(state.category).name || state.category) : '';
+    const ctx = { purpose: state.purpose, purposeName: pn, category: state.category, categoryName: cn, desc: (document.getElementById('prodDesc')||{}).value || '' };
+    try { localStorage.setItem(PRODUCT_KEY, JSON.stringify(ctx)); } catch(e){}
+}
+function loadProductContext(){
+    try {
+        const ctx = JSON.parse(localStorage.getItem(PRODUCT_KEY) || 'null');
+        if(!ctx) return;
+        if(ctx.purpose && PURPOSES[ctx.purpose]){ state.purpose = ctx.purpose; document.querySelectorAll('.pcard').forEach(c=>c.classList.toggle('active', c.dataset.key===ctx.purpose)); }
+        if(ctx.category && (CATEGORIES[ctx.category] || getCategory(ctx.category))){ state.category = ctx.category; setActiveCat(ctx.category); }
+        if(ctx.desc && document.getElementById('prodDesc')) document.getElementById('prodDesc').value = ctx.desc;
+    } catch(e){}
+}
 function initImportFromStorage(){
     let prof = null;
     try {
@@ -539,9 +556,7 @@ function buildTagTreeHTML(p){
     return mods.map(([m,mo])=>{
         const dims = Object.entries(mo.dims).sort((a,b)=>b[1].n-a[1].n).slice(0,4);
         const dimsHtml = dims.map(([d, dim])=>{
-            const tags = Object.entries(dim.tags).sort((a,b)=>b[1]-a[1]).slice(0,5);
-            const tagsHtml = tags.map(([t,n])=>`<span class="it-tag">${escapeHtml(t)} <span class="it-n">${n}</span></span>`).join('');
-            return `<div class="it-dim"><span class="it-dn">${escapeHtml(d)}</span> <span class="it-n">${dim.n}</span>${tagsHtml?'<div class="it-tags">'+tagsHtml+'</div>':''}</div>`;
+            return `<div class="it-dim"><span class="it-dn">${escapeHtml(d)}</span> <span class="it-n">${dim.n}</span></div>`;
         }).join('');
         return `<details class="it-mod" open><summary><span class="it-mn">${escapeHtml(m)}</span> <span class="it-n">${mo.n}</span></summary><div class="it-dims">${dimsHtml}</div></details>`;
     }).join('');
@@ -648,10 +663,11 @@ function renderCategories(){
         `<button class="cchip${v.custom?' custom':''}" data-key="${k}" onclick="pickCategory('${k}')">${v.icon} ${k}</button>`).join('') +
         `<button class="cchip cchip-add" onclick="showCustomCat()">➕ 其他</button>`;
 }
-function pickPurpose(k){ state.purpose=k; document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('active')); event.currentTarget.classList.add('active'); }
+function pickPurpose(k){ state.purpose=k; document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('active')); event.currentTarget.classList.add('active'); saveProductContext(); }
 function pickCategory(k){ setActiveCat(k); }
 function setActiveCat(key){
     state.category = key;
+    saveProductContext();
     document.querySelectorAll('.cchip').forEach(c=>{
         c.classList.remove('active');
         if(c.dataset.key===key) c.classList.add('active');
@@ -688,6 +704,7 @@ async function startExperience(){
         alert('请先选择「分析目的」和「产品类目」～');
         return;
     }
+    saveProductContext();
     const btn = document.getElementById('genBtn');
     btn.disabled = true;
     const p = PURPOSES[state.purpose], c = getCategory(state.category);
@@ -1061,7 +1078,12 @@ function buildCardDeep(fk, p, profile, desc){
 
 function openFrameworkDetail(fk){
     const f = FRAMEWORKS[fk];
-    // 占位：后续接入对应框架技能 + 真实 VOC 标签数据做深度分析
+    if(fk === 'jtbd'){
+        // JTBD 详细分析：独立可视化报告页（基于真实 VOC 标签 + 产品上下文，确定性引擎）
+        window.open('jtbd-analysis.html', '_blank');
+        return;
+    }
+    // 其他框架：占位（后续逐个接入对应框架技能）
     alert(`「${f.name}」详细分析功能即将上线。\n\n后续将基于你导入的真实 VOC 标签数据，调用对应框架技能生成可下钻的完整分析报告。`);
 }
 
@@ -1177,7 +1199,10 @@ document.addEventListener('keydown', function(e){
 
 renderPurpose();
 renderCategories();
+loadProductContext();
 initImportFromStorage();
+const prodDescEl = document.getElementById('prodDesc');
+if(prodDescEl) prodDescEl.addEventListener('input', saveProductContext);
 </script>
 </body>
 </html>
