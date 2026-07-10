@@ -225,6 +225,35 @@ textarea::placeholder{color:var(--muted);}
     .jm-chip{font-size:9px; padding:2px 5px;}
 }
 
+/* journey head + actions */
+.journey-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:16px;}
+.journey-titles{min-width:0;}
+.journey-actions{display:flex; gap:8px; flex-shrink:0; align-items:flex-start; padding-top:2px;}
+.jm-act{display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:700; color:var(--slate); background:#fff; border:1px solid var(--line); border-radius:9px; padding:7px 12px; cursor:pointer; transition:.15s; box-shadow:var(--shadow);}
+.jm-act:hover{color:#6366F1; border-color:#C7D2FE; background:#F5F3FF;}
+.jm-act:active{transform:translateY(1px);}
+@media(max-width:680px){
+  .journey-head{flex-direction:column; gap:10px;}
+  .journey-actions{width:100%;}
+  .jm-act{flex:1; justify-content:center;}
+}
+/* journey zoom modal */
+.jm-zoom-overlay{position:fixed; inset:0; z-index:9999; background:rgba(15,23,42,.55); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:28px;}
+.jm-zoom-overlay.show{display:flex;}
+.jm-zoom-modal{width:min(1180px,96vw); max-height:92vh; background:#F8FAFC; border-radius:16px; box-shadow:0 24px 70px rgba(15,23,42,.35); display:flex; flex-direction:column; overflow:hidden;}
+.jm-zoom-bar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 18px; background:#fff; border-bottom:1px solid var(--line);}
+.jm-zoom-title{font-weight:800; font-size:15px; color:var(--ink);}
+.jm-zoom-tools{display:flex; align-items:center; gap:8px;}
+.jm-zb{height:34px; min-width:34px; padding:0 11px; border-radius:9px; border:1px solid var(--line); background:#fff; color:var(--slate); font-size:14px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:.15s;}
+.jm-zb:hover{background:#F5F3FF; color:#6366F1; border-color:#C7D2FE;}
+.jm-zb-pri{background:#6366F1; color:#fff; border-color:#6366F1;}
+.jm-zb-pri:hover{background:#4F46E5; color:#fff;}
+.jm-zoom-pct{font-size:12px; font-weight:700; color:var(--muted); min-width:44px; text-align:center;}
+.jm-zoom-viewport{flex:1; overflow:hidden; padding:22px; cursor:grab; background:#F8FAFC;}
+.jm-zoom-viewport.grabbing{cursor:grabbing;}
+.jm-zoom-stage{transform-origin:0 0; will-change:transform;}
+.jm-zoom-stage .journey{margin-top:0; box-shadow:none; background:transparent; border:none; padding:0;}
+
 /* analysis section */
 .analysis{margin-top:24px;}
 .analysis .an-head{text-align:center; margin-bottom:18px;}
@@ -477,7 +506,19 @@ table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
 
     <div class="submod" id="subModBox"></div>
 
-    <div class="journey" id="journeyBox"></div>
+    <div class="journey">
+      <div class="journey-head">
+        <div class="journey-titles">
+          <h3>🗺️ 用户旅程地图</h3>
+          <div class="jm-sub">按用户旅程阶段（认知 → 评估 → 购买 → 使用 → 体验 → 复购）铺排<b>最小维度标签</b>，并同步展示每个阶段撬动的<b>效果影响</b>（🟠转化 🟢复购 🟣品牌形象 🔴口碑 🔵体验 🔷留存）与<b>情绪强度</b>（绿＝偏正面 · 红＝偏负面 · 色条越长越强）</div>
+        </div>
+        <div class="journey-actions">
+          <button type="button" class="jm-act" id="jmZoomBtn" title="放大查看全图">🔍 放大</button>
+          <button type="button" class="jm-act" id="jmDownBtn" title="导出为 PNG 图片">⬇ 导出图片</button>
+        </div>
+      </div>
+      <div id="journeyBox"></div>
+    </div>
 
     <div class="need-map">
         <h3>🧭 十三种需求映射（从 Module-09 命中推导）</h3>
@@ -1320,15 +1361,12 @@ function effectOf(t){ return EFFECT_MAP[t] || []; }
 /* Plutchik 情绪极性分（正面 +、负面 −） */
 const EMOTION_POLARITY = { joy:2, trust:2, anticipation:1, surprise:1, sadness:-2, disgust:-2, anger:-2, fear:-2 };
 function renderJourneyMap(allHits){
+    window.__lastAllHits = allHits;
     const box = document.getElementById('journeyBox');
-    const hits = allHits.flat();
-    const buckets = {};
-    JOURNEY.forEach(j=>buckets[j.key]=[]);
-    hits.forEach(h=>{ buckets[stageOf(h)].push(h); });
+    const d = computeJourney(allHits);
+    const {buckets, effTotal, emoData, maxIntensity} = d;
 
-    let html = '<h3>🗺️ 用户旅程地图</h3>'+
-        '<div class="jm-sub">按用户旅程阶段（认知 → 评估 → 购买 → 使用 → 体验 → 复购）铺排<b>最小维度标签</b>，并同步展示每个阶段撬动的<b>效果影响</b>（🟠转化 🟢复购 🟣品牌形象 🔴口碑 🔵体验 🔷留存）与<b>情绪强度</b>（绿＝偏正面 · 红＝偏负面 · 色条越长越强）</div>';
-    html += '<div class="jm-map">';
+    let html = '<div class="jm-map">';
 
     /* 表头：阶段列 */
     html += '<div class="jm-corner"></div>';
@@ -1349,15 +1387,6 @@ function renderJourneyMap(allHits){
         html += `<div class="jm-cell jm-cell--journey"><div class="jm-chips">${chips}</div></div>`;
     });
 
-    /* 图层二：效果影响（业务产出聚合） */
-    const effTotal = {};
-    JOURNEY.forEach(j=>{
-        const eff = {};
-        buckets[j.key].forEach(h=>{
-            effectOf(h.t).forEach(k=>{ eff[k]=(eff[k]||0)+1; });
-        });
-        effTotal[j.key] = eff;
-    });
     html += '<div class="jm-rowlabel jm-rowlabel--effect">📈<br>效果影响</div>';
     JOURNEY.forEach(j=>{
         const eff = effTotal[j.key];
@@ -1368,18 +1397,6 @@ function renderJourneyMap(allHits){
         html += `<div class="jm-cell jm-cell--effect"><div class="jm-effs">${chips}</div></div>`;
     });
 
-    /* 图层三：情绪强度 */
-    const emoData = {};
-    let maxIntensity = 1;
-    JOURNEY.forEach(j=>{
-        const emo = {}; let intensity = 0, score = 0;
-        buckets[j.key].forEach(h=>{
-            const arr = EMOTION_MAP[h.t];
-            if(arr) arr.forEach(k=>{ emo[k]=(emo[k]||0)+1; intensity++; score += (EMOTION_POLARITY[k]||0); });
-        });
-        emoData[j.key] = {emo, intensity, score};
-        if(intensity > maxIntensity) maxIntensity = intensity;
-    });
     html += '<div class="jm-rowlabel jm-rowlabel--emo">🔥<br>情绪强度</div>';
     JOURNEY.forEach(j=>{
         const d = emoData[j.key];
@@ -1403,6 +1420,161 @@ function renderJourneyMap(allHits){
     html += '</div>';
     box.innerHTML = html;
 }
+
+/* ===================== 用户旅程地图：数据计算（供 DOM 与 SVG 共用） ===================== */
+function computeJourney(allHits){
+    const hits = allHits.flat();
+    const buckets = {}; JOURNEY.forEach(j=>buckets[j.key]=[]);
+    hits.forEach(h=>{ buckets[stageOf(h)].push(h); });
+    const effTotal = {};
+    JOURNEY.forEach(j=>{ const eff={}; buckets[j.key].forEach(h=>{ effectOf(h.t).forEach(k=>{ eff[k]=(eff[k]||0)+1; }); }); effTotal[j.key]=eff; });
+    const emoData = {}; let maxIntensity = 1;
+    JOURNEY.forEach(j=>{ const emo={}; let intensity=0, score=0; buckets[j.key].forEach(h=>{ const arr=EMOTION_MAP[h.t]; if(arr) arr.forEach(k=>{ emo[k]=(emo[k]||0)+1; intensity++; score+=(EMOTION_POLARITY[k]||0); }); }); emoData[j.key]={emo,intensity,score}; if(intensity>maxIntensity) maxIntensity=intensity; });
+    return {buckets, effTotal, emoData, maxIntensity};
+}
+
+/* ===================== 用户旅程地图：SVG 矢量渲染（用于导出 PNG，规避 grid 栅格化问题） ===================== */
+function renderJourneyMapSVG(d){
+    const {buckets, effTotal, emoData, maxIntensity} = d;
+    const PAD=24, LBL=104, CW=170, GAP=12, HEAD=74, RGAP=14;
+    const chipH=22, chipGap=6, txtPad=10, pillGap=8;
+    const colX = JOURNEY.map((j,i)=> PAD + LBL + i*(CW+GAP));
+    const W = PAD + LBL + JOURNEY.length*CW + (JOURNEY.length-1)*GAP + PAD;
+    let y = PAD;
+    let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" viewBox="0 0 '+W+' __JH__" font-family="-apple-system,BlinkMacSystemFont,\'PingFang SC\',\'Microsoft YaHei\',sans-serif">';
+    svg += '<rect x="0" y="0" width="'+W+'" height="__JH__" fill="#F8FAFC"/>';
+    JOURNEY.forEach((j,i)=>{
+        const x = colX[i];
+        svg += '<rect x="'+x+'" y="'+(y+6)+'" width="30" height="30" rx="9" fill="'+j.color+'"/>';
+        svg += '<text x="'+(x+15)+'" y="'+(y+26)+'" text-anchor="middle" font-size="16">'+j.icon+'</text>';
+        svg += '<text x="'+(x+38)+'" y="'+(y+20)+'" font-size="13" font-weight="800" fill="#0F172A">'+j.name+'</text>';
+        svg += '<text x="'+(x+38)+'" y="'+(y+36)+'" font-size="9" font-weight="700" fill="#94A3B8">阶段 '+(i+1)+'</text>';
+    });
+    y += HEAD;
+    function rowLabel(label, ly, lh){
+        svg += '<text x="'+(PAD+LBL-10)+'" y="'+(ly + lh/2)+'" text-anchor="end" dominant-baseline="middle" font-size="12" font-weight="800" fill="#475569">'+label+'</text>';
+    }
+    function pill(x, yy, w, h, t, cnt, color){
+        svg += '<rect x="'+x+'" y="'+yy+'" width="'+w+'" height="'+h+'" rx="6" fill="'+hex2rgba(color,0.10)+'" stroke="'+hex2rgba(color,0.28)+'"/>';
+        let label = t + (cnt>1? ' ×'+cnt : '');
+        if(label.length>9) label = label.slice(0,9)+'…';
+        svg += '<text x="'+(x+w/2)+'" y="'+(yy+h/2)+'" text-anchor="middle" dominant-baseline="middle" font-size="10.5" font-weight="700" fill="'+color+'">'+escHtml(label)+'</text>';
+    }
+    const pillW = (CW - txtPad*2 - pillGap)/2;
+    /* 图层一：用户旅程 */
+    const jCells = JOURNEY.map(j=>{
+        const hs = buckets[j.key]; const tagCnt={}; hs.forEach(h=>{tagCnt[h.t]=(tagCnt[h.t]||0)+1;});
+        const sorted = Object.entries(tagCnt).sort((a,b)=>b[1]-a[1]);
+        return {rows:Math.max(1, Math.ceil(sorted.length/2)), sorted, color:j.color};
+    });
+    const jRowsMax = Math.max.apply(null, jCells.map(c=>c.rows));
+    let layerH = txtPad + jRowsMax*chipH + (jRowsMax-1)*chipGap;
+    rowLabel('🧭 用户旅程', y, layerH);
+    jCells.forEach((c,i)=>{
+        const x=colX[i];
+        svg += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+layerH+'" rx="10" fill="#F1F5F9"/>';
+        c.sorted.forEach(([t,tc],k)=>{ const col=Math.floor(k/2), r=k%2; pill(x+txtPad+col*(pillW+pillGap), y+txtPad+r*(chipH+chipGap), pillW, chipH, t, tc, c.color); });
+        if(c.sorted.length===0) svg += '<text x="'+(x+CW/2)+'" y="'+(y+layerH/2)+'" text-anchor="middle" dominant-baseline="middle" font-size="10.5" fill="#94A3B8">本批未涉及</text>';
+    });
+    y += layerH + RGAP;
+    /* 图层二：效果影响 */
+    const eCells = JOURNEY.map(j=>{
+        const eff = effTotal[j.key]; const keys=Object.keys(eff);
+        const sorted = keys.length? keys.sort((a,b)=>eff[b]-eff[a]).map(k=>({e:EFFECTS.find(x=>x.key===k), c:eff[k]})) : [];
+        return {rows:Math.max(1, Math.ceil(sorted.length/2)), sorted};
+    });
+    const eRowsMax = Math.max.apply(null, eCells.map(c=>c.rows));
+    let eH = txtPad + eRowsMax*chipH + (eRowsMax-1)*chipGap;
+    rowLabel('📈 效果影响', y, eH);
+    eCells.forEach((c,i)=>{
+        const x=colX[i];
+        svg += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+eH+'" rx="10" fill="#F1F5F9"/>';
+        c.sorted.forEach((it,k)=>{ const col=Math.floor(k/2), r=k%2; pill(x+txtPad+col*(pillW+pillGap), y+txtPad+r*(chipH+chipGap), pillW, chipH, it.e.name, it.c, it.e.color); });
+        if(c.sorted.length===0) svg += '<text x="'+(x+CW/2)+'" y="'+(y+eH/2)+'" text-anchor="middle" dominant-baseline="middle" font-size="10.5" fill="#94A3B8">暂无明显效果信号</text>';
+    });
+    y += eH + RGAP;
+    /* 图层三：情绪强度 */
+    const emoH = 62;
+    rowLabel('🔥 情绪强度', y, emoH);
+    JOURNEY.forEach((j,i)=>{
+        const x=colX[i]; const dd=emoData[j.key];
+        svg += '<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+emoH+'" rx="10" fill="#F1F5F9"/>';
+        if(dd.intensity===0){
+            svg += '<text x="'+(x+CW/2)+'" y="'+(y+emoH/2)+'" text-anchor="middle" dominant-baseline="middle" font-size="10.5" fill="#94A3B8">暂无明显情绪信号</text>';
+        } else {
+            const pct=Math.max(14, Math.round(dd.intensity/maxIntensity*100));
+            const color = dd.score>1?'#059669':(dd.score<-1?'#DC2626':'#D97706');
+            const tone = dd.score>1?'正面':(dd.score<-1?'负面':'中性');
+            const bx=x+txtPad, bw=CW-txtPad*2;
+            svg += '<rect x="'+bx+'" y="'+(y+10)+'" width="'+bw+'" height="13" rx="999" fill="#fff" stroke="rgba(0,0,0,.06)"/>';
+            svg += '<rect x="'+bx+'" y="'+(y+10)+'" width="'+Math.max(6,bw*pct/100)+'" height="13" rx="999" fill="'+color+'"/>';
+            svg += '<text x="'+bx+'" y="'+(y+38)+'" font-size="9.5" font-weight="700" fill="'+color+'">'+tone+'</text>';
+            svg += '<text x="'+(x+CW-txtPad)+'" y="'+(y+38)+'" text-anchor="end" font-size="9.5" font-weight="700" fill="#475569">强度 '+dd.intensity+'</text>';
+            const top = Object.entries(dd.emo).sort((a,b)=>b[1]-a[1]).slice(0,3);
+            top.forEach(([k,c],ti)=>{ const e=EMOTIONS.find(x=>x.key===k); svg += '<circle cx="'+(bx+4+ti*13)+'" cy="'+(y+52)+'" r="4" fill="'+e.color+'"/>'; });
+        }
+    });
+    y += emoH + PAD;
+    svg = svg.split('__JH__').join(String(Math.ceil(y)));
+    svg += '</svg>';
+    return svg;
+}
+
+/* ===================== 用户旅程地图：放大弹窗 + 导出 PNG ===================== */
+(function(){
+    const overlay=document.getElementById('jmZoomOverlay');
+    const stage=document.getElementById('jmZoomStage');
+    const viewport=document.getElementById('jmZoomViewport');
+    const pctEl=document.getElementById('jmZoomPct');
+    let scale=1, tx=0, ty=0, grab=false, lx=0, ly=0;
+    function apply(){ stage.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')'; pctEl.textContent=Math.round(scale*100)+'%'; }
+    function getSrc(){ return document.getElementById('journeyBox'); }
+    function open(){
+        const src=getSrc();
+        if(!src || !src.innerHTML.trim()){ alert('请先完成打标，生成用户旅程地图后再放大查看。'); return; }
+        stage.innerHTML=src.innerHTML;
+        scale=1; tx=0; ty=0; apply();
+        overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false');
+        requestAnimationFrame(function(){ const v=viewport.getBoundingClientRect(), s=stage.getBoundingClientRect(); tx=Math.max(0,(v.width-s.width)/2); ty=Math.max(0,(v.height-s.height)/2); apply(); });
+    }
+    function close(){ overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true'); stage.innerHTML=''; }
+    function zoom(d){ scale=Math.min(4,Math.max(0.5,scale+d)); apply(); }
+    const btnZoom=document.getElementById('jmZoomBtn'); if(btnZoom) btnZoom.addEventListener('click',open);
+    const btnClose=document.getElementById('jmZoomClose'); if(btnClose) btnClose.addEventListener('click',close);
+    const btnIn=document.getElementById('jmZoomIn'); if(btnIn) btnIn.addEventListener('click',function(){zoom(0.2);});
+    const btnOut=document.getElementById('jmZoomOut'); if(btnOut) btnOut.addEventListener('click',function(){zoom(-0.2);});
+    const btnReset=document.getElementById('jmZoomReset'); if(btnReset) btnReset.addEventListener('click',function(){scale=1;tx=0;ty=0;apply();});
+    overlay.addEventListener('click',function(e){ if(e.target===overlay) close(); });
+    viewport.addEventListener('wheel',function(e){ e.preventDefault(); zoom(e.deltaY<0?0.12:-0.12); },{passive:false});
+    viewport.addEventListener('mousedown',function(e){ grab=true; lx=e.clientX; ly=e.clientY; viewport.classList.add('grabbing'); });
+    window.addEventListener('mouseup',function(){ grab=false; viewport.classList.remove('grabbing'); });
+    window.addEventListener('mousemove',function(e){ if(!grab) return; tx+=e.clientX-lx; ty+=e.clientY-ly; lx=e.clientX; ly=e.clientY; apply(); });
+    function download(){
+        const src=getSrc();
+        if(!src || !src.innerHTML.trim()){ alert('请先完成打标，生成用户旅程地图后再导出。'); return; }
+        const btn=document.getElementById('jmDownBtn'); const old=btn.innerHTML; btn.innerHTML='导出中…'; btn.disabled=true;
+        try{
+            const d = computeJourney(window.__lastAllHits || []);
+            const svg = renderJourneyMapSVG(d);
+            const blob = new Blob([svg], {type:'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            img.onload=function(){
+                const vb = svg.match(/viewBox="0 0 ([0-9.]+) ([0-9.]+)"/);
+                const w = vb? parseFloat(vb[1]):1200, h = vb? parseFloat(vb[2]):600;
+                const s2=2;
+                const canvas=document.createElement('canvas'); canvas.width=Math.ceil(w*s2); canvas.height=Math.ceil(h*s2);
+                const ctx=canvas.getContext('2d'); ctx.scale(s2,s2); ctx.drawImage(img,0,0);
+                URL.revokeObjectURL(url);
+                canvas.toBlob(function(b){ if(!b){ alert('导出失败'); btn.innerHTML=old; btn.disabled=false; return; } const a=document.createElement('a'); a.download='用户旅程地图.png'; a.href=URL.createObjectURL(b); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);},1000); btn.innerHTML=old; btn.disabled=false; }, 'image/png');
+            };
+            img.onerror=function(){ URL.revokeObjectURL(url); alert('导出失败：图片渲染错误'); btn.innerHTML=old; btn.disabled=false; };
+            img.src=url;
+        }catch(err){ alert('导出失败：'+err.message); btn.innerHTML=old; btn.disabled=false; }
+    }
+    const btnDown=document.getElementById('jmDownBtn'); if(btnDown) btnDown.addEventListener('click',download);
+    const btnZoomDown=document.getElementById('jmZoomDown'); if(btnZoomDown) btnZoomDown.addEventListener('click',download);
+})();
 
 /* ===================== 小版块（维度）覆盖 ===================== */
 function renderSubModules(allHits){
@@ -1602,5 +1774,24 @@ function toggleAgentCards(){
 /* init */
 renderModChips();
 </script>
+<div class="jm-zoom-overlay" id="jmZoomOverlay" aria-hidden="true">
+  <div class="jm-zoom-modal">
+    <div class="jm-zoom-bar">
+      <span class="jm-zoom-title">用户旅程地图</span>
+      <div class="jm-zoom-tools">
+        <button type="button" class="jm-zb" id="jmZoomOut" title="缩小">−</button>
+        <span class="jm-zoom-pct" id="jmZoomPct">100%</span>
+        <button type="button" class="jm-zb" id="jmZoomIn" title="放大">+</button>
+        <button type="button" class="jm-zb" id="jmZoomReset" title="重置缩放">⟲</button>
+        <button type="button" class="jm-zb jm-zb-pri" id="jmZoomDown">⬇ 下载</button>
+        <button type="button" class="jm-zb jm-zb-close" id="jmZoomClose" title="关闭">✕</button>
+      </div>
+    </div>
+    <div class="jm-zoom-viewport" id="jmZoomViewport">
+      <div class="jm-zoom-stage" id="jmZoomStage"></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
