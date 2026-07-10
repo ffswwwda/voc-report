@@ -1544,6 +1544,7 @@ function renderJourneyMapSVG(d){
 
 /* ===================== 用户旅程地图：放大弹窗 + 导出 PNG ===================== */
 (function(){
+  function initJourney(){
     const overlay=document.getElementById('jmZoomOverlay');
     const stage=document.getElementById('jmZoomStage');
     const viewport=document.getElementById('jmZoomViewport');
@@ -1597,6 +1598,13 @@ function renderJourneyMapSVG(d){
     }
     const btnDown=document.getElementById('jmDownBtn'); if(btnDown) btnDown.addEventListener('click',download);
     const btnZoomDown=document.getElementById('jmZoomDown'); if(btnZoomDown) btnZoomDown.addEventListener('click',download);
+  }
+  // 放大弹窗 DOM 在脚本之后才解析，必须等 DOMContentLoaded 再绑定，否则元素为 null 导致绑定跳过
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', initJourney);
+  } else {
+    initJourney();
+  }
 })();
 
 /* ===================== 小版块（维度）覆盖 ===================== */
