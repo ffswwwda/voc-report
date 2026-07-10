@@ -343,6 +343,10 @@ textarea::placeholder{color:var(--muted);}
     color:#fff; font-size:13px; font-weight:800; padding:9px 16px; border-radius:999px;
     box-shadow:0 6px 16px rgba(5,150,105,.3); transition:all .2s;
 }
+#expExperienceBtn{
+    background:linear-gradient(90deg,#7C3AED,#DB2777);
+    box-shadow:0 6px 16px rgba(124,58,237,.32);
+}
 .export-btn:hover{transform:translateY(-2px);}
 .export-btn:disabled{opacity:.45; cursor:not-allowed; box-shadow:none;}
 
@@ -521,6 +525,7 @@ table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
     <div class="res-toolbar">
         <div class="rt-info" id="rtInfo"></div>
         <button class="export-btn" id="exportBtn" onclick="exportResultXlsx()">⬇️ 导出打标结果 Excel</button>
+        <button class="export-btn" id="expExperienceBtn" onclick="exportToExperience()" title="把当前打标结果带入 VOC 一条龙体验页做深度分析">🚀 带入一条龙体验</button>
     </div>
     <div class="tag-table-wrap"><div id="tagTable"></div></div>
 
@@ -1345,6 +1350,69 @@ function renderCandidatePool(cands){
             <div class="cand-tags">${tags}</div>
         </div>`;
     }).join('');
+}
+
+/* ===================== 导出 VOC 画像（带入一条龙体验页） ===================== */
+/* 把当前打标的真实分析产物序列化成 JSON，供 experience.html 做深度框架分析（不依赖大模型） */
+function buildVOCProfile(){
+    const comments = TAG_STATE.map(r=>r.text);
+    const allHits = TAG_STATE.map(r=>r.hits);
+    const flat = allHits.flat();
+    const precise = flat.filter(h=>!h.provisional);
+    const prov = flat.filter(h=>h.provisional);
+    const preciseCount = precise.length, provCount = prov.length;
+    const modSet = new Set(); precise.forEach(h=>modSet.add(h.m));
+
+    // 模块痛点统计
+    const modules = {};
+    precise.forEach(h=>{ if(!modules[h.m]) modules[h.m]={precise:0,prov:0,color:h.color}; modules[h.m].precise++; });
+    prov.forEach(h=>{ if(!modules[h.m]) modules[h.m]={precise:0,prov:0,color:h.color}; modules[h.m].prov++; });
+
+    // Top 标签（按命中频次）
+    const tagCount = {};
+    precise.forEach(h=>{ const k=h.m+'|'+h.t; if(!tagCount[k]) tagCount[k]={m:h.m,t:h.t,color:h.color,n:0}; tagCount[k].n++; });
+    const topTags = Object.values(tagCount).sort((a,b)=>b.n-a.n).slice(0,40);
+
+    // 需求四象限
+    const needQuad = {explicit:[], implicit:[], unexpected:[], noncustomer:[]};
+    precise.forEach(h=>{ const q=classifyNeedQuad(h); if(q){ const ex=needQuad[q].find(x=>x.t===h.t); if(ex) ex.n++; else needQuad[q].push({t:h.t,n:1}); } });
+    Object.keys(needQuad).forEach(q=> needQuad[q].sort((a,b)=>b.n-a.n));
+
+    // 需求优先级（重要度 × 满意度）
+    const needHits = precise.filter(h=>h.m==='十三种需求');
+    const tally = {}; needHits.forEach(h=>{ tally[h.t]=(tally[h.t]||0)+1; });
+    const needPriority = Object.keys(tally).map(t=>{
+        const imp = NEED_IMPORTANCE[t]!==undefined ? NEED_IMPORTANCE[t] : 0.6;
+        let em=0, ec=0;
+        needHits.filter(h=>h.t===t).forEach(h=>{ const arr=EMOTION_MAP[h.t]; if(arr) arr.forEach(k=>{ em+=(EMOTION_POLARITY[k]||0); ec++; }); });
+        const sat = ec ? em/ec : 0;
+        return {t, imp, sat:Math.max(-1,Math.min(1,sat)), n:tally[t]};
+    }).sort((a,b)=>b.n-a.n);
+
+    // 情绪罗盘
+    const emoCounts = {}; EMOTIONS.forEach(e=>emoCounts[e.key]=0);
+    precise.forEach(h=>{ const arr=EMOTION_MAP[h.t]; if(arr) arr.forEach(k=>emoCounts[k]++); });
+    const emotions = EMOTIONS.map(e=>({key:e.key,name:e.name,count:emoCounts[e.key],polarity:EMOTION_POLARITY[e.key]||0,color:e.color})).filter(e=>e.count>0);
+
+    // 动机构成
+    const motCnt = {}; precise.forEach(h=>{ if(h.m==='购买动机') motCnt[h.d]=(motCnt[h.d]||0)+1; });
+    const motMix = Object.entries(motCnt).map(([dim,n])=>({dim,n})).sort((a,b)=>b.n-a.n);
+
+    // 自进化候选池（二级命中但无三级）
+    const candidatePool = [];
+    allHits.forEach((a,i)=>{ if(a.length>0 && !a.some(h=>h.level===3) && comments[i]){ a.forEach(h=> candidatePool.push({text:comments[i].slice(0,160), module:h.m, dim:h.d, t:h.t})); } });
+
+    return {
+        meta:{ totalComments:comments.length, preciseCount, provCount, coveredModules:modSet.size },
+        modules, topTags, needQuad, needPriority, emotions, motMix, candidatePool,
+        generatedAt:new Date().toISOString()
+    };
+}
+function exportToExperience(){
+    const p = buildVOCProfile();
+    if(!p.meta.preciseCount && !p.meta.provCount){ alert('当前没有可导出的标签结果，请先跑打标。'); return; }
+    try { localStorage.setItem('voc_tag_profile', JSON.stringify(p)); } catch(e){}
+    window.location.href = 'experience.html?from=tag';
 }
 
 /* 仅重算轻量分析（meta/summary/词云/模块/需求/旅程/四象限），不动表格 */

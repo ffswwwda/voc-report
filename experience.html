@@ -60,6 +60,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .cat-input{display:none; border:2px solid var(--pink); border-radius:999px; padding:10px 16px; font-family:inherit; font-size:14px; color:var(--ink); width:240px; outline:none; background:#FDF2F8;}
 .cat-input::placeholder{color:#C4B5FD;}
 
+/* ===== 第4板块：VOC 标签/痛点统计 导入 ===== */
+.import-hint{font-size:13px; color:var(--slate); line-height:1.6; margin-bottom:12px;}
+.import-card{background:linear-gradient(135deg,#F5F3FF,#EEF2FF); border:1px solid #E9D5FF; border-radius:14px; padding:18px 20px; box-shadow:var(--shadow);}
+.import-card .imp-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px;}
+.import-card .imp-badge{display:inline-flex; align-items:center; gap:6px; background:linear-gradient(90deg,#7C3AED,#DB2777); color:#fff; font-weight:700; font-size:13px; padding:6px 14px; border-radius:999px; box-shadow:0 4px 12px rgba(124,58,237,.3);}
+.import-card .imp-sub{font-size:12px; color:#6D28D9; font-weight:600;}
+.import-stats{display:flex; flex-direction:column; gap:10px;}
+.import-stat-row{display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap;}
+.import-stat-label{font-size:12px; font-weight:700; color:var(--slate); min-width:64px; padding-top:3px;}
+.import-chips{display:flex; gap:6px; flex-wrap:wrap;}
+.imp-chip{display:inline-flex; align-items:center; gap:5px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:4px 10px; font-size:12px; font-weight:600; color:var(--ink);}
+.imp-chip .n{color:#7C3AED; font-weight:800;}
+.imp-chip.neg{background:#FEF2F2; border-color:#FECACA; color:#B91C1C;}
+.imp-chip.pos{background:#F0FDF4; border-color:#BBF7D0; color:#15803D;}
+.import-clear{margin-top:14px; display:inline-flex; align-items:center; gap:6px; background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:8px 16px; font-size:13px; font-weight:700; color:var(--slate); cursor:pointer; font-family:inherit; transition:all .2s;}
+.import-clear:hover{border-color:#DB2777; color:#DB2777;}
+.import-manual-toggle{display:inline-flex; align-items:center; gap:6px; background:#fff; border:1.5px dashed var(--indigo); border-radius:999px; padding:9px 18px; font-size:13px; font-weight:700; color:var(--indigo); cursor:pointer; font-family:inherit; transition:all .2s;}
+.import-manual-toggle:hover{background:#EEF2FF;}
+.import-manual{display:none; margin-top:14px; background:#F8FAFC; border:1px solid var(--line); border-radius:12px; padding:16px;}
+.import-manual.show{display:block;}
+.import-manual textarea{min-height:120px;}
+.import-manual .imp-tip{font-size:12px; color:#94A3B8; margin:8px 0 12px; line-height:1.5;}
+.import-manual .imp-actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+.import-parse-btn{background:linear-gradient(90deg,var(--indigo),var(--pink)); color:#fff; border:none; border-radius:999px; padding:10px 22px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;}
+.import-parse-btn:disabled{opacity:.6; cursor:not-allowed;}
+.import-err{color:#B91C1C; font-size:12px; font-weight:600;}
+
 /* textarea */
 textarea{width:100%; min-height:110px; border:2px solid var(--line); border-radius:12px; padding:14px 16px; font-family:inherit; font-size:14px; color:var(--ink); resize:vertical; transition:border-color .2s;}
 textarea:focus{outline:none; border-color:var(--indigo);}
@@ -235,9 +262,14 @@ textarea::placeholder{color:var(--muted);}
             </div>
         </div>
 
+        <div class="cfg-block" id="importBlock">
+            <div class="cfg-label"><span class="num">4</span> VOC 用户标签 / 痛点统计 <span style="font-weight:400;color:#94A3B8;font-size:12px;">（可选 · 让结论基于真实数据）</span></div>
+            <div id="importArea"></div>
+        </div>
+
         <div class="gen-wrap">
             <button class="gen-btn" id="genBtn" onclick="startExperience()">🚀 一键生成分析结论</button>
-            <div class="gen-hint">演示数据基于你选的目的与类目自动生成，结论为示例，不是真实分析产出。</div>
+            <div class="gen-hint" id="genHint">演示数据基于你选的目的与类目自动生成，结论为示例，不是真实分析产出。</div>
         </div>
     </div>
 </div>
@@ -421,7 +453,112 @@ function loadSampleCase(key){
 }
 
 /* ============ 状态 ============ */
-let state = { purpose:null, category:null };
+let state = { purpose:null, category:null, imported:null, deepMode:false };
+
+/* ============ 第4板块：VOC 标签/痛点统计 导入 ============ */
+const LS_KEY = 'voc_tag_profile';
+function initImportFromStorage(){
+    let prof = null;
+    try {
+        const params = new URLSearchParams(location.search);
+        if(params.get('from')==='tag'){ prof = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); }
+        if(!prof){ prof = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); }
+    } catch(e){ prof = null; }
+    if(prof && prof.meta && (prof.meta.preciseCount || prof.meta.provCount || Object.keys(prof.modules||{}).length)){
+        state.imported = prof; state.deepMode = true;
+    }
+    renderImportArea();
+    updateGenHint();
+}
+function topTagsByModule(prof, m, n){
+    if(!prof || !prof.topTags) return [];
+    return prof.topTags.filter(t=>t.m===m).sort((a,b)=>b.n-a.n).slice(0, n||3).map(t=>t.t);
+}
+function renderImportArea(){
+    const el = document.getElementById('importArea'); if(!el) return;
+    const p = state.imported;
+    if(p){
+        const meta = p.meta || {};
+        const modEntries = Object.entries(p.modules||{}).sort((a,b)=>((b[1].precise+b[1].prov)-(a[1].precise+a[1].prov))).slice(0,4);
+        const topMods = modEntries.map(([m,o])=>`<span class="imp-chip">${m} <span class="n">${o.precise}${o.prov?('+'+o.prov):''}</span></span>`).join('');
+        const topNeeds = (p.needPriority||[]).slice(0,3).map(x=>`<span class="imp-chip">${x.t} <span class="n">${(x.imp*100).toFixed(0)}%</span></span>`).join('');
+        const pos = (p.emotions||[]).filter(e=>e.polarity>0).sort((a,b)=>b.count-a.count).slice(0,2).map(e=>`<span class="imp-chip pos">${e.name} <span class="n">${e.count}</span></span>`).join('');
+        const neg = (p.emotions||[]).filter(e=>e.polarity<0).sort((a,b)=>b.count-a.count).slice(0,2).map(e=>`<span class="imp-chip neg">${e.name} <span class="n">${e.count}</span></span>`).join('');
+        const tagsN = (p.topTags||[]).length;
+        el.innerHTML =
+            `<div class="import-card">
+                <div class="imp-head">
+                    <span class="imp-badge">✅ 已从 VOC 打标页导入</span>
+                    <span class="imp-sub">${meta.totalComments||0} 条评价 · ${meta.preciseCount||0} 精确标签${meta.provCount?(' + '+meta.provCount+' 推测'):''} · 覆盖 ${meta.coveredModules||0} 模块</span>
+                </div>
+                <div class="import-stats">
+                    <div class="import-stat-row"><span class="import-stat-label">痛点 Top</span><div class="import-chips">${topMods||'<span class="imp-chip">无</span>'}</div></div>
+                    ${topNeeds?`<div class="import-stat-row"><span class="import-stat-label">需求 Top</span><div class="import-chips">${topNeeds}</div></div>`:''}
+                    ${pos?`<div class="import-stat-row"><span class="import-stat-label">正向情绪</span><div class="import-chips">${pos}</div></div>`:''}
+                    ${neg?`<div class="import-stat-row"><span class="import-stat-label">负向情绪</span><div class="import-chips">${neg}</div></div>`:''}
+                </div>
+                <button class="import-clear" onclick="clearImport()">🗑 清空导入，改用演示数据</button>
+            </div>`;
+    } else {
+        el.innerHTML =
+            `<div class="import-hint">未检测到打标数据。你可以直接从 <b>VOC 打标页</b> 点「🚀 带入一条龙体验」自动导入；或手动粘贴标签数据（下方）。不导入也能生成演示结论。</div>
+             <button class="import-manual-toggle" onclick="toggleManualImport()">📥 粘贴 / 上传标签数据</button>
+             <div class="import-manual" id="manualImport">
+                <textarea id="manualImportText" placeholder='可粘贴从打标页导出的 JSON，或简易格式（每行一个「模块名: 计数」）：\n使用阻碍: 12\n产品改进建议: 8\n购买动机: 5'></textarea>
+                <div class="imp-tip">简易格式仅提供「模块痛点统计」，深度分析会自动降级（仅基于模块分布做框架推断）；粘贴完整 JSON 可解锁全部框架结论。</div>
+                <div class="imp-actions">
+                    <button class="import-parse-btn" onclick="parseManualImport()">解析并导入</button>
+                    <span class="import-err" id="manualErr"></span>
+                </div>
+             </div>`;
+    }
+}
+function toggleManualImport(){ const m=document.getElementById('manualImport'); if(m) m.classList.toggle('show'); }
+function clearImport(){
+    state.imported = null; state.deepMode = false;
+    try { localStorage.removeItem(LS_KEY); } catch(e){}
+    renderImportArea(); updateGenHint();
+}
+function parseManualImport(){
+    const errEl = document.getElementById('manualErr');
+    const txt = (document.getElementById('manualImportText')||{}).value || '';
+    if(!txt.trim()){ if(errEl) errEl.textContent='请先粘贴数据。'; return; }
+    let prof = null;
+    try {
+        prof = JSON.parse(txt);
+        if(!prof || typeof prof!=='object') throw new Error('格式不对');
+        // 归一化为统一结构
+        prof = {
+            meta: prof.meta || { totalComments:0, preciseCount: prof.modules?Object.values(prof.modules).reduce((s,o)=>s+(o.precise||0)+(o.prov||0),0):0, provCount:0, coveredModules: prof.modules?Object.keys(prof.modules).length:0 },
+            modules: prof.modules || {},
+            topTags: prof.topTags || [],
+            needQuad: prof.needQuad || {explicit:[],implicit:[],unexpected:[],noncustomer:[]},
+            needPriority: prof.needPriority || [],
+            emotions: prof.emotions || [],
+            motMix: prof.motMix || [],
+            candidatePool: prof.candidatePool || []
+        };
+    } catch(e){
+        // 简易格式：每行 "模块: 计数"
+        const modules = {};
+        txt.split('\n').forEach(line=>{
+            const mm = line.split(/[:：]/);
+            if(mm.length===2){ const name=mm[0].trim(), n=parseInt(mm[1].trim(),10); if(name && !isNaN(n)) modules[name]={precise:n,prov:0,color:'#7C3AED'}; }
+        });
+        if(Object.keys(modules).length===0){ if(errEl) errEl.textContent='无法解析：请检查 JSON 或「模块: 计数」格式。'; return; }
+        prof = { meta:{ totalComments:0, preciseCount:Object.values(modules).reduce((s,o)=>s+o.precise,0), provCount:0, coveredModules:Object.keys(modules).length }, modules, topTags:[], needQuad:{explicit:[],implicit:[],unexpected:[],noncustomer:[]}, needPriority:[], emotions:[], motMix:[], candidatePool:[] };
+    }
+    state.imported = prof; state.deepMode = true;
+    renderImportArea(); updateGenHint();
+}
+function updateGenHint(){
+    const h = document.getElementById('genHint'); if(!h) return;
+    if(state.deepMode && state.imported){
+        h.innerHTML = '已接入 <b>真实 VOC 打标数据</b>，结论将基于你的标签/痛点统计 + 所选目的，由分析框架确定性推导（无需大模型）。';
+    } else {
+        h.innerHTML = '演示数据基于你选的目的与类目自动生成，结论为示例，不是真实分析产出。';
+    }
+}
 
 /* ============ 渲染选择器 ============ */
 function renderPurpose(){
@@ -503,19 +640,30 @@ async function startExperience(){
     c1.innerHTML = '<span class="waiting">正在接入数据源…</span>';
     await sleep(500);
     c1.innerHTML = '';
-    for(const s of p.sources){
-        addChip(c1, '', `<span class="rk">${s.r}</span>${s.n} · ${s.d}`);
-        await sleep(280);
-    }
-    await sleep(300);
-    const tlabel = document.createElement('div');
-    tlabel.style.cssText = 'font-size:11px;color:#94A3B8;margin:8px 0 2px;font-weight:700;';
-    tlabel.textContent = '提取标签板块 →';
-    c1.appendChild(tlabel);
-    for(const t of p.tags){
-        const subs = (TAG_SUBS[t]||[]).slice(0,3).join(' · ');
-        addChip(c1, 'tag', `${t}${subs?'：'+subs:''}`);
-        await sleep(220);
+    if(state.deepMode && state.imported){
+        const mp = state.imported.meta || {};
+        addChip(c1, 'fw', `✅ 已导入真实 VOC 数据：${mp.totalComments||0} 评价 / ${mp.preciseCount||0} 标签`);
+        await sleep(360);
+        const modEntries = Object.entries(state.imported.modules||{}).sort((a,b)=>((b[1].precise+b[1].prov)-(a[1].precise+a[1].prov)));
+        for(const [m,o] of modEntries){
+            addChip(c1, 'tag', `${m} ×${o.precise}${o.prov?('+'+o.prov):''}`);
+            await sleep(180);
+        }
+    } else {
+        for(const s of p.sources){
+            addChip(c1, '', `<span class="rk">${s.r}</span>${s.n} · ${s.d}`);
+            await sleep(280);
+        }
+        await sleep(300);
+        const tlabel = document.createElement('div');
+        tlabel.style.cssText = 'font-size:11px;color:#94A3B8;margin:8px 0 2px;font-weight:700;';
+        tlabel.textContent = '提取标签板块 →';
+        c1.appendChild(tlabel);
+        for(const t of p.tags){
+            const subs = (TAG_SUBS[t]||[]).slice(0,3).join(' · ');
+            addChip(c1, 'tag', `${t}${subs?'：'+subs:''}`);
+            await sleep(220);
+        }
     }
     n1.classList.remove('active'); n1.classList.add('done');
     document.getElementById('progBar').style.width = '33%';
@@ -549,28 +697,38 @@ async function startExperience(){
     document.getElementById('progBar').style.width = '100%';
     await sleep(500);
 
-    renderResults(p, c);
+    renderResults(p, c, state.deepMode ? state.imported : null);
     btn.disabled = false;
 }
 
 /* ============ 渲染结论 ============ */
-function renderResults(p, c){
+function renderResults(p, c, profile){
     const desc = document.getElementById('prodDesc').value.trim() || '（未填写产品描述）';
     const catName = state.category;
-    const ex = c.sample;
+    const isDeep = !!(profile && profile.meta);
 
     document.getElementById('resSub').textContent =
-        `目的「${p.name}」 × 类目「${catName}」 — 共匹配 ${p.frameworks.length} 个分析框架`;
-    document.getElementById('resMeta').innerHTML =
-        `<span class="m">🎯 ${p.name}</span><span class="m">${c.icon} ${catName}</span><span class="m">📦 数据源 ${p.sources.length} 个</span><span class="m">🏷️ 标签 ${p.tags.length} 类</span>`;
-
-    document.getElementById('resSummary').innerHTML =
-        `基于你描述的「${catName}」产品，我们完成了 <b>${p.sources.length}</b> 个数据源接入、<b>${p.tags.length}</b> 类标签抽取，并匹配了 <b>${p.frameworks.length}</b> 个分析框架。` +
-        `针对目的「<b>${p.name}</b>」，核心洞察是：用户最在意的并非单一功能，而是「<b>${ex.motive}</b>」所代表的综合体验；当前主要卡点在 <b>${ex.blocks[0]}</b> 与 <b>${ex.blocks[1]}</b>。` +
-        (c.custom ? `<br><span style="color:#7C3AED;font-size:13px;">⚠️ 该类目为自定义输入，未内置真实样本，结论基于通用示例，建议补充该类目的真实评价数据后再分析。</span>` : '');
+        `目的「${p.name}」 × 类目「${catName}」 — 共匹配 ${p.frameworks.length} 个分析框架` + (isDeep ? ' · 深度模式（真实数据）' : '');
+    if(isDeep){
+        const mp = profile.meta;
+        document.getElementById('resMeta').innerHTML =
+            `<span class="m">🎯 ${p.name}</span><span class="m">${c.icon} ${catName}</span><span class="m">🏷️ 真实标签 ${mp.preciseCount||0}${mp.provCount?(' +'+mp.provCount+' 推测'):''}</span><span class="m">📊 覆盖 ${mp.coveredModules||0} 模块</span><span class="m" style="background:#FDF2F8;color:#DB2777;">🔬 深度分析</span>`;
+        const topMods = Object.entries(profile.modules||{}).sort((a,b)=>((b[1].precise+b[1].prov)-(a[1].precise+a[1].prov))).slice(0,3).map(e=>e[0]);
+        document.getElementById('resSummary').innerHTML =
+            `基于你从 VOC 打标页导入的 <b>${mp.totalComments||0}</b> 条真实评价（命中 <b>${mp.preciseCount||0}</b> 个标签），我们匹配了 <b>${p.frameworks.length}</b> 个分析框架并做确定性推导。` +
+            `针对目的「<b>${p.name}</b>」，用户痛点最集中在 <b>${topMods.join('、')}</b>${desc && desc!=='（未填写产品描述）' ? '；结合你补充的产品描述，' : '。'}结论由框架逻辑直接得出，无需大模型。`;
+    } else {
+        const ex = c.sample;
+        document.getElementById('resMeta').innerHTML =
+            `<span class="m">🎯 ${p.name}</span><span class="m">${c.icon} ${catName}</span><span class="m">📦 数据源 ${p.sources.length} 个</span><span class="m">🏷️ 标签 ${p.tags.length} 类</span>`;
+        document.getElementById('resSummary').innerHTML =
+            `基于你描述的「${catName}」产品，我们完成了 <b>${p.sources.length}</b> 个数据源接入、<b>${p.tags.length}</b> 类标签抽取，并匹配了 <b>${p.frameworks.length}</b> 个分析框架。` +
+            `针对目的「<b>${p.name}</b>」，核心洞察是：用户最在意的并非单一功能，而是「<b>${ex.motive}</b>」所代表的综合体验；当前主要卡点在 <b>${ex.blocks[0]}</b> 与 <b>${ex.blocks[1]}</b>。` +
+            (c.custom ? `<br><span style="color:#7C3AED;font-size:13px;">⚠️ 该类目为自定义输入，未内置真实样本，结论基于通用示例，建议补充该类目的真实评价数据后再分析。</span>` : '');
+    }
 
     // 用户案例表（本次分析对象）
-    document.getElementById('caseBlock').innerHTML = buildCaseTable(p, c, desc);
+    document.getElementById('caseBlock').innerHTML = isDeep ? buildCaseTableDeep(p, profile, desc) : buildCaseTable(p, c, desc);
     // 重置「用户完全体合成」状态
     const sb = document.getElementById('synthBtn');
     sb.disabled = false; sb.textContent = '🦞 点击合成用户完全体';
@@ -578,7 +736,7 @@ function renderResults(p, c){
     document.getElementById('synthResult').innerHTML = '';
 
     const wrap = document.getElementById('resCards');
-    wrap.innerHTML = p.frameworks.map(fk=>buildCard(fk, p, c, desc)).join('');
+    wrap.innerHTML = p.frameworks.map(fk=> isDeep ? buildCardDeep(fk, p, profile, desc) : buildCard(fk, p, c, desc)).join('');
 
     document.getElementById('results').classList.add('show');
     document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
@@ -676,6 +834,158 @@ function buildCaseTable(p, c, desc){
     </tbody></table>`;
 }
 
+/* ============ 深度模式：基于真实打标画像的框架分析（不调大模型） ============ */
+const TRIZ_MAP = {
+    '清洁':['分割原理：内胆/主体分离，可拆洗','预先反作用原理：出厂预清洁减少用户动作'],
+    '洗':['分割原理：可拆洗结构','预先反作用原理：免洗/自清洁涂层'],
+    '噪音':['局部质量原理：柔性包裹降低噪音传递','隔音/振动隔离原理：静音马达结构'],
+    '尺寸':['柔性壳体原理：可调/渐宽入口','动态性原理：尺寸可调节设计'],
+    '紧':['柔性壳体原理：入口渐宽','动态性原理：可调节松紧'],
+    '重':['局部质量原理：中空/轻质材料','复合材料原理：减重不降质感'],
+    '无法':['分割原理：结构自校正','自服务原理：免工具拆装'],
+    '错位':['分割原理：分体对准结构','自服务原理：卡扣自校正'],
+    '性价比':['反馈原理：成本透明化','复制原理：标准化降本'],
+    '图文':['反馈原理：实物实拍透明化','预先防范原理：详情页标注真实参数'],
+    '收纳':['嵌套原理：可折叠/可站立','柔性壳体原理：软质可卷'],
+    '携带':['嵌套原理：便携收纳','柔性壳体原理：轻量可卷'],
+    '隐私':['伪装原理： discreet 外观','合并原理：日常物品形态'],
+    '材质':['复合材料原理：亲肤医用材质','惰性原理：防过敏涂层'],
+    '尴尬':['伪装原理：去敏感化外观','合并原理：日常化包装'],
+    '羞耻':['伪装原理：去敏感化外观','合并原理：日常化包装']
+};
+function trizFor(obstacles){
+    const out = [];
+    obstacles.forEach(o=>{
+        for(const k in TRIZ_MAP){ if(o.indexOf(k)>=0){ TRIZ_MAP[k].forEach(pr=>{ if(!out.includes(pr)) out.push(pr); }); break; } }
+    });
+    if(out.length===0) out.push('分割原理：将主体/功能模块分离，降低耦合','柔性壳体原理：用软质包裹缓冲体验冲突');
+    return out.slice(0,3);
+}
+
+function buildCaseTableDeep(p, profile, desc){
+    const catName = state.category;
+    const motive = topTagsByModule(profile,'购买动机',3).join('、') || (profile.needPriority||[]).slice(0,2).map(x=>x.t).join('、') || '（未命中购买动机标签）';
+    const scene = topTagsByModule(profile,'使用场景',3).join('、') || '（未命中使用场景标签）';
+    const blocks = topTagsByModule(profile,'使用阻碍',4).join('、') || '（未命中使用阻碍标签）';
+    const improve = topTagsByModule(profile,'产品改进建议',4).join('、') || '（未命中改进建议标签）';
+    const candN = (profile.candidatePool||[]).length;
+    const rows = [
+        ['分析目的', p.name + '（深度模式 · 真实数据）'],
+        ['产品类目', catName],
+        ['基本情况', desc || '（未填写）'],
+        ['用户想要什么', motive],
+        ['使用场景', scene],
+        ['核心阻碍', blocks + (candN? ` ＋ 待细化 ${candN} 条`:'')],
+        ['改进方向', improve || '（未命中改进建议标签）']
+    ];
+    return `<div class="case-title">📋 用户案例（本次分析对象 · 来自真实打标）</div>
+    <table class="case-table"><tbody>
+        ${rows.map(r=>`<tr><th>${r[0]}</th><td>${escapeHtml(r[1])}</td></tr>`).join('')}
+    </tbody></table>`;
+}
+
+function buildCardDeep(fk, p, profile, desc){
+    const f = FRAMEWORKS[fk];
+    const catName = state.category;
+    const obstacles = topTagsByModule(profile,'使用阻碍',3);
+    const motives = topTagsByModule(profile,'购买动机',3);
+    const scenes = topTagsByModule(profile,'使用场景',3);
+    const improves = topTagsByModule(profile,'产品改进建议',3);
+    const needs = (profile.needPriority||[]).map(x=>x.t);
+    const cands = profile.candidatePool||[];
+    const emotions = profile.emotions||[];
+    let insight='', finds=[], action='';
+
+    if(fk==='jtbd'){
+        const emoJob = motives[0] || needs[0] || '情感满足';
+        const socialJob = topTagsByModule(profile,'用户画像',1)[0] || (obstacles.some(o=>/隐私|尴尬|羞耻/.test(o)) ? '私密不尴尬地拥有' : '被理解、敢外露');
+        const funcCtx = scenes.join('、') || '日常使用';
+        insight = `${catName}用户表面任务是「获得核心功能满足」，深层情感任务是「${emoJob}」，社会任务是「${socialJob}」。你描述的「${shorten(desc)}」正对应这一层。`;
+        finds = [
+            `功能任务：在${funcCtx}下稳定完成核心体验——当前${obstacles.length?('「'+obstacles.join('、')+'」是未完成的卡点'):'暂无明确阻碍标签'}`,
+            `情感任务：「${emoJob}」未被满足，是复购与推荐的关键驱动力`,
+            `社会任务：「${socialJob}」决定用户是否敢于复购、外露与安利`
+        ];
+        action = `叙事从「功能参数」切到「情感/社会任务」：先解决${obstacles[0]||'核心阻碍'}，再用「${emoJob}」与「${socialJob}」做沟通。`;
+    }
+    else if(fk==='needs-analysis'){
+        const np = profile.needPriority||[];
+        const topImp = np.slice().sort((a,b)=>b.imp-a.imp).slice(0,3).map(x=>x.t);
+        const gap = np.filter(x=>x.sat < -0.1).sort((a,b)=>b.imp-a.imp).map(x=>x.t);
+        const strong = np.filter(x=>x.sat > 0.1).map(x=>x.t);
+        const implicitNeeds = (profile.needQuad&&profile.needQuad.implicit||[]).map(x=>x.t);
+        insight = `按13种需求看，${catName}用户高重要需求集中在「${topImp.join('、')||'—'}」；其中「${gap.join('、')||'无明显缺口'}」重要但满意度低，是需求缺口；「${strong.join('、')||'—'}」已较好满足。`;
+        finds = [
+            `需求缺口（高重要/低满意）：${gap.join('、')||'暂未识别'} → 直接拉低满足度`,
+            `已满足需求（可做信任背书）：${strong.join('、')||'—'}`,
+            `隐性空白（${implicitNeeds.length?'含「'+implicitNeeds.slice(0,2).join('、')+'」等':'用户未说出的'}）：几乎无人从「被理解」角度沟通，存在蓝海`
+        ];
+        action = `优先补「${gap.slice(0,2).join('、')||topImp[0]||'核心需求'}」短板，再用隐性需求做价值升级与品牌差异化。`;
+    }
+    else if(fk==='extreme'){
+        const candTop = cands.slice(0,3).map(x=>x.t);
+        insight = `在${catName}品类，领先用户已自发在「${obstacles.join('、')||'使用阻碍'}」上将就，并出现「${candTop.join('、')||'待细化诉求'}」等 workaround——这就是未来1-2年的主流需求（von Hippel：领先用户需求=未来需求）。`;
+        finds = [
+            `领先用户信号：${obstacles.join('、')||'—'} 是他们仍在将就的点`,
+            `未来需求（workaround 产品化）：${candTop.join('、')||'（候选池为空，可补充更多评价以识别）'}`,
+            `可对话对象：复购≥3次、主动写长评/提改建议的用户，即为领先用户样本`
+        ];
+        action = `建立领先用户回访机制，把他们的 workaround 纳入下一代路线图，抢占品类定义权。`;
+    }
+    else if(fk==='triz'){
+        const principles = trizFor(obstacles);
+        insight = `针对技术矛盾「${obstacles.join(' × ')||'使用阻碍'}」，用 TRIZ 发明原理求解（40原理体系）：`;
+        finds = principles.map((pr,i)=>`原理${i+1}：${pr}`);
+        if(obstacles.length===0) finds.push('（未命中具体阻碍标签，建议补充使用阻碍类评价以定位技术矛盾）');
+        action = `用 TRIZ 做一轮方案发散，优先验证「${principles[0]||'分割+柔性壳体'}」组合的可行性，避免依赖直觉创新。`;
+    }
+    else if(fk==='compass'){
+        const emoJob = motives[0] || needs[0] || '情感价值';
+        insight = `用产品创意罗盘对「${catName}」做4象限×20打法发散，最具潜力的是「场景延伸 × 体验升级」象限：`;
+        finds = [
+            `场景延伸：在${scenes.join('、')||'现有场景'}之外拓展新使用情境`,
+            `体验升级：用${improves[0]||'材质/结构'}提升真实度与易用性`,
+            `情感加成：加入「${emoJob}」向的仪式感/陪伴设计`
+        ];
+        action = `从罗盘20种打法中筛选3个低成本概念做快速验证（众筹/预售测需求），跳出同质化。`;
+    }
+    else if(fk==='researcher'){
+        const np = profile.needPriority||[];
+        if(np.length===0){ insight = `未命中「十三种需求」标签，无法绘制重要度×满意度矩阵。建议补充需求/价值类表述后重跑。`; finds=['（需求优先级数据缺失）']; action='补充十三种需求相关评价，再启用本框架量化。'; }
+        else {
+            const zone = (x)=> (x.imp>=0.6?(x.sat>0?'维持区':'优先改进区'):(x.sat>0?'差异化区':'过度供给区'));
+            const groups = {};
+            np.forEach(x=>{ const z=zone(x); (groups[z]=groups[z]||[]).push(x.t); });
+            insight = `重要度×满意度矩阵（13种需求）：优先改进区=${groups['优先改进区']?groups['优先改进区'].join('、'):'无'}；维持区=${groups['维持区']?groups['维持区'].join('、'):'无'}；差异化区=${groups['差异化区']?groups['差异化区'].join('、'):'无'}；过度供给区=${groups['过度供给区']?groups['过度供给区'].join('、'):'无'}。`;
+            finds = [
+                `优先改进区（高重要/低满意）：${groups['优先改进区']?groups['优先改进区'].join('、'):'—'} → ROI 最高`,
+                `维持区（高重要/高满意）：${groups['维持区']?groups['维持区'].join('、'):'—'} → 巩固信任`,
+                `差异化区（低重要/高满意）：${groups['差异化区']?groups['差异化区'].join('、'):'—'} → 可做沟通卖点`
+            ];
+            action = `资源先投向优先改进区（${groups['优先改进区']?groups['优先改进区'].slice(0,2).join('、'):'核心缺口'}），ROI 最高。`;
+        }
+    }
+    else { // plutchik
+        const pos = emotions.filter(e=>e.polarity>0).sort((a,b)=>b.count-a.count).slice(0,2).map(e=>`${e.name}(${e.count})`);
+        const neg = emotions.filter(e=>e.polarity<0).sort((a,b)=>b.count-a.count).slice(0,2).map(e=>`${e.name}(${e.count})`);
+        insight = `情绪层面，${catName}评论负向高频为「${neg.join('、')||'—'}」，正向驱动为「${pos.join('、')||'—'}」（Plutchik 8情绪 × 强度）。`;
+        finds = [
+            `负向：${neg.join('、')||'—'} → 指向清洁/隐私/材质等具体痛点`,
+            `正向：${pos.join('、')||'—'} → 来自${improves.join('、')||'材质/体验'}与易用设计`,
+            `文案机会：用「安心」「无负担」对冲负向情绪，降低转化阻力`
+        ];
+        action = `详情页用「安心感」视觉与文案中和用户的${neg[0]||'负向'}情绪，提升转化与复购。`;
+    }
+
+    return `<div class="fw-result" style="border-left-color:${f.color}">
+        <h3>${f.icon} ${f.name} <span class="ftag" style="background:${f.color}">框架 · 真实数据</span></h3>
+        <div class="fdesc">${f.desc}</div>
+        <div class="finsight">${insight}</div>
+        <ul>${finds.map(x=>`<li>${x}</li>`).join('')}</ul>
+        <div class="faction"><b>🎯 行动建议：</b>${action}</div>
+    </div>`;
+}
+
 function synthComplete(){
     const p = PURPOSES[state.purpose], c = getCategory(state.category), ex = c.sample, catName = state.category;
     const desc = document.getElementById('prodDesc').value.trim() || '（未填写产品描述）';
@@ -683,27 +993,37 @@ function synthComplete(){
     if(btn.disabled) return;
     btn.disabled = true;
     btn.textContent = '🦞 正在合成用户完全体…';
+    const deep = !!(state.imported && state.imported.meta);
+    const prof = state.imported;
+    // 深度模式：用真实打标数据合成
+    const motive = deep ? (topTagsByModule(prof,'购买动机',3).join('、') || (prof.needPriority||[]).slice(0,2).map(x=>x.t).join('、') || '情感与功能满足') : ex.motive;
+    const scene = deep ? (topTagsByModule(prof,'使用场景',3).join('、') || '日常使用场景') : ex.scene;
+    const blocks = deep ? (topTagsByModule(prof,'使用阻碍',4).join('、') || '无明显阻碍') : ex.blocks.join('、');
+    const improve = deep ? (topTagsByModule(prof,'产品改进建议',4).join('、') || '（未命中改进建议）') : ex.improve.join('、');
+    const needArr = deep ? (prof.needPriority||[]).slice(0,5).map(x=>x.t) : (ex.needs||[]);
     setTimeout(()=>{
-        const lead = `一位注重「${ex.motive.split('、')[0]}」的${catName}用户，在${ex.scene}中使用产品；表面追求功能满足，深层渴望「${ex.motive.split('、')[1]||ex.motive.split('、')[0]}」与被理解的安心感。`;
-        const needTags = (ex.needs||[]).map(n=>`<span class="need-tag">${n}</span>`).join('');
-        const verdict = `完全体结论：${catName}用户不是要"一个更猛的功能"，而是要在「${ex.blocks.slice(0,2).join('、')}」被解决后，获得「${ex.motive}」的综合体验。先把 <b>${ex.improve.slice(0,2).join('、')}</b> 落地，再用 13 种需求里的「<b>${ex.needs.slice(0,3).join('、')}</b>」做差异化沟通，才是完整的用户经营闭环。`;
+        const leadDeep = `一位注重「${(motive.split('、')[0]||'体验')}」的${catName}用户，在${scene}中使用产品；表面追求功能满足，深层渴望被理解、被照顾到的安心感。`;
+        const lead = deep ? leadDeep : `一位注重「${ex.motive.split('、')[0]}」的${catName}用户，在${ex.scene}中使用产品；表面追求功能满足，深层渴望「${ex.motive.split('、')[1]||ex.motive.split('、')[0]}」与被理解的安心感。`;
+        const needTags = needArr.map(n=>`<span class="need-tag">${n}</span>`).join('');
+        const verdictDeep = `完全体结论（基于真实打标）：${catName}用户不是要"一个更猛的功能"，而是要在「${blocks}」被解决后，获得「${motive}」的综合体验。先把 <b>${improve}</b> 落地，再用 13 种需求里的「<b>${needArr.slice(0,3).join('、')}</b>」做差异化沟通，才是完整的用户经营闭环。`;
+        const verdict = deep ? verdictDeep : `完全体结论：${catName}用户不是要"一个更猛的功能"，而是要在「${ex.blocks.slice(0,2).join('、')}」被解决后，获得「${ex.motive}」的综合体验。先把 <b>${ex.improve.slice(0,2).join('、')}</b> 落地，再用 13 种需求里的「<b>${ex.needs.slice(0,3).join('、')}</b>」做差异化沟通，才是完整的用户经营闭环。`;
         document.getElementById('synthResult').innerHTML =
             `<div class="synth-card">
-                <div class="synth-head">🧬 用户完全体 · 合成画像</div>
+                <div class="synth-head">🧬 用户完全体 · 合成画像${deep?'（真实数据）':''}</div>
                 <div class="synth-lead">${lead}</div>
                 <div class="synth-grid">
                     <div class="synth-col">
-                        <div class="synth-h">🎯 用户想要什么</div><p>${ex.motive}</p>
-                        <div class="synth-h">📍 使用场景</div><p>${ex.scene}</p>
+                        <div class="synth-h">🎯 用户想要什么</div><p>${motive}</p>
+                        <div class="synth-h">📍 使用场景</div><p>${scene}</p>
                     </div>
                     <div class="synth-col">
-                        <div class="synth-h">⚠️ 核心卡点</div><p>${ex.blocks.join('、')}</p>
-                        <div class="synth-h">🛠️ 改进方向</div><p>${ex.improve.join('、')}</p>
+                        <div class="synth-h">⚠️ 核心卡点</div><p>${blocks}</p>
+                        <div class="synth-h">🛠️ 改进方向</div><p>${improve}</p>
                     </div>
                 </div>
                 <div class="synth-needs">
                     <div class="synth-h">🧭 十三种需求映射（高优先级）</div>
-                    <div class="need-tags">${needTags}</div>
+                    <div class="need-tags">${needTags||'<span class="need-tag">未命中需求标签</span>'}</div>
                 </div>
                 <div class="synth-verdict">${verdict}</div>
             </div>`;
@@ -733,7 +1053,8 @@ function toggleAgentCards(){
 }
 
 function resetExperience(){
-    state = { purpose:null, category:null };
+    state = { purpose:null, category:null, imported:null, deepMode:false };
+    try { localStorage.removeItem(LS_KEY); } catch(e){}
     document.querySelectorAll('.pcard,.cchip').forEach(c=>c.classList.remove('active'));
     document.getElementById('prodDesc').value='';
     document.getElementById('pipeline').classList.remove('show');
@@ -776,6 +1097,7 @@ document.addEventListener('keydown', function(e){
 
 renderPurpose();
 renderCategories();
+initImportFromStorage();
 </script>
 </body>
 </html>
