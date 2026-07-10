@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='white'/><text x='32' y='48' text-anchor='middle' font-size='40'>🦞</text></svg>">
-<title>VOC 粘贴即打标 Demo</title>
+<title>VOC 智能打标工具</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
     --indigo:#4F46E5; --indigo-d:#4338CA; --blue:#2563EB; --blue-l:#EFF6FF;
@@ -272,10 +273,11 @@ textarea::placeholder{color:var(--muted);}
 .csv-info b{color:var(--indigo);}
 
 /* CSV 多列选择 */
-.csv-cols select[multiple]{min-width:220px; min-height:120px; padding:6px; border:2px solid var(--line); border-radius:10px; font-family:inherit; font-size:13px; background:#fff;}
-.csv-cols select[multiple]:focus{outline:none; border-color:var(--indigo);}
-.csv-cols select[multiple] option{padding:5px 8px; border-radius:6px; margin:2px 0;}
-.csv-cols select[multiple] option:checked{background:linear-gradient(90deg,var(--indigo),var(--pink)); color:#fff;}
+.csv-cols .csv-chips{display:flex; flex-wrap:wrap; gap:8px; min-width:220px; max-width:100%;}
+.csv-cols .csv-chip{cursor:pointer; padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:#fff; color:var(--slate); font-size:13px; transition:all .15s;}
+.csv-cols .csv-chip:hover{border-color:var(--indigo); color:var(--indigo); background:#F5F3FF;}
+.csv-cols .csv-chip.selected{background:linear-gradient(135deg,var(--indigo),var(--pink)); color:#fff; border-color:transparent; box-shadow:0 4px 10px rgba(79,70,229,.2);}
+.csv-cols .csv-chip .cc-rate{font-size:11px; opacity:.75; margin-left:4px;}
 
 /* 公共模块选择块 */
 .shared-mod-block{margin-top:22px;}
@@ -395,9 +397,9 @@ table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
             <input type="file" id="csvFile" accept=".csv,text/csv" onchange="onCsvSelected(this)">
             <div class="csv-info" id="csvInfo"></div>
             <div class="split-mode csv-cols">
-                <span>文本列（可多选）：</span>
-                <select id="csvCol" multiple></select>
-                <span class="sm-hint">自动检测「内容/评论/评价/正文」等文本列，可按住 Ctrl/Cmd 多选；多列会合并成一条评价打标</span>
+                <span>文本列（点击选择，可多选）：</span>
+                <div class="csv-chips" id="csvColChips"></div>
+                <span class="sm-hint">自动识别有内容的列并默认选中；点击 chip 切换。多列内容会合并成一条评价打标。</span>
             </div>
         </div>
     </div>
@@ -446,18 +448,14 @@ table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
 
     <div class="res-toolbar">
         <div class="rt-info" id="rtInfo"></div>
-        <button class="export-btn" id="exportBtn" onclick="exportResultCsv()">⬇️ 导出打标结果 CSV</button>
+        <button class="export-btn" id="exportBtn" onclick="exportResultXlsx()">⬇️ 导出打标结果 Excel</button>
     </div>
     <div class="tag-table-wrap"><div id="tagTable"></div></div>
 
     <div class="overview" id="overview">
         <div class="ov-box">
-            <h3>👀 用户原评价展示 <span class="ov-sub">（仅抽检前 5 条，完整数据见上方表格）</span></h3>
+            <h3>👀 用户原评价展示 <span class="ov-sub">（仅抽检前 5 条，完整数据见导出 Excel）</span></h3>
             <div class="ov-samples" id="ovSamples"></div>
-        </div>
-        <div class="ov-box">
-            <h3>🏷️ 标签词云 <span class="ov-sub">（按频次取前 20，完整见导出 CSV）</span></h3>
-            <div class="ov-cloud" id="ovCloud"></div>
         </div>
     </div>
 
@@ -776,6 +774,7 @@ function smartSplit(text, mode){
 
 /* ===================== 主流程 ===================== */
 function runTagging(){
+    CSV_MODE = false;
     const raw = document.getElementById('vocInput').value;
     if(!raw.trim()){ alert('请先粘贴用户评价，或点「载入示例评价」。'); return; }
     const mode = document.getElementById('splitMode').value;
@@ -787,7 +786,11 @@ function runTagging(){
 /* ===================== CSV 上传 / 可编辑表格 / 导出 ===================== */
 let TAG_STATE = [];          // [{id, text, hits:[{m,d,t,kw,conf,color}]}]
 let CSV_COLUMNS = [];
-let CSV_TEXT_COL = '';
+let CSV_HEADER = [];
+let CSV_ROWS = [];
+let CSV_SELECTED_COLS = [];
+let CSV_ROW_TAGS = [];     // 与 CSV_ROWS 一一对应，每行的 hits
+let CSV_MODE = false;
 
 /* 从 RULES 汇总每个模块的可用标签（用于表格内「+」下拉） */
 const MODULE_LABELS = (function(){
@@ -829,11 +832,25 @@ function parseCSV(text){
     return rows;
 }
 
-function detectCsvColumns(cols){
+function columnStats(header, rows){
+    return header.map((col, ci)=>{
+        let nonEmpty = 0;
+        rows.forEach(r=>{ const v = (r[ci]||'').trim(); if(v) nonEmpty++; });
+        return {col, ci, nonEmpty, rate: rows.length ? nonEmpty/rows.length : 0};
+    });
+}
+
+function detectCsvColumns(stats){
     const cands = ['内容','评论','评价','正文','评论内容','review','content','text','comment'];
     const found = [];
-    for(const c of cands){ if(cols.includes(c)) found.push(c); }
-    if(found.length === 0 && cols.length) found.push(cols[0]);
+    for(const c of cands){
+        const s = stats.find(x => x.col.toLowerCase() === c.toLowerCase() && x.nonEmpty > 0);
+        if(s) found.push(s.col);
+    }
+    if(found.length === 0){
+        const withContent = stats.filter(x => x.nonEmpty > 0);
+        if(withContent.length) found.push(withContent.sort((a,b)=>b.rate-a.rate)[0].col);
+    }
     return found;
 }
 
@@ -847,11 +864,13 @@ function onCsvSelected(input){
     const file = input.files && input.files[0];
     const drop = document.getElementById('csvDrop');
     const info = document.getElementById('csvInfo');
-    const colSel = document.getElementById('csvCol');
+    const chipWrap = document.getElementById('csvColChips');
     if(!file){ 
         drop.classList.remove('has-file');
         drop.querySelector('.fd-text').textContent = '点击选择 CSV 文件（支持中文列名，自动检测文本列）';
-        info.innerHTML=''; colSel.innerHTML=''; return; 
+        info.innerHTML=''; chipWrap.innerHTML=''; 
+        CSV_COLUMNS=[]; CSV_HEADER=[]; CSV_ROWS=[]; CSV_SELECTED_COLS=[];
+        return; 
     }
     drop.classList.add('has-file');
     drop.querySelector('.fd-text').innerHTML = `<b>${escHtml(file.name)}</b> <span style="color:var(--muted);font-weight:500">(${formatFileSize(file.size)})</span> · 点击重新选择`;
@@ -859,40 +878,53 @@ function onCsvSelected(input){
     reader.onload = function(e){
         const rows = parseCSV(e.target.result);
         if(rows.length < 2){ info.innerHTML = '⚠️ 文件行数过少，请检查格式（需含表头）。'; return; }
-        CSV_COLUMNS = rows[0].map(c=>(c||'').trim());
-        const tcols = detectCsvColumns(CSV_COLUMNS);
-        CSV_TEXT_COL = tcols.join(', ');
-        colSel.innerHTML = CSV_COLUMNS.map(c=>{
-            const selected = tcols.includes(c) ? 'selected' : '';
-            return `<option value="${escHtml(c)}" ${selected}>${escHtml(c)}</option>`;
-        }).join('');
-        info.innerHTML = `已读取 <b>${rows.length-1}</b> 行 · 检测到文本列：${tcols.map(c=>`<b>${escHtml(c)}</b>`).join('、')}`;
+        CSV_HEADER = rows[0].map(c=>(c||'').trim());
+        CSV_ROWS = rows.slice(1);
+        CSV_COLUMNS = CSV_HEADER;
+        const stats = columnStats(CSV_HEADER, CSV_ROWS);
+        const autoCols = detectCsvColumns(stats);
+        CSV_SELECTED_COLS = autoCols.slice();
+        renderCsvColChips(stats, CSV_SELECTED_COLS);
+        info.innerHTML = `已读取 <b>${CSV_ROWS.length}</b> 行 · 已自动选中有内容的文本列：${autoCols.map(c=>`<b>${escHtml(c)}</b>`).join('、')}`;
     };
     reader.readAsText(file, 'utf-8');
+}
+
+function renderCsvColChips(stats, selected){
+    const wrap = document.getElementById('csvColChips');
+    wrap.innerHTML = stats.map(s => {
+        const isSel = selected.includes(s.col);
+        const rateTxt = s.nonEmpty > 0 ? `${Math.round(s.rate*100)}%` : '空';
+        return `<span class="csv-chip ${isSel?'selected':''}" onclick="toggleCsvCol('${escHtml(s.col)}')">${escHtml(s.col)}<span class="cc-rate">${rateTxt}</span></span>`;
+    }).join('');
+}
+
+function toggleCsvCol(col){
+    if(CSV_SELECTED_COLS.includes(col)){
+        CSV_SELECTED_COLS = CSV_SELECTED_COLS.filter(c => c !== col);
+    } else {
+        CSV_SELECTED_COLS.push(col);
+    }
+    const stats = columnStats(CSV_HEADER, CSV_ROWS);
+    renderCsvColChips(stats, CSV_SELECTED_COLS);
 }
 
 function runCsvTagging(){
     const input = document.getElementById('csvFile');
     const file = input.files && input.files[0];
     if(!file){ alert('请先选择 CSV 文件。'); return; }
-    const sel = document.getElementById('csvCol');
-    const cols = Array.from(sel.selectedOptions).map(o => o.value);
+    const cols = CSV_SELECTED_COLS.slice();
     if(cols.length === 0){ alert('请至少选择一个文本列。'); return; }
-    CSV_TEXT_COL = cols.join(', ');
-    const reader = new FileReader();
-    reader.onload = function(e){
-        const rows = parseCSV(e.target.result);
-        const header = rows[0].map(c=>(c||'').trim());
-        const cis = cols.map(c => header.indexOf(c)).filter(i => i >= 0);
-        if(cis.length === 0){ alert('未找到选中的文本列。'); return; }
-        const comments = rows.slice(1).map(r => {
-            const parts = cis.map(ci => (r[ci] || '').trim()).filter(Boolean);
-            return parts.join('\n');
-        }).filter(Boolean);
-        if(comments.length === 0){ alert('选中的文本列无有效内容。'); return; }
-        runTaggingWith(comments);
-    };
-    reader.readAsText(file, 'utf-8');
+    CSV_MODE = true;
+    const header = CSV_HEADER;
+    const cis = cols.map(c => header.indexOf(c)).filter(i => i >= 0);
+    if(cis.length === 0){ alert('未找到选中的文本列。'); return; }
+    const comments = CSV_ROWS.map(r => {
+        const parts = cis.map(ci => (r[ci] || '').trim()).filter(Boolean);
+        return parts.join('\n');
+    }).filter(Boolean);
+    if(comments.length === 0){ alert('选中的文本列无有效内容。'); return; }
+    runTaggingWith(comments);
 }
 
 /* 粘贴 / CSV 共用的打标主流程 */
@@ -988,45 +1020,78 @@ function refreshAfterEdit(){
 function updateToolbarInfo(comments, allHits){
     const n = allHits.reduce((s,a)=>s+a.length,0);
     const el = document.getElementById('rtInfo');
-    if(el) el.innerHTML = `共 <b>${comments.length}</b> 条评价 · 命中 <b>${n}</b> 个标签 · 可在表格内增删标签后导出`;
+    if(el){
+        const editHint = CSV_MODE ? '完整结果导出 Excel 查看' : '可在表格内增删标签后导出';
+        el.innerHTML = `共 <b>${comments.length}</b> 条评价 · 命中 <b>${n}</b> 个标签 · ${editHint}`;
+    }
 }
 
 function renderOverview(comments, allHits){
     const sampEl = document.getElementById('ovSamples');
     const show = comments.slice(0, 5);
     sampEl.innerHTML = show.length ? show.map((c,i)=>`<div class="ov-sample"><span class="os-idx">${i+1}.</span>${escHtml(c)}</div>`).join('') : '<span class="cmt-empty">暂无评价</span>';
-    // 标签词云 top20
-    const tagCount = {};
-    allHits.flat().forEach(h=>{ const k=h.m+'|'+h.t; if(!tagCount[k]) tagCount[k]={m:h.m,t:h.t,color:h.color,n:0}; tagCount[k].n++; });
-    const arr = Object.values(tagCount).sort((a,b)=>b.n-a.n).slice(0,20);
-    const maxN = arr.length?arr[0].n:1;
-    const cloud = document.getElementById('ovCloud');
-    if(!arr.length){ cloud.innerHTML = '<span class="cmt-empty">暂无标签</span>'; return; }
-    cloud.innerHTML = arr.map(o=>{
-        const size = 13 + Math.round((o.n/maxN)*13);
-        return `<span class="ct" style="font-size:${size}px;background:${hex2rgba(o.color,0.1)};color:${o.color};border-color:${hex2rgba(o.color,0.3)};">${o.t} <small>×${o.n}</small></span>`;
-    }).join('');
 }
 
-function exportResultCsv(){
+function exportResultXlsx(){
     if(!TAG_STATE.length){ alert('暂无数据可导出。'); return; }
-    const header = ['原评价', ...MODULE_ORDER.map(m=>m+'_标签'), ...MODULE_ORDER.map(m=>m+'_命中词')];
-    const lines = [header.join(',')];
-    TAG_STATE.forEach(row=>{
-        const byMod = {};
-        MODULE_ORDER.forEach(m=> byMod[m] = row.hits.filter(h=>h.m===m));
-        const text = csvCell(row.text);
-        const tagCells = MODULE_ORDER.map(m=> csvCell(byMod[m].map(h=>h.t).join('、')));
-        const kwCells = MODULE_ORDER.map(m=> csvCell(byMod[m].map(h=>h.kw).join('、')));
-        lines.push([text, ...tagCells, ...kwCells].join(','));
+    if(typeof XLSX === 'undefined'){ alert('Excel 导出库加载失败，请刷新后重试。'); return; }
+    const wb = XLSX.utils.book_new();
+
+    /* ===== Sheet 1: 原字段 + 标签字段 ===== */
+    let ws1Data = [];
+    const tagHeader = MODULE_ORDER.flatMap(m => [m+'_标签', m+'_命中词']);
+    if(CSV_MODE && CSV_ROWS.length){
+        ws1Data.push([...CSV_HEADER, ...tagHeader]);
+        CSV_ROWS.forEach((r, ri)=>{
+            const hits = CSV_ROW_TAGS[ri] || [];
+            const byMod = {};
+            MODULE_ORDER.forEach(m => byMod[m] = hits.filter(h=>h.m===m));
+            const tagCells = MODULE_ORDER.flatMap(m=>[
+                byMod[m].map(h=>h.t).join('、'),
+                byMod[m].map(h=>h.kw).join('、')
+            ]);
+            ws1Data.push([...r, ...tagCells]);
+        });
+    } else {
+        ws1Data.push(['原评价', ...tagHeader]);
+        TAG_STATE.forEach(row=>{
+            const byMod = {};
+            MODULE_ORDER.forEach(m => byMod[m] = row.hits.filter(h=>h.m===m));
+            const tagCells = MODULE_ORDER.flatMap(m=>[
+                byMod[m].map(h=>h.t).join('、'),
+                byMod[m].map(h=>h.kw).join('、')
+            ]);
+            ws1Data.push([row.text, ...tagCells]);
+        });
+    }
+    const ws1 = XLSX.utils.aoa_to_sheet(ws1Data);
+    XLSX.utils.book_append_sheet(wb, ws1, '打标结果');
+
+    /* ===== Sheet 2: 层级标签统计（模块 → 维度 → 标签 → 数量） ===== */
+    const statRows = [['模块','维度','标签','数量']];
+    const allHits = TAG_STATE.flatMap(r=>r.hits);
+    const tree = {};
+    allHits.forEach(h=>{
+        if(!tree[h.m]) tree[h.m] = {};
+        const d = h.d || '未分类';
+        if(!tree[h.m][d]) tree[h.m][d] = {};
+        if(!tree[h.m][d][h.t]) tree[h.m][d][h.t] = 0;
+        tree[h.m][d][h.t]++;
     });
-    const csv = '﻿' + lines.join('\n');
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'voc_已打标.csv';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    MODULE_ORDER.forEach(m=>{
+        if(!tree[m]) return;
+        const dims = tree[m];
+        Object.keys(dims).sort().forEach(d=>{
+            const tags = dims[d];
+            Object.entries(tags).sort((a,b)=>b[1]-a[1]).forEach(([t,n])=>{
+                statRows.push([m, d, t, n]);
+            });
+        });
+    });
+    const ws2 = XLSX.utils.aoa_to_sheet(statRows);
+    XLSX.utils.book_append_sheet(wb, ws2, '标签统计');
+
+    XLSX.writeFile(wb, 'voc_打标结果.xlsx');
 }
 function csvCell(s){
     s = (s==null?'':String(s));
@@ -1039,7 +1104,23 @@ function renderResults(comments, allHits){
         id:i, text:c,
         hits: allHits[i].map(h=>({m:h.m,d:h.d,t:h.t,kw:h.kw,conf:h.conf,color:h.color}))
     }));
-    renderTable();
+    if(CSV_MODE && CSV_ROWS.length){
+        const cis = CSV_SELECTED_COLS.map(c => CSV_HEADER.indexOf(c)).filter(i => i >= 0);
+        CSV_ROW_TAGS = CSV_ROWS.map(r => {
+            const parts = cis.map(ci => (r[ci] || '').trim()).filter(Boolean);
+            const text = parts.join('\n');
+            const found = TAG_STATE.find(s => s.text === text);
+            return found ? found.hits : [];
+        });
+    } else {
+        CSV_ROW_TAGS = [];
+    }
+    if(CSV_MODE){
+        document.querySelector('.tag-table-wrap').style.display = 'none';
+    } else {
+        document.querySelector('.tag-table-wrap').style.display = '';
+        renderTable();
+    }
     recomputeAnalytics(comments, allHits);
     renderOverview(comments, allHits);
     updateToolbarInfo(comments, allHits);
@@ -1062,7 +1143,8 @@ function recomputeAnalytics(comments, allHits){
     if(totalTags===0){
         sumEl.innerHTML = '这次输入的评价未命中任何规则标签。可尝试载入示例评价，或调整重点模块后重试。';
     } else {
-        sumEl.innerHTML = `这批评价最集中在 <b>${topMods.join('、')}</b> 三个模块。标签可在上方表格内逐条增删，调整后可导出 CSV；如需深度语义标注，点下方「找智能体聊真的」。`;
+        const editHint = CSV_MODE ? '如需逐条调整标签，可切回「粘贴评价」模式；完整结果请导出 Excel。' : '标签可在上方表格内逐条增删，调整后可导出 Excel；如需深度语义标注，点下方「找智能体聊真的」。';
+        sumEl.innerHTML = `这批评价最集中在 <b>${topMods.join('、')}</b> 三个模块。${editHint}`;
     }
 
     // tag cloud (cap 20)
@@ -1493,12 +1575,14 @@ function renderMotMix(allHits){
 /* ===================== 重置 / 智能体 ===================== */
 function resetDemo(){
     TAG_STATE = [];
+    CSV_MODE = false;
+    CSV_HEADER = []; CSV_ROWS = []; CSV_SELECTED_COLS = []; CSV_ROW_TAGS = [];
     document.getElementById('results').classList.remove('show');
     document.getElementById('pipelineWrap').classList.remove('show');
     document.getElementById('cmtCards').innerHTML='';
     document.getElementById('tagTable').innerHTML='';
+    document.querySelector('.tag-table-wrap').style.display = '';
     document.getElementById('ovSamples').innerHTML='';
-    document.getElementById('ovCloud').innerHTML='';
     window.scrollTo({top:0, behavior:'smooth'});
 }
 function toggleAgentCards(){
