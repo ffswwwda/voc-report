@@ -177,24 +177,43 @@ textarea::placeholder{color:var(--muted);}
 /* user journey map */
 .journey{margin-top:18px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; box-shadow:var(--shadow);}
 .journey h3{font-size:15px; margin-bottom:6px;}
-.journey .jm-sub{font-size:12px; color:var(--muted); margin-bottom:16px;}
-.jm-track{display:flex; gap:0; overflow-x:auto; padding-bottom:6px;}
-.jm-stage{flex:1 1 0; min-width:150px; position:relative; padding:0 8px;}
-.jm-stage:not(:last-child)::after{content:''; position:absolute; top:30px; right:-2px; width:4px; height:4px; border-top:2px solid var(--line); border-right:2px solid var(--line); transform:rotate(45deg);}
-.jm-stagehead{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
-.jm-stagehead .jm-ico{width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; color:#fff;}
-.jm-stagehead .jm-name{font-weight:800; font-size:13px; color:var(--ink); line-height:1.2;}
-.jm-stagehead .jm-step{font-size:10px; color:var(--muted); font-weight:700; letter-spacing:.04em;}
-.jm-chips{display:flex; flex-wrap:wrap; gap:6px; min-height:30px;}
-.jm-chip{display:inline-flex; align-items:center; gap:4px; border-radius:7px; padding:4px 8px; font-size:11px; font-weight:700; border:1px solid transparent;}
-.jm-chip small{font-weight:600; opacity:.65; font-size:10px;}
-.jm-empty{font-size:11px; color:var(--muted); padding:6px 0;}
+.journey .jm-sub{font-size:12px; color:var(--muted); margin-bottom:16px; line-height:1.6;}
+
+.jm-map{display:grid; grid-template-columns:78px repeat(6,minmax(0,1fr)); gap:8px 10px; align-items:stretch;}
+.jm-corner{}
+.jm-colhead{display:flex; align-items:center; gap:8px; padding:6px 4px 12px; border-bottom:2px solid var(--line);}
+.jm-colhead .jm-ico{width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; color:#fff; flex-shrink:0;}
+.jm-colhead .jm-name{font-weight:800; font-size:12px; color:var(--ink); line-height:1.15;}
+.jm-colhead .jm-step{font-size:9px; color:var(--muted); font-weight:700; letter-spacing:.04em; margin-top:1px;}
+
+.jm-rowlabel{display:flex; align-items:center; justify-content:flex-end; text-align:right; font-size:11px; font-weight:800; color:var(--slate); padding-right:6px; border-right:2px solid var(--line); line-height:1.25;}
+.jm-rowlabel--journey{color:#2563EB;}
+.jm-rowlabel--emo{color:#DC2626;}
+
+.jm-cell{background:#F1F5F9; border-radius:10px; padding:9px 8px; min-height:58px; display:flex; flex-direction:column; gap:6px;}
+.jm-cell--emo{justify-content:center;}
+
+.jm-chips{display:flex; flex-wrap:wrap; gap:5px; align-content:flex-start;}
+.jm-chip{display:inline-flex; align-items:center; gap:3px; border-radius:6px; padding:3px 7px; font-size:10.5px; font-weight:700; border:1px solid transparent; line-height:1.1;}
+.jm-chip small{font-weight:600; opacity:.6; font-size:9px;}
+.jm-empty{font-size:10.5px; color:var(--muted); padding:4px 2px;}
+
+/* emotion intensity band */
+.jm-emo-wrap{display:flex; flex-direction:column; gap:7px;}
+.jm-emo-bar{position:relative; height:13px; background:#fff; border-radius:999px; overflow:hidden; border:1px solid rgba(0,0,0,.05);}
+.jm-emo-fill{position:absolute; left:0; top:0; bottom:0; border-radius:999px; min-width:6px;}
+.jm-emo-meta{display:flex; align-items:center; justify-content:space-between; font-size:9.5px; font-weight:700;}
+.jm-emo-dots{display:flex; flex-wrap:wrap; gap:4px;}
+.jm-emo-dot{width:9px; height:9px; border-radius:50%; display:inline-block; flex-shrink:0;}
+.jm-emo-none{font-size:10px; color:var(--muted); padding:2px 0;}
 
 @media(max-width:680px){
-    .jm-track{flex-direction:column;}
-    .jm-stage{min-width:0; padding:0;}
-    .jm-stage:not(:last-child)::after{display:none;}
-    .jm-stage:not(:last-child){border-bottom:1px dashed var(--line); padding-bottom:12px; margin-bottom:12px;}
+    .jm-map{grid-template-columns:60px repeat(6,minmax(0,1fr)); gap:6px 5px;}
+    .jm-colhead{flex-direction:column; gap:4px; text-align:center; padding:4px 2px 10px;}
+    .jm-colhead .jm-name{font-size:10px;}
+    .jm-rowlabel{font-size:9.5px; padding-right:3px;}
+    .jm-cell{padding:7px 5px; min-height:48px;}
+    .jm-chip{font-size:9px; padding:2px 5px;}
 }
 
 /* analysis section */
@@ -815,26 +834,70 @@ const JOURNEY_MAP = {
 function stageOf(hit){
     return JOURNEY_MAP[hit.m + '|' + hit.t] || 'exp';
 }
+/* Plutchik 情绪极性分（正面 +、负面 −） */
+const EMOTION_POLARITY = { joy:2, trust:2, anticipation:1, surprise:1, sadness:-2, disgust:-2, anger:-2, fear:-2 };
 function renderJourneyMap(allHits){
     const box = document.getElementById('journeyBox');
+    const hits = allHits.flat();
     const buckets = {};
     JOURNEY.forEach(j=>buckets[j.key]=[]);
-    allHits.flat().forEach(h=>{ buckets[stageOf(h)].push(h); });
-    let html = '<h3>🗺️ 用户旅程维度分类</h3>'+
-        '<div class="jm-sub">按用户旅程地图（认知 → 评估 → 购买 → 使用 → 体验 → 复购），把上面打出的标签归到对应阶段，看需求集中在旅程哪一段</div>'+
-        '<div class="jm-track">';
-    JOURNEY.forEach((j, i)=>{
+    hits.forEach(h=>{ buckets[stageOf(h)].push(h); });
+
+    let html = '<h3>🗺️ 用户旅程地图</h3>'+
+        '<div class="jm-sub">按用户旅程阶段（认知 → 评估 → 购买 → 使用 → 体验 → 复购）铺排<b>最小维度标签</b>，下方同步展示各阶段的 <b>情绪强度</b>：绿＝偏正面 · 红＝偏负面 · 色条越长情绪信号越强</div>';
+    html += '<div class="jm-map">';
+
+    /* 表头：阶段列 */
+    html += '<div class="jm-corner"></div>';
+    JOURNEY.forEach((j,i)=>{
+        html += `<div class="jm-colhead"><div class="jm-ico" style="background:${j.color}">${j.icon}</div><div><div class="jm-name">${j.name}</div><div class="jm-step">阶段 ${i+1}</div></div></div>`;
+    });
+
+    /* 图层一：用户旅程（标签铺排） */
+    html += '<div class="jm-rowlabel jm-rowlabel--journey">🧭<br>用户旅程</div>';
+    JOURNEY.forEach(j=>{
         const hs = buckets[j.key];
         const tagCnt = {};
-        hs.forEach(h=>{ tagCnt[h.t] = (tagCnt[h.t]||0) + 1; });
+        hs.forEach(h=>{ tagCnt[h.t] = (tagCnt[h.t]||0)+1; });
         const sorted = Object.entries(tagCnt).sort((a,b)=>b[1]-a[1]);
         const chips = sorted.length
-            ? sorted.map(([t,tc])=>`<span class="jm-chip" style="background:${hex2rgba(j.color,0.1)}; color:${j.color}; border-color:${hex2rgba(j.color,0.3)};">${t}<small>x${tc}</small></span>`).join('')
-            : '<span class="jm-empty">本批评价未涉及此阶段</span>';
-        html += `<div class="jm-stage">`+
-            `<div class="jm-stagehead"><div class="jm-ico" style="background:${j.color}">${j.icon}</div><div><div class="jm-name">${j.name}</div><div class="jm-step">阶段 ${i+1}</div></div></div>`+
-            `<div class="jm-chips">${chips}</div></div>`;
+            ? sorted.map(([t,tc])=>`<span class="jm-chip" style="background:${hex2rgba(j.color,0.10)}; color:${j.color}; border-color:${hex2rgba(j.color,0.28)};">${t}${tc>1?`<small>x${tc}</small>`:''}</span>`).join('')
+            : '<span class="jm-empty">本批未涉及</span>';
+        html += `<div class="jm-cell jm-cell--journey"><div class="jm-chips">${chips}</div></div>`;
     });
+
+    /* 图层二：情绪强度 */
+    const emoData = {};
+    let maxIntensity = 1;
+    JOURNEY.forEach(j=>{
+        const emo = {}; let intensity = 0, score = 0;
+        buckets[j.key].forEach(h=>{
+            const arr = EMOTION_MAP[h.t];
+            if(arr) arr.forEach(k=>{ emo[k]=(emo[k]||0)+1; intensity++; score += (EMOTION_POLARITY[k]||0); });
+        });
+        emoData[j.key] = {emo, intensity, score};
+        if(intensity > maxIntensity) maxIntensity = intensity;
+    });
+    html += '<div class="jm-rowlabel jm-rowlabel--emo">🔥<br>情绪强度</div>';
+    JOURNEY.forEach(j=>{
+        const d = emoData[j.key];
+        if(d.intensity === 0){
+            html += `<div class="jm-cell jm-cell--emo"><div class="jm-emo-none">暂无明显情绪信号</div></div>`;
+        } else {
+            const pct = Math.max(14, Math.round(d.intensity/maxIntensity*100));
+            const color = d.score > 1 ? '#059669' : (d.score < -1 ? '#DC2626' : '#D97706');
+            const tone  = d.score > 1 ? '正面' : (d.score < -1 ? '负面' : '中性');
+            const top = Object.entries(d.emo).sort((a,b)=>b[1]-a[1]).slice(0,3);
+            const dots = top.map(([k,c])=>{ const e=EMOTIONS.find(x=>x.key===k); return `<span class="jm-emo-dot" title="${e.name} ×${c}" style="background:${e.color}"></span>`; }).join('');
+            const names = top.map(([k,c])=>{ const e=EMOTIONS.find(x=>x.key===k); return `${e.name}${c>1?'×'+c:''}`; }).join(' · ');
+            html += `<div class="jm-cell jm-cell--emo"><div class="jm-emo-wrap">`+
+                `<div class="jm-emo-bar"><div class="jm-emo-fill" style="width:${pct}%; background:${color}"></div></div>`+
+                `<div class="jm-emo-meta"><span style="color:${color}">${tone}</span><span>强度 ${d.intensity}</span></div>`+
+                `<div class="jm-emo-dots" title="${names}">${dots}</div>`+
+                `</div></div>`;
+        }
+    });
+
     html += '</div>';
     box.innerHTML = html;
 }
