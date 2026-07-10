@@ -9,6 +9,7 @@
 <style>
 :root{
     --indigo:#4F46E5; --indigo-d:#4338CA; --blue:#2563EB; --blue-l:#EFF6FF;
+    --brand:#4F46E5; --brand-bg:#E0E7FF;
     --ink:#0F172A; --slate:#475569; --muted:#94A3B8; --line:#E2E8F0;
     --green:#059669; --pink:#DB2777; --amber:#D97706; --cyan:#0891B2; --purple:#7C3AED;
     --bg:#F8FAFC; --card:#FFFFFF; --radius:16px; --shadow:0 4px 20px rgba(15,23,42,.07);
@@ -337,9 +338,13 @@ table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
 .ov-box{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; box-shadow:var(--shadow);}
 .ov-box h3{font-size:14px; margin-bottom:10px; display:flex; align-items:center; gap:6px;}
 .ov-box .ov-sub{font-size:11px; color:var(--muted); margin-bottom:10px;}
-.ov-samples{display:flex; flex-direction:column; gap:10px; max-height:300px; overflow:auto;}
-.ov-sample{border-left:3px solid var(--brand); padding:6px 10px; background:var(--bg); border-radius:0 8px 8px 0; font-size:12px; color:var(--slate); line-height:1.55;}
-.ov-sample .os-idx{font-weight:700; color:var(--brand); margin-right:6px;}
+.ov-samples{display:flex; flex-direction:column; gap:12px; max-height:520px; overflow:auto; padding-right:4px;}
+.ov-card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow); transition:all .2s;}
+.ov-card:hover{box-shadow:0 6px 22px rgba(15,23,42,.08); transform:translateY(-1px);}
+.ov-text{font-size:14px; color:var(--ink); font-weight:600; line-height:1.65;}
+.ov-text .os-idx{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--brand-bg); color:var(--brand); font-size:12px; font-weight:800; margin-right:8px;}
+.ov-tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
+.ov-tag{display:inline-flex; align-items:center; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; line-height:1; cursor:default;}
 .ov-cloud{display:flex; flex-wrap:wrap; gap:8px; align-content:flex-start; max-height:300px; overflow:auto;}
 @media(max-width:680px){
     .overview{grid-template-columns:1fr;}
@@ -411,11 +416,11 @@ table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
 
     <div class="gen-wrap" id="genWrapPaste">
         <button class="gen-btn" id="genBtn" onclick="runTagging()">🏷️ 开始打标</button>
-        <div class="gen-hint">本地规则引擎实时匹配 · 不上传任何数据 · 复杂语义可找智能体深聊</div>
+        <div class="gen-hint">本地规则引擎实时匹配 · 不上传任何数据 · 结果以卡片形式展示并支持导出 Excel</div>
     </div>
     <div class="gen-wrap" id="genWrapCsv" style="display:none;">
         <button class="gen-btn" id="csvBtn" onclick="runCsvTagging()">📑 解析并打标</button>
-        <div class="gen-hint">CSV 每行评价自动打标，结果可在下方表格内增删标签并导出</div>
+        <div class="gen-hint">CSV 每行评价自动打标，结果以卡片形式展示并支持导出 Excel</div>
     </div>
 </div>
 
@@ -1029,7 +1034,17 @@ function updateToolbarInfo(comments, allHits){
 function renderOverview(comments, allHits){
     const sampEl = document.getElementById('ovSamples');
     const show = comments.slice(0, 5);
-    sampEl.innerHTML = show.length ? show.map((c,i)=>`<div class="ov-sample"><span class="os-idx">${i+1}.</span>${escHtml(c)}</div>`).join('') : '<span class="cmt-empty">暂无评价</span>';
+    if(!show.length){ sampEl.innerHTML = '<span class="cmt-empty">暂无评价</span>'; return; }
+    sampEl.innerHTML = show.map((c,i)=>{
+        const hits = allHits[i] || [];
+        const tagChips = hits.map(h =>
+            `<span class="ov-tag" style="background:${hex2rgba(h.color,0.12)};color:${h.color};border:1px solid ${hex2rgba(h.color,0.35)};" title="命中词：${escHtml(h.kw)}">${escHtml(h.t)}</span>`
+        ).join('');
+        return `<div class="ov-card">
+            <div class="ov-text"><span class="os-idx">${i+1}.</span>${escHtml(c)}</div>
+            ${tagChips ? `<div class="ov-tags">${tagChips}</div>` : ''}
+        </div>`;
+    }).join('');
 }
 
 function exportResultXlsx(){
@@ -1115,12 +1130,7 @@ function renderResults(comments, allHits){
     } else {
         CSV_ROW_TAGS = [];
     }
-    if(CSV_MODE){
-        document.querySelector('.tag-table-wrap').style.display = 'none';
-    } else {
-        document.querySelector('.tag-table-wrap').style.display = '';
-        renderTable();
-    }
+    document.querySelector('.tag-table-wrap').style.display = 'none';
     recomputeAnalytics(comments, allHits);
     renderOverview(comments, allHits);
     updateToolbarInfo(comments, allHits);
@@ -1143,7 +1153,7 @@ function recomputeAnalytics(comments, allHits){
     if(totalTags===0){
         sumEl.innerHTML = '这次输入的评价未命中任何规则标签。可尝试载入示例评价，或调整重点模块后重试。';
     } else {
-        const editHint = CSV_MODE ? '如需逐条调整标签，可切回「粘贴评价」模式；完整结果请导出 Excel。' : '标签可在上方表格内逐条增删，调整后可导出 Excel；如需深度语义标注，点下方「找智能体聊真的」。';
+        const editHint = CSV_MODE ? '如需逐条调整标签，可切回「粘贴评价」模式；完整结果请导出 Excel。' : '标签已按原文聚合展示，完整结果请导出 Excel；如需深度语义标注，点下方「找智能体聊真的」。';
         sumEl.innerHTML = `这批评价最集中在 <b>${topMods.join('、')}</b> 三个模块。${editHint}`;
     }
 
