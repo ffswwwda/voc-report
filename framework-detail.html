@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>框架深度分析 · VOC 全流程分析</title>
+<link rel="stylesheet" href="radium-dark.css">
+<style>
+/* ============ 设计令牌：白天默认（对齐 JTBD 报告模板） ============ */
+:root{
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --card-2:#f8fafc;
+  --ink:#0f1b2d;
+  --slate:#475569;
+  --muted:#94a3b8;
+  --line:rgba(15,27,45,.10);
+  --line-soft:rgba(15,27,45,.06);
+  --brand:#4f46e5;
+  --brand2:#0ea5e9;
+  --brand-bg:#eef2ff;
+  --indigo:#4d8bff;
+  --green:#16a34a;
+  --pink:#e11d48;
+  --amber:#d97706;
+  --cyan:#0891b2;
+  --purple:#7c3aed;
+  --red:#dc2626;
+  --teal:#0f766e;
+  --shadow:0 2px 10px rgba(31,36,48,.04);
+  --shadow-sm:0 1px 4px rgba(31,36,48,.04);
+  --radius:14px;
+  --radius-sm:10px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"JetBrains Mono","SF Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  padding-bottom:60px;
+}
+.wrap{max-width:880px;margin:0 auto;padding:0 18px;}
+h1,h2,h3{letter-spacing:-.01em;line-height:1.3;}
+
+/* ============ 顶栏 ============ */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;padding:14px 22px;
+  background:color-mix(in srgb, var(--card) 88%, transparent);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.topbar .left{display:flex;align-items:center;gap:14px;min-width:0;}
+.back-link{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:600;color:var(--slate);
+  text-decoration:none;padding:7px 12px;border-radius:10px;
+  border:1px solid var(--line);background:var(--card-2);
+  transition:.18s;white-space:nowrap;
+}
+.back-link:hover{color:var(--brand);border-color:var(--brand);}
+.brand{font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;min-width:0;}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--brand);box-shadow:0 0 12px var(--brand);}
+.brand small{font-weight:500;color:var(--muted);font-size:12px;}
+.theme-toggle{
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  border:1px solid var(--line);background:var(--card-2);
+  color:var(--slate);font-size:13px;font-weight:600;
+  padding:8px 13px;border-radius:11px;transition:.18s;white-space:nowrap;
+}
+.theme-toggle:hover{border-color:var(--brand);color:var(--brand);}
+.theme-toggle .ti{font-size:15px;}
+
+/* ============ Hero ============ */
+.hero{
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  color:#fff;border-radius:18px;padding:28px 30px;
+  box-shadow:0 10px 30px rgba(79,70,229,.18);
+  margin-top:26px;
+}
+.hero .kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12px;letter-spacing:.04em;font-weight:600;
+  background:rgba(255,255,255,.18);color:#fff;
+  padding:5px 12px;border-radius:999px;margin-bottom:14px;
+}
+.hero h1{font-size:24px;font-weight:700;margin-bottom:8px;color:#fff;}
+.hero .sub{font-size:14px;opacity:.92;max-width:680px;}
+.pctx{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+.pctx .pc{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:12px;color:#fff;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);
+  padding:5px 11px;border-radius:999px;
+}
+.pctx .pc b{font-weight:700;color:#fff;}
+.pctx .pc .ic{font-size:13px;}
+
+/* ============ 卡片 ============ */
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px 24px;margin-top:18px;box-shadow:var(--shadow);
+}
+.card h2{font-size:16px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:9px;}
+.card h2 .n{
+  width:24px;height:24px;border-radius:7px;background:var(--brand);color:#fff;
+  font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none;
+}
+.lead{font-size:15px;color:var(--slate);line-height:1.65;margin-bottom:14px;}
+.lead b{color:var(--brand);}
+
+/* 列表 */
+.checklist{list-style:none;}
+.checklist li{position:relative;padding-left:22px;margin-bottom:9px;font-size:14px;color:var(--slate);line-height:1.55;}
+.checklist li::before{content:"▹";position:absolute;left:0;color:var(--brand);font-weight:700;}
+
+/* 象限 / 网格 */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.cell{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--card-2);}
+.cell h3{font-size:13px;font-weight:700;margin-bottom:8px;}
+.cell p{font-size:13px;color:var(--slate);line-height:1.55;}
+.cell .tag{font-size:12px;display:inline-block;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 10px;margin:3px 3px 0 0;color:var(--slate);}
+.cell .count{float:right;font-size:12px;font-weight:800;color:var(--pink);}
+
+/* 矩阵 */
+.matrix{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.quad{border:1px solid var(--line);border-radius:12px;padding:14px;min-height:120px;}
+.quad h3{font-size:13px;font-weight:700;margin-bottom:8px;}
+.quad.high{border-top:4px solid var(--red);}
+.quad.keep{border-top:4px solid var(--green);}
+.quad.diff{border-top:4px solid var(--brand);}
+.quad.over{border-top:4px solid var(--muted);}
+.quad ul{list-style:none;font-size:13px;color:var(--slate);}
+.quad li{padding:3px 0;padding-left:14px;position:relative;}
+.quad li::before{content:"·";position:absolute;left:2px;color:var(--brand);}
+
+/* 条形 */
+.bar-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);}
+.bar-row:last-child{border-bottom:none;}
+.bar-row .t{width:180px;font-size:13px;color:var(--ink);flex:none;}
+.bar-row .bar{flex:1;height:8px;background:var(--card-2);border-radius:99px;overflow:hidden;}
+.bar-row .bar i{display:block;height:100%;background:var(--brand);border-radius:99px;}
+.bar-row .c{font-size:12px;color:var(--muted);font-family:var(--mono);flex:none;}
+
+/* 标签云 */
+.tagcloud{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.tagcloud span{font-size:12px;background:var(--card-2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--slate);}
+.tagcloud span.pos{background:#f0fdf4;border-color:#bbf7d0;color:#15803d;}
+.tagcloud span.neg{background:#fef2f2;border-color:#fecaca;color:#b91c1c;}
+
+/* 行动建议 */
+.rec{border:1px solid var(--line);border-top:3px solid var(--brand);border-radius:12px;padding:14px;background:var(--card-2);}
+.rec h3{font-size:13px;font-weight:700;margin-bottom:8px;}
+.rec ul{list-style:none;font-size:13px;color:var(--slate);}
+.rec li{padding:3px 0;padding-left:14px;position:relative;line-height:1.5;}
+.rec li:before{content:"·";position:absolute;left:2px;color:var(--brand);}
+
+/* 数据附录 */
+.appx{font-size:12px;color:var(--slate);}
+.appx table{width:100%;border-collapse:collapse;margin-top:4px;}
+.appx th,.appx td{border:1px solid var(--line);padding:7px 9px;text-align:left;font-size:12px;vertical-align:top;}
+.appx th{background:var(--card-2);font-weight:700;color:var(--ink);}
+.appx td .c{color:var(--muted);font-family:var(--mono);margin-left:4px;}
+
+/* 空状态 */
+.empty-state{text-align:center;padding:70px 20px;}
+.empty-state .eic{font-size:54px;margin-bottom:18px;}
+.empty-state h2{font-size:22px;margin-bottom:10px;}
+.empty-state p{color:var(--slate);max-width:460px;margin:0 auto 22px;}
+.empty-state .ebtn{display:inline-block;background:var(--brand);color:#fff;font-weight:600;padding:12px 22px;border-radius:12px;text-decoration:none;font-size:14px;}
+
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px;}
+
+/* ============ 夜晚模式 ============ */
+body[data-theme="dark"]{
+  --brand:#6366f1; --brand2:#0ea5e9; --pink:#f43f5e; --amber:#f59e0b;
+  --teal:#2dd4bf; --red:#f87171; --green:#4ade80; --slate:#cbd5e1; --muted:#94a3b8;
+  --bg:#0F1525; --card:rgba(15,21,37,.60); --card-2:rgba(255,255,255,.04);
+  --line:rgba(255,255,255,.10); --ink:#E6EDF6;
+  --brand-bg:rgba(99,102,241,.14);
+}
+body[data-theme="dark"] .hero{background:linear-gradient(135deg,#312e81,#0e7490);box-shadow:0 10px 30px rgba(0,0,0,.4);}
+body[data-theme="dark"] .topbar{background:color-mix(in srgb,#0F1525 88%,transparent);border-bottom-color:rgba(255,255,255,.10);}
+body[data-theme="dark"] .topbar .brand{color:#fff;}
+body[data-theme="dark"] .back-link,body[data-theme="dark"] .theme-toggle{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:#cbd5e1;}
+body[data-theme="dark"] .back-link:hover,body[data-theme="dark"] .theme-toggle:hover{border-color:#818cf8;color:#818cf8;}
+body[data-theme="dark"] .card{background:rgba(15,21,37,.60);border-color:rgba(255,255,255,.10);box-shadow:0 2px 10px rgba(0,0,0,.25);}
+body[data-theme="dark"] .card h2{color:#fff;}
+body[data-theme="dark"] .lead,body[data-theme="dark"] .checklist li,body[data-theme="dark"] .cell p,body[data-theme="dark"] .quad li,body[data-theme="dark"] .rec ul,body[data-theme="dark"] .appx{color:#cbd5e1;}
+body[data-theme="dark"] .cell,body[data-theme="dark"] .rec,body[data-theme="dark"] .bar-row .bar{background:rgba(255,255,255,.05);}
+body[data-theme="dark"] .cell .tag{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:#cbd5e1;}
+body[data-theme="dark"] .quad,body[data-theme="dark"] .cell,body[data-theme="dark"] .rec{border-color:rgba(255,255,255,.10);}
+body[data-theme="dark"] .bar-row{border-color:rgba(255,255,255,.08);}
+body[data-theme="dark"] .appx th{background:rgba(255,255,255,.05);color:#fff;}
+body[data-theme="dark"] .appx th,body[data-theme="dark"] .appx td{border-color:rgba(255,255,255,.10);}
+body[data-theme="dark"] .empty-state h2{color:#fff;}
+body[data-theme="dark"] .empty-state p{color:#cbd5e1;}
+body[data-theme="dark"] .empty-state .ebtn{background:linear-gradient(135deg,#6366f1,#7c3aed);}
+body[data-theme="dark"] .foot{color:#94a3b8;}
+
+@media (max-width:680px){
+  .grid2,.grid3,.matrix{grid-template-columns:1fr;}
+  .bar-row .t{width:120px;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="left">
+    <a class="back-link" href="experience.html">← 返回全流程分析</a>
+    <div class="brand"><span class="dot"></span><span id="brandName">框架深度分析</span> <small id="brandSub">基于真实 VOC 标签</small></div>
+  </div>
+  <button class="theme-toggle" id="themeToggle" data-active="light"><span class="ti">☀️</span><span class="tt">白天</span></button>
+</div>
+
+<div class="wrap" id="app"><!-- 动态渲染 --></div>
+
+<script>
+/* ===================== 跨页主题切换 ===================== */
+(function(){
+  function applyTheme(isDark){
+    document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    var btn = document.getElementById('themeToggle');
+    if(!btn) return;
+    btn.setAttribute('data-active', isDark ? 'dark' : 'light');
+    btn.innerHTML = isDark
+      ? '<span class="ti">🌙</span><span class="tt">夜晚</span>'
+      : '<span class="ti">☀️</span><span class="tt">白天</span>';
+  }
+  var saved = localStorage.getItem('voc_theme');
+  applyTheme(saved === 'dark');
+  var btn = document.getElementById('themeToggle');
+  if(btn) btn.addEventListener('click', function(){
+    var next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('voc_theme', next);
+    applyTheme(next === 'dark');
+  });
+})();
+
+/* ===================== 数据读取 ===================== */
+const LS_KEY = 'voc_tag_profile';
+const PRODUCT_KEY = 'voc_product_context';
+
+function loadProfile(){
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch(e){ return null; }
+}
+function loadProduct(){
+  try { return JSON.parse(localStorage.getItem(PRODUCT_KEY) || 'null'); } catch(e){ return null; }
+}
+function safeProf(p){
+  if(!p || typeof p !== 'object') return null;
+  if(!p.meta && !p.modules && !p.topTags) return null;
+  return {
+    meta: p.meta || { totalComments:0, preciseCount:0, provCount:0, coveredModules:0 },
+    modules: p.modules || {},
+    topTags: p.topTags || [],
+    needPriority: p.needPriority || [],
+    needQuad: p.needQuad || {explicit:[],implicit:[],unexpected:[],noncustomer:[]},
+    emotions: p.emotions || [],
+    motMix: p.motMix || [],
+    candidatePool: p.candidatePool || [],
+    tagTree: p.tagTree || {}
+  };
+}
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function topByModule(p, m, n){
+  if(!p || !p.topTags) return [];
+  return p.topTags.filter(t => t.m === m).sort((a,b)=>b.n-a.n).slice(0, n||5).map(t=>({t:t.t, n:t.n}));
+}
+function modTotal(p, m){ const o = p && p.modules && p.modules[m]; return o ? ((o.precise||0)+(o.prov||0)) : 0; }
+
+const FRAMEWORKS = {
+  'jtbd':{name:'JTBD 待完成任务', icon:'🎯', color:'#2563EB', desc:'理解用户真正想要完成的任务（功能/情感/社会三层）。'},
+  'needs-analysis':{name:'十三种需求分析', icon:'🧭', color:'#7C3AED', desc:'从13种人类需求出发，定位需求层次与优先级。'},
+  'compass':{name:'产品创意罗盘', icon:'🧩', color:'#0891B2', desc:'4象限×20种打法，系统化发散产品创意。'},
+  'extreme':{name:'极端/领先用户', icon:'🔬', color:'#059669', desc:'基于 von Hippel 理论，从领先用户挖未来需求。'},
+  'triz':{name:'TRIZ 创新方法', icon:'⚙️', color:'#D97706', desc:'40个发明原理，系统化解决技术矛盾。'},
+  'researcher':{name:'4象限用户需求', icon:'📊', color:'#DB2777', desc:'重要度-满意度矩阵，区分表达需求与真实需求。'},
+  'plutchik':{name:'Plutchik 情绪罗盘', icon:'🎭', color:'#BE185D', desc:'8种基本情绪+强度，洞察情感驱动因素。'}
+};
+
+/* ===================== 各框架确定性引擎 ===================== */
+const Engines = {
+  'needs-analysis': function(p, prod){
+    const np = p.needPriority || [];
+    const topImp = np.slice().sort((a,b)=>b.imp-a.imp).slice(0,5);
+    const gap = np.filter(x=>(x.sat||0) < -0.05).sort((a,b)=>b.imp-a.imp);
+    const strong = np.filter(x=>(x.sat||0) > 0.05).sort((a,b)=>b.imp-a.imp);
+    const implicit = (p.needQuad && p.needQuad.implicit) || [];
+    const explicit = (p.needQuad && p.needQuad.explicit) || [];
+
+    const insight = topImp.length
+      ? `十三种需求中，高重要需求为「${topImp.slice(0,3).map(x=>x.t).join('、')}」；其中「${gap.slice(0,2).map(x=>x.t).join('、')||'—'}」重要但满意度低，是缺口；「${strong.slice(0,2).map(x=>x.t).join('、')||'—'}」已较好满足。`
+      : '未命中「十三种需求」标签，无法绘制需求层次。建议补充需求/价值类表述后重跑。';
+
+    const findings = [
+      `显性需求（用户直接说出的）：${explicit.slice(0,3).map(x=>x.t).join('、') || '—'}`,
+      `隐性需求（未被明说但可推断）：${implicit.slice(0,3).map(x=>x.t).join('、') || '—'}`,
+      `需求缺口（高重要/低满意）：${gap.slice(0,3).map(x=>x.t).join('、') || '—'}`,
+      `可维持优势（高重要/高满意）：${strong.slice(0,3).map(x=>x.t).join('、') || '—'}`
+    ];
+
+    const actions = [
+      `优先补足需求缺口「${gap.slice(0,2).map(x=>x.t).join('、') || '核心需求'}」，这是 ROI 最高的方向。`,
+      `用隐性需求「${implicit.slice(0,2).map(x=>x.t).join('、') || '用户未说出口的价值'}」做差异化沟通与品牌叙事。`,
+      `把已满足需求「${strong.slice(0,2).map(x=>x.t).join('、') || '—'}」作为信任背书，减少用户决策焦虑。`
+    ];
+
+    return {insight, findings, actions, appendix: np.slice(0,8).map(x=>({m:x.t, n:Math.round(x.imp*100), note:'重要度'+'/满意'+(x.sat>0?'+':(x.sat<0?'-':'0'))}))};
+  },
+
+  'compass': function(p, prod){
+    const scenes = topByModule(p,'使用场景',4).map(x=>x.t);
+    const motives = topByModule(p,'购买动机',4).map(x=>x.t);
+    const improves = topByModule(p,'产品改进建议',4).map(x=>x.t);
+    const obstacles = topByModule(p,'使用阻碍',3).map(x=>x.t);
+    const cat = prod && prod.categoryName ? prod.categoryName : '产品';
+
+    const quadrants = [
+      {name:'场景延伸', desc:'在现有场景之外找到新情境', tags:scenes.slice(0,3), note:'从「'+scenes[0]+'」延伸到新场景'},
+      {name:'体验升级', desc:'用材质/结构/功能提升核心体验', tags:improves.slice(0,3), note:'把「'+improves[0]+'」做成可感知卖点'},
+      {name:'情感加成', desc:'围绕购买动机做仪式感与情绪设计', tags:motives.slice(0,3), note:'打动「'+motives[0]+'」动机'},
+      {name:'商业模式', desc:'用订阅/配件/社群放大生命周期价值', tags:['复购','配件','会员'], note:'把一次性购买变成长期关系'}
+    ];
+
+    const insight = scenes.length || motives.length
+      ? `产品创意罗盘显示，${cat}的机会集中在「场景延伸×体验升级」交叉象限：在${scenes[0]||'核心场景'}解决${obstacles[0]||'核心阻碍'}，同时用${improves[0]||'改进点'}提升体验，并用${motives[0]||'购买动机'}做情感沟通。`
+      : '未命中「使用场景 / 购买动机 / 产品改进建议」标签，创意罗盘发散缺少数据锚点。';
+
+    return {insight, quadrants, actions:[
+      `从 20 种打法中筛选 3 个低成本概念，先在「${quadrants[0].name}」象限做众筹/预售验证。`,
+      `把头号阻碍「${obstacles[0]||'核心痛点'}」转化为创意约束：解决它 + 不增加成本。`,
+      `用「${motives[0]||'情感价值'}」作为概念筛子，剔除与其无关的创意方向。`
+    ], appendix: quadrants.map(q=>({m:q.name, n:q.tags.length, note:q.tags.join('、')}))};
+  },
+
+  'extreme': function(p, prod){
+    const obstacles = topByModule(p,'使用阻碍',4).map(x=>x.t);
+    const cands = p.candidatePool || [];
+    const workarounds = topByModule(p,'克服方式',3).map(x=>x.t);
+    const improves = topByModule(p,'产品改进建议',3).map(x=>x.t);
+    const cat = prod && prod.categoryName ? prod.categoryName : '产品';
+
+    const topCands = cands.slice(0,4).map(x=>x.t);
+    const insight = obstacles.length
+      ? `在${cat}品类，领先用户已自发在「${obstacles.join('、')}」上将就，并出现「${topCands.join('、') || '待细化诉求'}」等 workaround——这就是未来1-2年的主流需求（von Hippel：领先用户需求=未来需求）。`
+      : '未命中「使用阻碍」标签，无法识别领先用户正在将就的痛点。';
+
+    const findings = [
+      `领先用户信号：${obstacles.join('、') || '—'} 是他们仍在将就的点`,
+      `未来需求（workaround 产品化）：${topCands.join('、') || '（候选池为空，可补充更多评价以识别）'}`,
+      `用户自发 workaround：${workarounds.join('、') || '—'}`,
+      `可对话对象：复购≥3次、主动写长评/提改建议的用户，即为领先用户样本`
+    ];
+
+    return {insight, findings, actions:[
+      '建立领先用户回访机制，把他们的 workaround 纳入下一代路线图。',
+      `优先把 workaround「${workarounds[0] || topCands[0] || '用户自发解法'}」产品化，抢占品类定义权。`,
+      '为领先用户建立非公开反馈通道（如小范围内测群），提前验证未来功能。'
+    ], appendix: [...obstacles.map(x=>({m:'将就点', n:x.n, note:x.t})), ...cands.slice(0,4).map(x=>({m:'候选诉求', n:x.n||1, note:x.t}))]};
+  },
+
+  'triz': function(p, prod){
+    const obstacles = topByModule(p,'使用阻碍',5).map(x=>x.t);
+    const improves = topByModule(p,'产品改进建议',4).map(x=>x.t);
+    const cat = prod && prod.categoryName ? prod.categoryName : '产品';
+
+    const TRIZ_MAP = {
+      '清洁':['分割原理：内胆/主体分离，可拆洗','预先反作用原理：出厂预清洁减少用户动作'],
+      '洗':['分割原理：可拆洗结构','预先反作用原理：免洗/自清洁涂层'],
+      '噪音':['局部质量原理：柔性包裹降低噪音传递','隔音/振动隔离原理：静音马达结构'],
+      '尺寸':['柔性壳体原理：可调/渐宽入口','动态性原理：尺寸可调节设计'],
+      '紧':['柔性壳体原理：入口渐宽','动态性原理：可调节松紧'],
+      '重':['局部质量原理：中空/轻质材料','复合材料原理：减重不降质感'],
+      '无法':['分割原理：结构自校正','自服务原理：免工具拆装'],
+      '错位':['分割原理：分体对准结构','自服务原理：卡扣自校正'],
+      '性价比':['反馈原理：成本透明化','复制原理：标准化降本'],
+      '图文':['反馈原理：实物实拍透明化','预先防范原理：详情页标注真实参数'],
+      '收纳':['嵌套原理：可折叠/可站立','柔性壳体原理：软质可卷'],
+      '携带':['嵌套原理：便携收纳','柔性壳体原理：轻量可卷'],
+      '隐私':['伪装原理：discreet 外观','合并原理：日常物品形态'],
+      '材质':['复合材料原理：亲肤医用材质','惰性原理：防过敏涂层'],
+      '尴尬':['伪装原理：去敏感化外观','合并原理：日常化包装'],
+      '羞耻':['伪装原理：去敏感化外观','合并原理：日常化包装']
+    };
+
+    const principles = [];
+    obstacles.forEach(o=>{
+      const tag = o.t || o;
+      for(const k in TRIZ_MAP){ if(tag.indexOf(k)>=0){ TRIZ_MAP[k].forEach(pr=>{ if(!principles.includes(pr)) principles.push(pr); }); break; }}
+    });
+    if(principles.length===0) principles.push('分割原理：将主体/功能模块分离，降低耦合','柔性壳体原理：用软质包裹缓冲体验冲突','预先反作用原理：提前消除负面效应');
+
+    const insight = obstacles.length
+      ? `针对${cat}的技术矛盾「${obstacles.slice(0,2).map(x=>x.t).join(' × ')}」，TRIZ 40发明原理给出如下求解方向：`
+      : '未命中具体「使用阻碍」标签，建议补充阻碍类评价以定位技术矛盾。';
+
+    return {insight, principles, actions:[
+      `优先验证「${principles[0]}」与「${principles[1] || principles[0]}」组合的可行性。`,
+      `把头号阻碍「${obstacles[0] && obstacles[0].t}」作为技术矛盾 A，把改进建议「${improves[0] && improves[0].t}」作为目标 B，寻找可同时满足 A+B 的原理。`,
+      '用 TRIZ 做一轮结构化的方案发散，避免依赖直觉创新。'
+    ], appendix: obstacles.map(x=>({m:'技术矛盾', n:x.n, note:x.t}))};
+  },
+
+  'researcher': function(p, prod){
+    const np = p.needPriority || [];
+    const cat = prod && prod.categoryName ? prod.categoryName : '产品';
+    const zone = (x)=> (x.imp>=0.6?(x.sat>0?'维持区':'优先改进区'):(x.sat>0?'差异化区':'过度供给区'));
+    const groups = {};
+    np.forEach(x=>{ const z=zone(x); (groups[z]=groups[z]||[]).push(x.t); });
+
+    const insight = np.length
+      ? `重要度×满意度矩阵（13种需求）：${cat}的优先改进区=${groups['优先改进区']?groups['优先改进区'].join('、'):'无'}；维持区=${groups['维持区']?groups['维持区'].join('、'):'无'}；差异化区=${groups['差异化区']?groups['差异化区'].join('、'):'无'}；过度供给区=${groups['过度供给区']?groups['过度供给区'].join('、'):'无'}。`
+      : '未命中「十三种需求」标签，无法绘制重要度×满意度矩阵。';
+
+    const quadrants = [
+      {name:'优先改进区', cls:'high', desc:'高重要 / 低满意', items:groups['优先改进区']||[]},
+      {name:'维持区', cls:'keep', desc:'高重要 / 高满意', items:groups['维持区']||[]},
+      {name:'差异化区', cls:'diff', desc:'低重要 / 高满意', items:groups['差异化区']||[]},
+      {name:'过度供给区', cls:'over', desc:'低重要 / 低满意', items:groups['过度供给区']||[]}
+    ];
+
+    return {insight, quadrants, actions:[
+      `资源先投向优先改进区「${groups['优先改进区']?groups['优先改进区'].slice(0,2).join('、'):'核心缺口'}」，ROI 最高。`,
+      `维持区「${groups['维持区']?groups['维持区'].slice(0,2).join('、'):'—'}」继续巩固，作为信任背书。`,
+      `差异化区卖点「${groups['差异化区']?groups['差异化区'].slice(0,2).join('、'):'—'}」用于沟通，但不必过度投入。`
+    ], appendix: np.slice(0,8).map(x=>({m:x.t, n:Math.round(x.imp*100), note:zone(x)}))};
+  },
+
+  'plutchik': function(p, prod){
+    const emotions = p.emotions || [];
+    const pos = emotions.filter(e=>e.polarity>0).sort((a,b)=>b.count-a.count);
+    const neg = emotions.filter(e=>e.polarity<0).sort((a,b)=>b.count-a.count);
+    const improves = topByModule(p,'产品改进建议',3).map(x=>x.t);
+    const cat = prod && prod.categoryName ? prod.categoryName : '产品';
+
+    const insight = emotions.length
+      ? `Plutchik 情绪罗盘显示，${cat}评论负向高频为「${neg.slice(0,2).map(e=>e.name).join('、')||'—'}」，正向驱动为「${pos.slice(0,2).map(e=>e.name).join('、')||'—'}」。`
+      : '未命中情绪标签，无法绘制情绪罗盘。';
+
+    const findings = [
+      `负向情绪（需对冲）：${neg.slice(0,4).map(e=>`${e.name}(${e.count})`).join('、') || '—'}`,
+      `正向情绪（可放大）：${pos.slice(0,4).map(e=>`${e.name}(${e.count})`).join('、') || '—'}`,
+      `情绪-痛点映射：负向情绪多指向清洁、隐私、材质等具体痛点；正向情绪来自${improves.join('、')||'体验设计'}。`,
+      `文案机会：用「安心」「无负担」等词对冲负向情绪，用「愉悦」「信任」放大正向。`
+    ];
+
+    return {insight, findings, pos, neg, actions:[
+      `详情页与广告用「安心感」视觉与文案中和用户的${neg[0]?neg[0].name:'负向'}情绪。`,
+      `把正向情绪「${pos[0]?pos[0].name:'愉悦'}」与${improves[0]||'改进点'}绑定，作为推荐语核心。`,
+      '针对负向情绪做专门的售后/FAQ内容，降低采用焦虑。'
+    ], appendix: emotions.slice(0,8).map(e=>({m:e.name, n:e.count, note:e.polarity>0?'正向':'负向'}))};
+  },
+
+  'jtbd': function(p, prod){
+    // 简化版 JTBD，作为通用页备用（完整版在 jtbd-analysis.html）
+    const motives = topByModule(p,'购买动机',3).map(x=>x.t);
+    const scenes = topByModule(p,'使用场景',3).map(x=>x.t);
+    const obstacles = topByModule(p,'使用阻碍',3).map(x=>x.t);
+    const cat = prod && prod.categoryName ? prod.categoryName : '产品';
+    return {
+      insight: `${cat}用户表面任务是「获得核心功能满足」，深层情感任务是「${motives[0]||'被理解'}」，社会任务是「体面、不尴尬地拥有」。`,
+      findings: [
+        `功能任务：在${scenes[0]||'核心场景'}下稳定完成体验`,
+        `情感任务：通过${motives[0]||'核心动机'}获得被理解的安心感`,
+        `社会任务：隐私、体面、敢外露是复购前提`
+      ],
+      actions: [
+        `叙事从功能参数切到情感/社会任务，先解决${obstacles[0]||'核心阻碍'}。`,
+        `用「${motives[0]||'动机'}」作为详情页主线。`,
+        '把社会任务（被看作懂行/体面）做成可分享的设计语言。'
+      ],
+      appendix: [...motives.slice(0,3).map(x=>({m:'购买动机', n:x.n, note:x.t})), ...obstacles.slice(0,3).map(x=>({m:'使用阻碍', n:x.n, note:x.t}))]
+    };
+  }
+};
+
+/* ===================== 渲染 ===================== */
+function render(){
+  const app = document.getElementById('app');
+  const params = new URLSearchParams(location.search);
+  const fk = params.get('f') || 'jtbd';
+  const f = FRAMEWORKS[fk] || FRAMEWORKS['jtbd'];
+  const p = safeProf(loadProfile());
+  const prod = loadProduct();
+
+  document.getElementById('brandName').textContent = f.name;
+  document.getElementById('brandSub').textContent = '深度分析报告';
+  document.title = f.name + ' · 深度分析报告';
+
+  if(!p){
+    app.innerHTML = `
+      <div class="empty-state">
+        <div class="eic">${f.icon}</div>
+        <h2>还没有可分析的 VOC 数据</h2>
+        <p>${f.name} 需要真实的打标数据。请先在 <b>VOC 打标页</b> 完成打标并「🚀 带入全流程分析」，或在 <b>全流程分析页</b> 导入/粘贴标签数据，本页会自动读取并生成分析。</p>
+        <a class="ebtn" href="experience.html">前往全流程分析 →</a>
+      </div>`;
+    return;
+  }
+
+  const total = p.meta.totalComments || 0;
+  const precise = p.meta.preciseCount || 0;
+  const covered = p.meta.coveredModules || Object.keys(p.modules||{}).length;
+  const cat = prod && prod.categoryName ? prod.categoryName : '产品';
+  const engine = Engines[fk] || Engines['jtbd'];
+  const result = engine(p, prod);
+
+  const pctxHtml = (()=>{
+    const arr = [];
+    if(prod){
+      if(prod.purposeName) arr.push(`<span class="pc"><span class="ic">🎯</span><b>目的</b> ${esc(prod.purposeName)}</span>`);
+      if(prod.categoryName) arr.push(`<span class="pc"><span class="ic">📦</span><b>类目</b> ${esc(prod.categoryName)}</span>`);
+    }
+    arr.push(`<span class="pc"><span class="ic">💬</span><b>评价</b> ${total} 条 · ${precise} 精确标签</span>`);
+    arr.push(`<span class="pc"><span class="ic">🧩</span><b>覆盖</b> ${covered} 个模块</span>`);
+    return arr.join('');
+  })();
+
+  // 核心结论
+  const coreHtml = `<div class="lead"><b>${f.icon} ${f.name}：</b>${esc(result.insight)}</div>
+    <ul class="checklist">${result.findings ? result.findings.map(x=>`<li>${esc(x)}</li>`).join('') : ''}</ul>`;
+
+  // 详细分析（框架不同）
+  let detailHtml = '';
+  if(fk === 'compass' || fk === 'researcher'){
+    const cells = result.quadrants.map(q=>`
+      <div class="quad ${q.cls||''}">
+        <h3>${esc(q.name)} ${q.desc?'<span style="font-weight:500;color:var(--muted);">· '+esc(q.desc)+'</span>':''}</h3>
+        ${q.tags ? `<div class="tagcloud">${q.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>` : ''}
+        ${q.items ? `<ul>${q.items.slice(0,6).map(i=>`<li>${esc(i)}</li>`).join('')}</ul>` : ''}
+      </div>`).join('');
+    detailHtml = `<div class="matrix">${cells}</div>`;
+  } else if(fk === 'triz'){
+    detailHtml = `<div class="grid2">${result.principles.map((pr,i)=>`
+      <div class="cell">
+        <h3>原理 ${i+1}</h3>
+        <p>${esc(pr)}</p>
+      </div>`).join('')}</div>`;
+  } else if(fk === 'plutchik'){
+    const posTags = (result.pos||[]).map(e=>`<span class="pos">${esc(e.name)} ${e.count}</span>`).join('');
+    const negTags = (result.neg||[]).map(e=>`<span class="neg">${esc(e.name)} ${e.count}</span>`).join('');
+    detailHtml = `<div class="grid2">
+      <div class="cell"><h3>正向情绪</h3><div class="tagcloud">${posTags||'<span>—</span>'}</div></div>
+      <div class="cell"><h3>负向情绪</h3><div class="tagcloud">${negTags||'<span>—</span>'}</div></div>
+    </div>`;
+  } else {
+    // needs-analysis / extreme / jtbd / fallback
+    const bars = (result.appendix || []).slice(0,6).map(it=>{
+      const max = Math.max(1, ...result.appendix.map(x=>x.n||0));
+      const w = Math.max(6, Math.round((it.n||0)/max*100));
+      return `<div class="bar-row">
+        <div class="t">${esc(it.m)}</div>
+        <div class="bar"><i style="width:${w}%"></i></div>
+        <div class="c">${it.note?esc(it.note):''}</div>
+      </div>`;
+    }).join('');
+    detailHtml = bars || `<div class="lead">暂无足够数据绘制该框架详细分析。</div>`;
+  }
+
+  // 行动建议
+  const recsHtml = result.actions.map((a,i)=>`
+    <div class="rec" style="border-top-color:${['var(--brand)','var(--brand2)','var(--teal)'][i%3]}">
+      <h3>${['🎯','🛠️','💡','📣'][i%4]} 行动建议 ${i+1}</h3>
+      <ul><li>${esc(a)}</li></ul>
+    </div>`).join('');
+
+  // 数据附录
+  const appx = result.appendix || [];
+  const appxHtml = appx.length ? `<div class="appx"><table>
+    <tr><th>维度</th><th>Top 信号</th></tr>
+    ${appx.map(a=>`<tr><th>${esc(a.m)}</th><td>${a.note?esc(a.note):''}<span class="c">${a.n ? '· '+a.n:''}</span></td></tr>`).join('')}
+  </table></div>` : '<div class="appx">未检测到可展示的数据附录。</div>';
+
+  app.innerHTML = `
+    <section class="hero">
+      <span class="kicker">${f.icon} ${f.name}</span>
+      <h1>${f.name}</h1>
+      <p class="sub">${f.desc} 基于你导入的真实 VOC 标签数据，由确定性框架引擎推导（无需大模型）。</p>
+      <div class="pctx">${pctxHtml}</div>
+    </section>
+
+    <div class="card">
+      <h2><span class="n">★</span>核心结论</h2>
+      ${coreHtml}
+    </div>
+
+    <div class="card">
+      <h2><span class="n">1</span>详细分析</h2>
+      ${detailHtml}
+    </div>
+
+    <div class="card">
+      <h2><span class="n">2</span>行动建议</h2>
+      <div class="grid3">${recsHtml}</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">3</span>数据附录 · 标签来源</h2>
+      ${appxHtml}
+    </div>
+
+    <div class="foot">
+      本报告由 <b>${f.name} 确定性引擎</b> 基于浏览器内真实 VOC 标签生成，未调用大模型。<br>
+      数据来源：voc_tag_profile · 产品上下文：voc_product_context · 主题与站点跨页共享。
+    </div>`;
+}
+
+document.addEventListener('DOMContentLoaded', render);
+</script>
+</body>
+</html>

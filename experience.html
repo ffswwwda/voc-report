@@ -89,18 +89,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .imp-chip.pos{background:#F0FDF4; border-color:#BBF7D0; color:#15803D;}
 .import-clear{margin-top:14px; display:inline-flex; align-items:center; gap:6px; background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:8px 16px; font-size:13px; font-weight:700; color:var(--slate); cursor:pointer; font-family:inherit; transition:all .2s;}
 .import-clear:hover{border-color:#DB2777; color:#DB2777;}
-.import-tree{display:flex; flex-direction:column; gap:6px; flex:1;}
-.it-row{align-items:flex-start !important;}
-.it-mod{font-size:13px; border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:#fff;}
-.it-mod summary{cursor:pointer; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:8px; list-style:none;}
-.it-mod summary::-webkit-details-marker{display:none;}
-.it-mn{flex:1;}
-.it-dims{margin-top:8px; padding-left:10px; display:flex; flex-direction:column; gap:6px;}
-.it-dim{padding:5px 0; border-bottom:1px dashed var(--line);}
-.it-dim:last-child{border-bottom:none;}
-.it-dn{font-weight:700; color:var(--indigo);}
-.it-tags{margin-top:6px; display:flex; flex-wrap:wrap; gap:5px;}
-.it-tag{font-size:12px; background:var(--bg); color:var(--slate); padding:3px 7px; border-radius:6px; border:1px solid var(--line);}
+.import-tree{display:flex; flex-wrap:wrap; gap:8px; flex:1; align-items:flex-start;}
+.it-mod{display:inline-flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px;}
+.it-mn{font-weight:700; color:var(--indigo);}
 .it-n{color:var(--pink); font-weight:800; font-size:12px;}
 .import-manual-toggle{display:inline-flex; align-items:center; gap:6px; background:#fff; border:1.5px dashed var(--indigo); border-radius:999px; padding:9px 18px; font-size:13px; font-weight:700; color:var(--indigo); cursor:pointer; font-family:inherit; transition:all .2s;}
 .import-manual-toggle:hover{background:#EEF2FF;}
@@ -553,13 +544,9 @@ function buildTagTreeHTML(p){
     const tree = p && p.tagTree;
     if(!tree || !Object.keys(tree).length) return '';
     const mods = Object.entries(tree).sort((a,b)=>b[1].n-a[1].n).slice(0,6);
-    return mods.map(([m,mo])=>{
-        const dims = Object.entries(mo.dims).sort((a,b)=>b[1].n-a[1].n).slice(0,4);
-        const dimsHtml = dims.map(([d, dim])=>{
-            return `<div class="it-dim"><span class="it-dn">${escapeHtml(d)}</span> <span class="it-n">${dim.n}</span></div>`;
-        }).join('');
-        return `<details class="it-mod" open><summary><span class="it-mn">${escapeHtml(m)}</span> <span class="it-n">${mo.n}</span></summary><div class="it-dims">${dimsHtml}</div></details>`;
-    }).join('');
+    return `<div class="import-tree">` + mods.map(([m,mo])=>{
+        return `<div class="it-mod"><span class="it-mn">${escapeHtml(m)}</span> <span class="it-n">${mo.n}</span></div>`;
+    }).join('') + `</div>`;
 }
 function renderImportArea(){
     const el = document.getElementById('importArea'); if(!el) return;
@@ -1079,12 +1066,10 @@ function buildCardDeep(fk, p, profile, desc){
 function openFrameworkDetail(fk){
     const f = FRAMEWORKS[fk];
     if(fk === 'jtbd'){
-        // JTBD 详细分析：独立可视化报告页（基于真实 VOC 标签 + 产品上下文，确定性引擎）
         window.open('jtbd-analysis.html', '_blank');
-        return;
+    } else {
+        window.open('framework-detail.html?f=' + encodeURIComponent(fk), '_blank');
     }
-    // 其他框架：占位（后续逐个接入对应框架技能）
-    alert(`「${f.name}」详细分析功能即将上线。\n\n后续将基于你导入的真实 VOC 标签数据，调用对应框架技能生成可下钻的完整分析报告。`);
 }
 
 
