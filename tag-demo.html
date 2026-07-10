@@ -276,6 +276,19 @@ textarea::placeholder{color:var(--muted);}
 .motbar .mcnt{width:28px; font-weight:700; text-align:left;}
 .an-empty{font-size:12px; color:var(--muted); padding:10px 0;}
 
+/* need quadrant matrix */
+.nq-wrap{position:relative; padding-left:34px; padding-top:22px;}
+.nq-axis{display:flex; justify-content:space-between; font-size:10px; color:var(--muted); font-weight:600;}
+.nq-axis-x{position:absolute; top:0; left:34px; right:0;}
+.nq-axis-y{position:absolute; left:0; top:22px; bottom:0; flex-direction:column; writing-mode:vertical-rl; text-align:center;}
+.nq-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+.nq-cell{border-radius:12px; border:1px solid; padding:12px; min-height:110px;}
+.nq-title{font-size:13px; font-weight:700; margin-bottom:3px;}
+.nq-sub{font-size:10px; color:var(--slate); line-height:1.35; margin-bottom:6px; min-height:28px;}
+.nq-count{font-size:11px; font-weight:700; color:var(--ink); margin-bottom:6px;}
+.nq-chips{display:flex; flex-wrap:wrap; gap:5px;}
+.nq-chip{font-size:10px; padding:3px 7px; border-radius:999px;}
+
 @media(max-width:680px){
     .an-grid{grid-template-columns:1fr;}
 }
@@ -541,8 +554,13 @@ table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
             </div>
             <div class="an-box">
                 <h4>🎯 用户需求四象限</h4>
-                <div class="an-desc">重要度（来自需求层级）× 满意度（由阻碍/好评反推），气泡大小＝命中次数</div>
+                <div class="an-desc">按「容易识别 ↔ 难以识别」×「产品形态改变 ↔ 产品形态不变」划分为四类需求</div>
                 <div id="needQuad"></div>
+            </div>
+            <div class="an-box full">
+                <h4>📈 需求优先级排序</h4>
+                <div class="an-desc">情绪（满意度）× 用户需求交叉：横轴＝情绪得分，纵轴＝需求重要度，气泡大小＝命中次数</div>
+                <div id="needPriority"></div>
             </div>
             <div class="an-box full">
                 <h4>🚦 购买动机构成</h4>
@@ -1682,6 +1700,7 @@ const MOT_COLORS = ['#2563EB','#7C3AED','#DB2777','#0891B2','#D97706','#DC2626']
 function renderAnalysis(allHits){
     renderEmotionCompass(allHits);
     renderNeedQuad(allHits);
+    renderNeedPriority(allHits);
     renderMotMix(allHits);
 }
 
@@ -1722,49 +1741,142 @@ function renderEmotionCompass(allHits){
     legend.innerHTML = EMOTIONS.map(e=>`<span class="lg"><span class="ld" style="background:${e.color}"></span>${e.name} ${counts[e.key]}</span>`).join('');
 }
 
+/* 用户需求四象限映射：容易识别 ↔ 难以识别 × 产品形态改变 ↔ 产品形态不变 */
+const NEED_QUAD_META = {
+    explicit:{name:'显性需求', desc:'消费者自己知道、能够明确说出来的需求', color:'#FEE2E2', border:'#FECACA', chip:'#EF4444'},
+    implicit:{name:'隐性需求', desc:'真实存在，但用户没有意识到也说不出的需求', color:'#ECFDF5', border:'#A7F3D0', chip:'#10B981'},
+    unexpected:{name:'非预期需求', desc:'用户把产品用于设计意图之外的用途', color:'#FEF3C7', border:'#FDE68A', chip:'#F59E0B'},
+    noncustomer:{name:'非顾客需求', desc:'尚未购买、尚未使用、甚至主动回避的人群', color:'#E0E7FF', border:'#C7D2FE', chip:'#6366F1'}
+};
+const IMPLICIT_NEED_SUBDIMS = ['身份层'];
+const NONCUSTOMER_KEYWORDS = ['不买','没买','不敢买','不敢用','拒绝','排斥','羞耻','尴尬','顾虑','担心','太慢','太麻烦','没必要','不需要'];
+const UNEXPECTED_KEYWORDS = ['一起用','情侣','swap','幻想','角色扮演','意外','没想到','另类','代替','替代','两用'];
+function classifyNeedQuad(h){
+    if(h.m==='使用阻碍') return 'noncustomer';
+    if(h.m==='产品改进建议' || h.m==='购买目的') return 'explicit';
+    if(h.m==='购买动机' || h.m==='用户画像') return 'implicit';
+    if(h.m==='使用场景'){
+        const txt = (h.t||'') + ' ' + (h.kw||'');
+        if(UNEXPECTED_KEYWORDS.some(k=>txt.includes(k))) return 'unexpected';
+        return 'explicit';
+    }
+    if(h.m==='十三种需求'){
+        const dim = RULES.find(t=>t.m==='十三种需求' && t.t===h.t)?.d;
+        if(IMPLICIT_NEED_SUBDIMS.includes(dim)) return 'implicit';
+        return 'explicit';
+    }
+    return null;
+}
+
 function renderNeedQuad(allHits){
     const box = document.getElementById('needQuad');
-    const hits = allHits.flat().filter(h=>h.m==='十三种需求');
-    if(hits.length===0){
-        box.innerHTML = '<div class="an-empty">未命中十三种需求标签，无法绘制四象限（可在评价中补充需求/价值相关表述）。</div>';
+    const buckets = {explicit:[], implicit:[], unexpected:[], noncustomer:[]};
+    allHits.flat().forEach(h=>{
+        const q = classifyNeedQuad(h);
+        if(q) buckets[q].push(h);
+    });
+    const total = Object.values(buckets).reduce((s,a)=>s+a.length,0);
+    if(total===0){
+        box.innerHTML = '<div class="an-empty">未命中可映射到四象限的需求标签（可补充购买目的、使用场景、使用阻碍、购买动机、用户画像或十三种需求相关表述）。</div>';
         return;
     }
-    const hasBlock = allHits.flat().some(h=>h.m==='使用阻碍');
-    const hasLoyal = allHits.flat().some(h=>h.m==='用户忠诚度');
-    const hasImprove = allHits.flat().some(h=>h.m==='产品改进建议');
+    const order = ['noncustomer','explicit','implicit','unexpected'];
+    const labels = [
+        {text:'容易识别 ←', x:18, y:14},
+        {text:'→ 难以识别', x:82, y:14, anchor:'end'},
+        {text:'产品形态改变 ↑', x:14, y:20, rotate:-90},
+        {text:'产品形态不变 ↓', x:86, y:80, rotate:90}
+    ];
+    let html = '<div class="nq-wrap">';
+    html += '<div class="nq-axis nq-axis-x"><span>容易识别</span><span>难以识别</span></div>';
+    html += '<div class="nq-axis nq-axis-y"><span>产品形态改变</span><span>产品形态不变</span></div>';
+    html += '<div class="nq-grid">';
+    order.forEach(key=>{
+        const meta = NEED_QUAD_META[key];
+        const arr = buckets[key];
+        const cnt = {};
+        arr.forEach(h=>{ cnt[h.t]=(cnt[h.t]||0)+1; });
+        const chips = Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t,n])=>
+            `<span class="nq-chip" style="background:${meta.chip}15;border:1px solid ${meta.chip}40;color:${meta.chip};">${escHtml(t)} <b>${n}</b></span>`
+        ).join('');
+        html += `<div class="nq-cell" style="background:${meta.color};border-color:${meta.border};">`+
+            `<div class="nq-title" style="color:${meta.chip};">${meta.name}</div>`+
+            `<div class="nq-sub">${meta.desc}</div>`+
+            `<div class="nq-count">命中 ${arr.length} 条</div>`+
+            `<div class="nq-chips">${chips}</div>`+
+            `</div>`;
+    });
+    html += '</div></div>';
+    box.innerHTML = html;
+}
+
+function renderNeedPriority(allHits){
+    const box = document.getElementById('needPriority');
+    const flat = allHits.flat();
+    const needHits = flat.filter(h=>h.m==='十三种需求');
+    if(needHits.length===0){
+        box.innerHTML = '<div class="an-empty">未命中十三种需求标签，无法绘制需求优先级排序（可在评价中补充需求/价值相关表述）。</div>';
+        return;
+    }
     const tally = {};
-    hits.forEach(h=>{ tally[h.t]=(tally[h.t]||0)+1; });
+    needHits.forEach(h=>{ tally[h.t]=(tally[h.t]||0)+1; });
     const items = Object.keys(tally).map(t=>{
         const imp = NEED_IMPORTANCE[t]!==undefined ? NEED_IMPORTANCE[t] : 0.6;
-        let sat = 0.55;
-        if(hasBlock) sat -= 0.22;
-        if(hasLoyal) sat += 0.16;
-        if(hasImprove) sat -= 0.10;
-        sat = Math.max(0.12, Math.min(0.95, sat));
-        return {t, imp, sat, n:tally[t]};
-    });
-    const m=34, pw=232, ph=200;
-    const qx = m + pw*0.5, qy = m + ph*0.5;
-    let svg = `<svg viewBox="0 0 ${pw+2*m} ${ph+2*m}" width="100%" style="max-width:300px;display:block;margin:0 auto;">`;
-    svg += `<rect x="${m}" y="${m}" width="${pw*0.5}" height="${ph*0.5}" fill="#ECFDF5"/>`;
-    svg += `<rect x="${qx}" y="${m}" width="${pw*0.5}" height="${ph*0.5}" fill="#FEF2F2"/>`;
-    svg += `<rect x="${m}" y="${qy}" width="${pw*0.5}" height="${ph*0.5}" fill="#F8FAFC"/>`;
-    svg += `<rect x="${qx}" y="${qy}" width="${pw*0.5}" height="${ph*0.5}" fill="#FEFCE8"/>`;
-    svg += `<line x1="${qx}" y1="${m}" x2="${qx}" y2="${m+ph}" stroke="#CBD5E1" stroke-width="1"/>`;
-    svg += `<line x1="${m}" y1="${qy}" x2="${m+pw}" y2="${qy}" stroke="#CBD5E1" stroke-width="1"/>`;
-    svg += `<text x="${m}" y="${m-10}" font-size="10" fill="#94A3B8">低重要</text>`;
-    svg += `<text x="${m+pw}" y="${m-10}" text-anchor="end" font-size="10" fill="#94A3B8">高重要 →</text>`;
-    svg += `<text x="${m-6}" y="${m+8}" font-size="10" fill="#94A3B8" text-anchor="end">高满意</text>`;
-    svg += `<text x="${m-6}" y="${m+ph}" font-size="10" fill="#94A3B8" text-anchor="end">→ 低满意</text>`;
+        let emotionScore = 0, emotionCount = 0;
+        needHits.filter(h=>h.t===t).forEach(h=>{
+            const arr = EMOTION_MAP[h.t];
+            if(arr){
+                arr.forEach(k=>{
+                    emotionScore += (EMOTION_POLARITY[k]||0);
+                    emotionCount++;
+                });
+            }
+        });
+        const sat = emotionCount? emotionScore/emotionCount : 0;
+        return {t, imp, sat:Math.max(-1,Math.min(1,sat)), n:tally[t]};
+    }).filter(it=>it.n>=1);
+    if(items.length===0){
+        box.innerHTML = '<div class="an-empty">十三种需求标签未映射到情绪，无法排序。</div>';
+        return;
+    }
+    const W=560, H=260, m={l:46,r:18,t:24,b:34};
+    const pw=W-m.l-m.r, ph=H-m.t-m.b;
+    const maxN = Math.max(...items.map(it=>it.n));
+    let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:620px;display:block;margin:0 auto;">`;
+    svg += `<rect x="${m.l}" y="${m.t}" width="${pw}" height="${ph}" fill="#F8FAFC" stroke="#E2E8F0" rx="8"/>`;
+    /* quadrant backgrounds */
+    svg += `<rect x="${m.l+pw*0.5}" y="${m.t}" width="${pw*0.5}" height="${ph*0.5}" fill="#FEF2F2" fill-opacity="0.6"/>`;
+    svg += `<rect x="${m.l}" y="${m.t}" width="${pw*0.5}" height="${ph*0.5}" fill="#ECFDF5" fill-opacity="0.6"/>`;
+    svg += `<rect x="${m.l}" y="${m.t+ph*0.5}" width="${pw*0.5}" height="${ph*0.5}" fill="#FEFCE8" fill-opacity="0.6"/>`;
+    svg += `<rect x="${m.l+pw*0.5}" y="${m.t+ph*0.5}" width="${pw*0.5}" height="${ph*0.5}" fill="#E0E7FF" fill-opacity="0.6"/>`;
+    /* axes */
+    svg += `<line x1="${m.l}" y1="${m.t+ph*0.5}" x2="${m.l+pw}" y2="${m.t+ph*0.5}" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="4 3"/>`;
+    svg += `<line x1="${m.l+pw*0.5}" y1="${m.t}" x2="${m.l+pw*0.5}" y2="${m.t+ph}" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="4 3"/>`;
+    /* labels */
+    svg += `<text x="${m.l+pw}" y="${m.t-6}" text-anchor="end" font-size="11" fill="#94A3B8">正面情绪 →</text>`;
+    svg += `<text x="${m.l}" y="${m.t-6}" font-size="11" fill="#94A3B8">← 负面情绪</text>`;
+    svg += `<text x="${m.l-8}" y="${m.t+6}" text-anchor="end" font-size="11" fill="#94A3B8">高重要</text>`;
+    svg += `<text x="${m.l-8}" y="${m.t+ph}" text-anchor="end" font-size="11" fill="#94A3B8">低重要</text>`;
+    /* bubbles */
     items.forEach(it=>{
-        const x = m + it.imp*pw;
-        const y = m + (1-it.sat)*ph;
-        const rad = 7 + Math.min(10, it.n*3);
-        svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rad.toFixed(1)}" fill="#7C3AED" fill-opacity="0.72" stroke="#fff" stroke-width="1.5"><title>${it.t}｜重要度 ${it.imp}｜满意度 ${it.sat.toFixed(2)}｜命中 ${it.n}</title></circle>`;
-        svg += `<text x="${x.toFixed(1)}" y="${(y+rad+10).toFixed(1)}" text-anchor="middle" font-size="9.5" fill="#4C1D95">${it.t}</text>`;
+        const x = m.l + pw * ((it.sat + 1) / 2);
+        const y = m.t + ph * (1 - it.imp);
+        const r = 7 + Math.min(18, (it.n/maxN)*14);
+        const color = it.sat > 0.1 ? '#10B981' : (it.sat < -0.1 ? '#EF4444' : '#F59E0B');
+        svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${color}" fill-opacity="0.72" stroke="#fff" stroke-width="1.5"><title>${escHtml(it.t)}｜重要度 ${(it.imp*100).toFixed(0)}%｜情绪得分 ${it.sat.toFixed(2)}｜命中 ${it.n}</title></circle>`;
+        if(r>=10){
+            svg += `<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">${it.n}</text>`;
+        }
+        svg += `<text x="${x.toFixed(1)}" y="${(y+r+12).toFixed(1)}" text-anchor="middle" font-size="10" fill="#475569">${escHtml(it.t)}</text>`;
     });
     svg += `</svg>`;
-    box.innerHTML = svg;
+    /* legend */
+    const legend = `<div class="an-legend" style="margin-top:6px;">`+
+        `<span class="lg"><span class="ld" style="background:#10B981"></span>正面情绪</span>`+
+        `<span class="lg"><span class="ld" style="background:#F59E0B"></span>中性情绪</span>`+
+        `<span class="lg"><span class="ld" style="background:#EF4444"></span>负面情绪</span>`+
+        `</div>`;
+    box.innerHTML = svg + legend;
 }
 
 function renderMotMix(allHits){
