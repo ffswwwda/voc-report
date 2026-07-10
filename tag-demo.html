@@ -246,17 +246,100 @@ textarea::placeholder{color:var(--muted);}
 @media(max-width:680px){
     .an-grid{grid-template-columns:1fr;}
 }
+
+/* ===================== CSV 上传 / 可编辑表格 / 抽检概览 ===================== */
+.mode-tabs{display:flex; gap:8px; margin-bottom:16px;}
+.mtab{
+    flex:1; padding:10px 14px; font-size:14px; font-weight:700; cursor:pointer;
+    border:1px solid var(--line); background:var(--card); color:var(--slate);
+    border-radius:10px; transition:all .18s;
+}
+.mtab.active{background:linear-gradient(135deg,#7C3AED,#2563EB); color:#fff; border-color:transparent; box-shadow:0 6px 16px rgba(124,58,237,.25);}
+
+.csv-cfg{display:none;}
+.csv-cfg .file-drop{
+    border:2px dashed var(--line); border-radius:12px; padding:18px; text-align:center;
+    background:var(--bg); color:var(--slate); font-size:13px; cursor:pointer; transition:all .18s;
+}
+.csv-cfg .file-drop:hover{border-color:var(--brand); color:var(--brand);}
+.csv-cfg input[type=file]{display:none;}
+.csv-info{margin-top:10px; font-size:12px; color:var(--muted); min-height:16px;}
+.csv-info b{color:var(--brand);}
+
+/* 结果表格 */
+.res-toolbar{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    margin:18px 0 10px; padding:12px 14px; background:linear-gradient(135deg,#F5F3FF,#EEF2FF);
+    border:1px solid #E9D5FF; border-radius:12px;
+}
+.res-toolbar .rt-info{font-size:13px; color:#4C1D95; font-weight:600;}
+.res-toolbar .rt-info b{color:#7C3AED;}
+.export-btn{
+    border:none; cursor:pointer; background:linear-gradient(135deg,#059669,#0891B2);
+    color:#fff; font-size:13px; font-weight:800; padding:9px 16px; border-radius:999px;
+    box-shadow:0 6px 16px rgba(5,150,105,.3); transition:all .2s;
+}
+.export-btn:hover{transform:translateY(-2px);}
+.export-btn:disabled{opacity:.45; cursor:not-allowed; box-shadow:none;}
+
+.tag-table-wrap{max-height:560px; overflow:auto; border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow);}
+table.tag-table{border-collapse:collapse; width:100%; font-size:12.5px; background:var(--card);}
+table.tag-table th, table.tag-table td{border-bottom:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top;}
+table.tag-table thead th{
+    position:sticky; top:0; background:var(--ink); color:#fff; font-weight:700; z-index:2; white-space:nowrap;
+    font-size:12px; box-shadow:0 1px 0 var(--line);
+}
+table.tag-table thead th .thc{font-size:10px; font-weight:500; opacity:.8; display:block;}
+table.tag-table tbody tr:nth-child(even){background:rgba(241,245,249,.5);}
+table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
+.td-idx{width:38px; text-align:center; color:var(--muted); font-weight:700;}
+.td-text{min-width:200px; max-width:280px; color:var(--slate); line-height:1.5;}
+.td-text .tt-full{color:var(--muted); font-size:11px; cursor:pointer; margin-left:4px;}
+.td-text .tt-long{display:none; white-space:pre-wrap;}
+.td-text.exp .tt-short{display:none;}
+.td-text.exp .tt-long{display:inline;}
+.td-mod{width:150px;}
+.cell-chips{display:flex; flex-wrap:wrap; gap:4px;}
+.tchip2{
+    display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:999px;
+    font-size:11px; font-weight:600; border:1px solid transparent; cursor:default;
+}
+.tchip2 .x{cursor:pointer; font-weight:700; opacity:.6; margin-left:1px;}
+.tchip2 .x:hover{opacity:1;}
+.cell-add{margin-top:5px;}
+.cell-add select{
+    width:100%; font-size:11px; padding:3px 5px; border:1px dashed var(--line); border-radius:6px;
+    background:#fff; color:var(--muted); cursor:pointer;
+}
+.cell-add select:hover{border-color:var(--brand); color:var(--brand);}
+.td-op{width:54px; text-align:center;}
+.op-del{font-size:11px; color:#DC2626; cursor:pointer; font-weight:600;}
+.op-del:hover{text-decoration:underline;}
+
+/* 抽检概览 */
+.overview{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:14px;}
+.ov-box{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; box-shadow:var(--shadow);}
+.ov-box h3{font-size:14px; margin-bottom:10px; display:flex; align-items:center; gap:6px;}
+.ov-box .ov-sub{font-size:11px; color:var(--muted); margin-bottom:10px;}
+.ov-samples{display:flex; flex-direction:column; gap:10px; max-height:300px; overflow:auto;}
+.ov-sample{border-left:3px solid var(--brand); padding:6px 10px; background:var(--bg); border-radius:0 8px 8px 0; font-size:12px; color:var(--slate); line-height:1.55;}
+.ov-sample .os-idx{font-weight:700; color:var(--brand); margin-right:6px;}
+.ov-cloud{display:flex; flex-wrap:wrap; gap:8px; align-content:flex-start; max-height:300px; overflow:auto;}
+@media(max-width:680px){
+    .overview{grid-template-columns:1fr;}
+    .td-text{max-width:200px;}
+}
 </style>
 </head>
 <body>
 
 <div class="topbar">
     <a href="index.html">← 返回主网页</a>
-    <span class="brand">🦞 VOC 标签体系 Demo</span>
+    <span class="brand">🦞 VOC 智能打标工具</span>
 </div>
 
 <div class="hero">
-    <span class="eyebrow">标签体系 · 可交互 Demo</span>
+    <span class="eyebrow">标签体系 · 智能打标工具</span>
     <h1>VOC <span class="grad">粘贴即打标</span></h1>
     <p>把你的用户评价贴进来，看它如何被自动拆成结构化标签。每条命中都附「判断依据」，规则完全对齐主站的九大标签模块。</p>
     <div class="steps-hint">
@@ -268,7 +351,11 @@ textarea::placeholder{color:var(--muted);}
 </div>
 
 <div class="panel">
-    <div class="cfg">
+    <div class="mode-tabs">
+        <button class="mtab active" id="tabPaste" onclick="switchMode('paste')">✏️ 粘贴评价</button>
+        <button class="mtab" id="tabCsv" onclick="switchMode('csv')">📄 上传 CSV</button>
+    </div>
+    <div class="cfg" id="cfgPaste">
         <div class="cfg-block">
             <div class="cfg-label"><span class="num">1</span>粘贴用户评价<span class="sample-link" onclick="loadSample()">点击载入示例评价</span></div>
             <textarea id="vocInput" placeholder="把商品评价、社区讨论、社媒评论贴进来（多条评价用空行分隔）。例如：&#10;&#10;第一次买这种东西，看博主种草推荐的，刚好赶上双11折扣就下单了，深夜一个人用在卧室里还挺放松的。&#10;&#10;材质有点硬不舒服，合租怕室友听到挺尴尬的，希望能出更软的医用硅胶款，加个静音模式就更好了。"></textarea>
@@ -289,6 +376,24 @@ textarea::placeholder{color:var(--muted);}
         <div class="gen-wrap">
             <button class="gen-btn" id="genBtn" onclick="runTagging()">🏷️ 开始打标</button>
             <div class="gen-hint">本地规则引擎实时匹配 · 不上传任何数据 · 复杂语义可找智能体深聊</div>
+        </div>
+    </div>
+
+    <div class="cfg csv-cfg" id="cfgCsv">
+        <div class="cfg-block">
+            <div class="cfg-label"><span class="num">1</span>上传 CSV 文件<span class="hint">每行 = 一条评价</span></div>
+            <label class="file-drop" for="csvFile" id="csvDrop">点击选择 CSV 文件（支持中文列名，自动检测文本列）</label>
+            <input type="file" id="csvFile" accept=".csv,text/csv" onchange="onCsvSelected(this)">
+            <div class="csv-info" id="csvInfo"></div>
+            <div class="split-mode">
+                <span>文本列：</span>
+                <select id="csvCol"></select>
+                <span class="sm-hint">自动检测「内容/评论/评价/正文」等，可手动切换</span>
+            </div>
+        </div>
+        <div class="gen-wrap">
+            <button class="gen-btn" id="csvBtn" onclick="runCsvTagging()">📑 解析并打标</button>
+            <div class="gen-hint">CSV 每行评价自动打标，结果可在下方表格内增删标签并导出</div>
         </div>
     </div>
 </div>
@@ -319,6 +424,23 @@ textarea::placeholder{color:var(--muted);}
     </div>
     <div class="res-summary" id="resSummary"></div>
     <div id="cmtCards"></div>
+
+    <div class="res-toolbar">
+        <div class="rt-info" id="rtInfo"></div>
+        <button class="export-btn" id="exportBtn" onclick="exportResultCsv()">⬇️ 导出打标结果 CSV</button>
+    </div>
+    <div class="tag-table-wrap"><div id="tagTable"></div></div>
+
+    <div class="overview" id="overview">
+        <div class="ov-box">
+            <h3>👀 用户原评价展示 <span class="ov-sub">（仅抽检前 5 条，完整数据见上方表格）</span></h3>
+            <div class="ov-samples" id="ovSamples"></div>
+        </div>
+        <div class="ov-box">
+            <h3>🏷️ 标签词云 <span class="ov-sub">（按频次取前 20，完整见导出 CSV）</span></h3>
+            <div class="ov-cloud" id="ovCloud"></div>
+        </div>
+    </div>
 
     <div class="agg-grid">
         <div class="agg-box">
@@ -388,7 +510,7 @@ textarea::placeholder{color:var(--muted);}
 </div>
 
 <footer class="footer">
-    VOC 完整分析体系 · 标签体系打标 Demo · 规则对齐九大模块<br>
+    VOC 完整分析体系 · 标签体系智能打标工具 · 规则对齐九大模块<br>
     本地规则引擎仅作演示，深度语义标注请找类目智能体
 </footer>
 
@@ -637,49 +759,251 @@ function smartSplit(text, mode){
 function runTagging(){
     const raw = document.getElementById('vocInput').value;
     if(!raw.trim()){ alert('请先粘贴用户评价，或点「载入示例评价」。'); return; }
-    const btn = document.getElementById('genBtn');
-    btn.disabled = true;
+    const mode = document.getElementById('splitMode').value;
+    const comments = smartSplit(raw, mode);
+    runTaggingWith(comments);
+}
 
+/* ===================== 渲染结果 ===================== */
+/* ===================== CSV 上传 / 可编辑表格 / 导出 ===================== */
+let TAG_STATE = [];          // [{id, text, hits:[{m,d,t,kw,conf,color}]}]
+let CSV_COLUMNS = [];
+let CSV_TEXT_COL = '';
+
+/* 从 RULES 汇总每个模块的可用标签（用于表格内「+」下拉） */
+const MODULE_LABELS = (function(){
+    const map = {};
+    MODULE_ORDER.forEach(m=> map[m] = []);
+    RULES.forEach(r=>{ if(!map[r.m].includes(r.t)) map[r.m].push(r.t); });
+    return map;
+})();
+
+function switchMode(mode){
+    const paste = mode==='paste';
+    document.getElementById('tabPaste').classList.toggle('active', paste);
+    document.getElementById('tabCsv').classList.toggle('active', !paste);
+    document.getElementById('cfgPaste').style.display = paste ? '' : 'none';
+    document.getElementById('cfgCsv').style.display = paste ? 'none' : 'block';
+}
+
+/* 简易 CSV 解析（支持引号包裹、转义双引号、逗号/换行） */
+function parseCSV(text){
+    const rows = []; let row = [], field = '', i = 0, inQ = false;
+    text = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+    while(i < text.length){
+        const c = text[i];
+        if(inQ){
+            if(c === '"'){
+                if(text[i+1] === '"'){ field += '"'; i += 2; continue; }
+                inQ = false; i++; continue;
+            }
+            field += c; i++; continue;
+        }
+        if(c === '"'){ inQ = true; i++; continue; }
+        if(c === ','){ row.push(field); field = ''; i++; continue; }
+        if(c === '\n'){ row.push(field); rows.push(row); row = []; field = ''; i++; continue; }
+        field += c; i++;
+    }
+    if(field.length>0 || row.length>0){ row.push(field); rows.push(row); }
+    return rows;
+}
+
+function detectCsvColumn(cols){
+    const cands = ['内容','评论','评价','正文','评论内容','review','content','text','comment'];
+    for(const c of cands){ if(cols.includes(c)) return c; }
+    return cols[0];
+}
+
+function onCsvSelected(input){
+    const file = input.files && input.files[0];
+    const info = document.getElementById('csvInfo');
+    const colSel = document.getElementById('csvCol');
+    if(!file){ info.innerHTML=''; colSel.innerHTML=''; return; }
+    const reader = new FileReader();
+    reader.onload = function(e){
+        const rows = parseCSV(e.target.result);
+        if(rows.length < 2){ info.innerHTML = '⚠️ 文件行数过少，请检查格式（需含表头）。'; return; }
+        CSV_COLUMNS = rows[0].map(c=>(c||'').trim());
+        const tcol = detectCsvColumn(CSV_COLUMNS);
+        CSV_TEXT_COL = tcol;
+        colSel.innerHTML = CSV_COLUMNS.map(c=>`<option value="${c}" ${c===tcol?'selected':''}>${c}</option>`).join('');
+        info.innerHTML = `已读取 <b>${rows.length-1}</b> 行 · 检测到文本列：<b>${tcol}</b>`;
+    };
+    reader.readAsText(file, 'utf-8');
+}
+
+function runCsvTagging(){
+    const input = document.getElementById('csvFile');
+    const file = input.files && input.files[0];
+    if(!file){ alert('请先选择 CSV 文件。'); return; }
+    const col = document.getElementById('csvCol').value;
+    CSV_TEXT_COL = col;
+    const reader = new FileReader();
+    reader.onload = function(e){
+        const rows = parseCSV(e.target.result);
+        const header = rows[0].map(c=>(c||'').trim());
+        const ci = header.indexOf(col);
+        if(ci < 0){ alert('未找到文本列：'+col); return; }
+        const comments = rows.slice(1).map(r=> (r[ci]||'').trim()).filter(Boolean);
+        if(comments.length===0){ alert('文本列无有效内容。'); return; }
+        runTaggingWith(comments);
+    };
+    reader.readAsText(file, 'utf-8');
+}
+
+/* 粘贴 / CSV 共用的打标主流程 */
+function runTaggingWith(comments){
+    const btn = document.getElementById('genBtn');
+    if(btn) btn.disabled = true;
     const pw = document.getElementById('pipelineWrap');
     pw.classList.add('show');
     document.getElementById('results').classList.remove('show');
     ['pn1','pn2','pn3'].forEach(id=>document.getElementById(id).className='pnode');
     document.getElementById('pipeBar').style.width = '0%';
-
-    const mode = document.getElementById('splitMode').value;
-    const comments = smartSplit(raw, mode);
-
+    const R = (id)=>document.getElementById(id);
+    setTimeout(()=>{ R('pn1').className='pnode active'; R('pc1').innerHTML = `已切分 <b>${comments.length}</b> 条评价，清洗标点与空行。`; R('pipeBar').style.width = '33%'; }, 200);
+    setTimeout(()=>{ R('pn1').className='pnode done'; R('pn2').className='pnode active'; R('pc2').innerHTML = `遍历 <b>${RULES.length}</b> 条规则，对每条评价做关键词 / 语义匹配…`; R('pipeBar').style.width = '66%'; }, 900);
     setTimeout(()=>{
-        document.getElementById('pn1').className='pnode active';
-        document.getElementById('pc1').innerHTML = `已切分 <b>${comments.length}</b> 条评价，清洗标点与空行。`;
-        document.getElementById('pipeBar').style.width = '33%';
-    }, 200);
-
-    setTimeout(()=>{
-        document.getElementById('pn1').className='pnode done';
-        document.getElementById('pn2').className='pnode active';
-        document.getElementById('pc2').innerHTML = `遍历 <b>${RULES.length}</b> 条规则，对每条评价做关键词 / 语义匹配…`;
-        document.getElementById('pipeBar').style.width = '66%';
-    }, 900);
-
-    setTimeout(()=>{
-        document.getElementById('pn2').className='pnode done';
-        document.getElementById('pn3').className='pnode active';
+        R('pn2').className='pnode done'; R('pn3').className='pnode active';
         const all = comments.map(c=>tagComment(c));
         const totalTags = all.reduce((s,a)=>s+a.length,0);
-        document.getElementById('pc3').innerHTML = `共命中 <b>${totalTags}</b> 个标签，正在聚合标签云与需求映射…`;
-        document.getElementById('pipeBar').style.width = '100%';
+        R('pc3').innerHTML = `共命中 <b>${totalTags}</b> 个标签，正在聚合标签云与需求映射…`;
+        R('pipeBar').style.width = '100%';
         renderResults(comments, all);
-        document.getElementById('pn3').className='pnode done';
+        R('pn3').className='pnode done';
         document.getElementById('results').classList.add('show');
         document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
-        btn.disabled = false;
+        if(btn) btn.disabled = false;
     }, 1700);
 }
 
-/* ===================== 渲染结果 ===================== */
+function escHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderTable(){
+    const wrap = document.getElementById('tagTable');
+    if(!TAG_STATE.length){ wrap.innerHTML = '<div class="cmt-empty">暂无数据</div>'; return; }
+    let html = '<table class="tag-table"><thead><tr><th class="td-idx">#</th><th>原评价</th>';
+    MODULE_ORDER.forEach(m=>{ html += `<th>${m}</th>`; });
+    html += '<th>操作</th></tr></thead><tbody>';
+    TAG_STATE.forEach((row, ri)=>{
+        const esc = escHtml;
+        const full = esc(row.text);
+        const short = row.text.length>60 ? esc(row.text.slice(0,60)+'…') : full;
+        let tr = `<tr data-ri="${ri}"><td class="td-idx">${ri+1}</td>`;
+        tr += `<td class="td-text"><span class="tt-short">${short}</span><span class="tt-long">${full}</span>`;
+        if(row.text.length>60) tr += `<span class="tt-full" onclick="var td=this.closest('.td-text');td.classList.toggle('exp');this.textContent=td.classList.contains('exp')?'收起':'展开';">展开</span>`;
+        tr += `</td>`;
+        MODULE_ORDER.forEach(m=>{
+            const chips = row.hits.filter(h=>h.m===m);
+            let cell = '<div class="cell-chips">';
+            chips.forEach(h=>{
+                cell += `<span class="tchip2" style="background:${hex2rgba(h.color,0.12)};color:${h.color};border-color:${hex2rgba(h.color,0.35)};" title="依据：${esc(h.kw)}">${esc(h.t)}<span class="x" onclick="editTag(${ri},'${m}','${esc(h.t)}','remove')">✕</span></span>`;
+            });
+            cell += '</div>';
+            const opts = MODULE_LABELS[m].filter(t=>!chips.some(c=>c.t===t))
+                .map(t=>`<option value="${t}">${t}</option>`).join('');
+            cell += `<div class="cell-add"><select onchange="editTag(${ri},'${m}',this.value,'add');this.value='';"><option value="">+ 添加标签</option>${opts}</select></div>`;
+            tr += `<td class="td-mod">${cell}</td>`;
+        });
+        tr += `<td class="td-op"><span class="op-del" onclick="editTag(${ri},'','','delrow')">删除行</span></td></tr>`;
+        html += tr;
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+}
+
+function editTag(ri, m, t, action){
+    if(action==='delrow'){ TAG_STATE.splice(ri,1); reindexState(); refreshAfterEdit(); return; }
+    const row = TAG_STATE[ri];
+    if(!row) return;
+    if(action==='remove'){
+        row.hits = row.hits.filter(h=>!(h.m===m && h.t===t));
+    } else if(action==='add'){
+        if(!t) return;
+        if(row.hits.some(h=>h.m===m && h.t===t)) return;
+        row.hits.push({m, d:'', t, kw:'人工添加', conf:'mid', color:MODULE_META[m].color});
+    }
+    refreshAfterEdit();
+}
+
+function reindexState(){ TAG_STATE.forEach((r,i)=> r.id=i); }
+
+function refreshAfterEdit(){
+    const comments = TAG_STATE.map(r=>r.text);
+    const allHits = TAG_STATE.map(r=>r.hits);
+    const tw = document.querySelector('.tag-table-wrap');
+    const scroll = tw ? tw.scrollTop : 0;
+    renderTable();
+    if(tw) tw.scrollTop = scroll;
+    recomputeAnalytics(comments, allHits);
+    renderOverview(comments, allHits);
+    updateToolbarInfo(comments, allHits);
+}
+
+function updateToolbarInfo(comments, allHits){
+    const n = allHits.reduce((s,a)=>s+a.length,0);
+    const el = document.getElementById('rtInfo');
+    if(el) el.innerHTML = `共 <b>${comments.length}</b> 条评价 · 命中 <b>${n}</b> 个标签 · 可在表格内增删标签后导出`;
+}
+
+function renderOverview(comments, allHits){
+    const sampEl = document.getElementById('ovSamples');
+    const show = comments.slice(0, 5);
+    sampEl.innerHTML = show.length ? show.map((c,i)=>`<div class="ov-sample"><span class="os-idx">${i+1}.</span>${escHtml(c)}</div>`).join('') : '<span class="cmt-empty">暂无评价</span>';
+    // 标签词云 top20
+    const tagCount = {};
+    allHits.flat().forEach(h=>{ const k=h.m+'|'+h.t; if(!tagCount[k]) tagCount[k]={m:h.m,t:h.t,color:h.color,n:0}; tagCount[k].n++; });
+    const arr = Object.values(tagCount).sort((a,b)=>b.n-a.n).slice(0,20);
+    const maxN = arr.length?arr[0].n:1;
+    const cloud = document.getElementById('ovCloud');
+    if(!arr.length){ cloud.innerHTML = '<span class="cmt-empty">暂无标签</span>'; return; }
+    cloud.innerHTML = arr.map(o=>{
+        const size = 13 + Math.round((o.n/maxN)*13);
+        return `<span class="ct" style="font-size:${size}px;background:${hex2rgba(o.color,0.1)};color:${o.color};border-color:${hex2rgba(o.color,0.3)};">${o.t} <small>×${o.n}</small></span>`;
+    }).join('');
+}
+
+function exportResultCsv(){
+    if(!TAG_STATE.length){ alert('暂无数据可导出。'); return; }
+    const header = ['原评价', ...MODULE_ORDER.map(m=>m+'_标签'), ...MODULE_ORDER.map(m=>m+'_命中词')];
+    const lines = [header.join(',')];
+    TAG_STATE.forEach(row=>{
+        const byMod = {};
+        MODULE_ORDER.forEach(m=> byMod[m] = row.hits.filter(h=>h.m===m));
+        const text = csvCell(row.text);
+        const tagCells = MODULE_ORDER.map(m=> csvCell(byMod[m].map(h=>h.t).join('、')));
+        const kwCells = MODULE_ORDER.map(m=> csvCell(byMod[m].map(h=>h.kw).join('、')));
+        lines.push([text, ...tagCells, ...kwCells].join(','));
+    });
+    const csv = '﻿' + lines.join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'voc_已打标.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+function csvCell(s){
+    s = (s==null?'':String(s));
+    if(/[",\n\r]/.test(s)) s = '"'+s.replace(/"/g,'""')+'"';
+    return s;
+}
+
 function renderResults(comments, allHits){
-    // meta
+    TAG_STATE = comments.map((c,i)=>({
+        id:i, text:c,
+        hits: allHits[i].map(h=>({m:h.m,d:h.d,t:h.t,kw:h.kw,conf:h.conf,color:h.color}))
+    }));
+    renderTable();
+    recomputeAnalytics(comments, allHits);
+    renderOverview(comments, allHits);
+    updateToolbarInfo(comments, allHits);
+}
+
+/* 仅重算轻量分析（meta/summary/词云/模块/需求/旅程/四象限），不动表格 */
+function recomputeAnalytics(comments, allHits){
     const totalTags = allHits.reduce((s,a)=>s+a.length,0);
     const modSet = new Set();
     allHits.flat().forEach(h=>modSet.add(h.m));
@@ -688,7 +1012,6 @@ function renderResults(comments, allHits){
         `<span class="m">命中标签 ${totalTags} 个</span>`+
         `<span class="m">覆盖模块 ${modSet.size}/${MODULE_ORDER.length}</span>`;
 
-    // summary text
     const modCount = {};
     allHits.flat().forEach(h=>{ modCount[h.m]=(modCount[h.m]||0)+1; });
     const topMods = Object.entries(modCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
@@ -696,60 +1019,32 @@ function renderResults(comments, allHits){
     if(totalTags===0){
         sumEl.innerHTML = '这次输入的评价未命中任何规则标签。可尝试载入示例评价，或调整重点模块后重试。';
     } else {
-        sumEl.innerHTML = `这批评价最集中在 <b>${topMods.join('、')}</b> 三个模块。每条评价右侧标签均附「判断依据」（命中的关键词）与置信度，可据此核对准确率；如需深度语义标注，点下方「找智能体聊真的」。`;
+        sumEl.innerHTML = `这批评价最集中在 <b>${topMods.join('、')}</b> 三个模块。标签可在上方表格内逐条增删，调整后可导出 CSV；如需深度语义标注，点下方「找智能体聊真的」。`;
     }
 
-    // per-comment cards
-    const cc = document.getElementById('cmtCards');
-    cc.innerHTML = '';
-    comments.forEach((c, i)=>{
-        const hits = allHits[i];
-        const card = document.createElement('div');
-        card.className = 'cmt-card';
-        const quote = c.length>80 ? c.slice(0,80)+'…<span class="more" onclick="this.parentNode.innerHTML=this.getAttribute(\'data-full\')">展开全文</span>' : c;
-        const quoteFull = c.replace(/</g,'&lt;');
-        let inner = `<div class="cmt-head"><div class="cmt-idx">${i+1}</div>`+
-            `<div class="cmt-quote" data-full="${quoteFull.replace(/"/g,'&quot;')}">${quoteFull.slice(0,80)}${c.length>80?'…<span class="more" onclick="this.parentNode.innerHTML=this.parentNode.getAttribute(\'data-full\')">展开全文</span>':''}</div></div>`;
-        if(hits.length===0){
-            inner += `<div class="cmt-empty">未命中标签（可能语义过于隐晦，建议找智能体深聊）。</div>`;
-        } else {
-            inner += '<div class="cmt-tags">';
-            hits.forEach(h=>{
-                inner += `<span class="tchip" style="background:${hex2rgba(h.color,0.1)}; color:${h.color}; border-color:${hex2rgba(h.color,0.3)};" title="判断依据：命中关键词「${h.kw}」 · 维度：${h.d}">`+
-                    `<span class="conf ${h.conf}"></span>${h.t}<span class="td">${h.d}</span></span>`;
-            });
-            inner += '</div>';
-        }
-        card.innerHTML = inner;
-        cc.appendChild(card);
-    });
-
-    // tag cloud (aggregate by tag)
+    // tag cloud (cap 20)
     const tagCount = {};
     allHits.flat().forEach(h=>{
         const k = h.m+'|'+h.t;
         if(!tagCount[k]) tagCount[k] = {m:h.m, t:h.t, color:h.color, n:0};
         tagCount[k].n++;
     });
-    const cloudArr = Object.values(tagCount).sort((a,b)=>b.n-a.n);
+    const cloudArr = Object.values(tagCount).sort((a,b)=>b.n-a.n).slice(0,20);
     const maxN = cloudArr.length?cloudArr[0].n:1;
     const cloud = document.getElementById('tagCloud');
     cloud.innerHTML = '';
-    if(cloudArr.length===0){
-        cloud.innerHTML = '<span class="cmt-empty">暂无标签</span>';
-    } else {
-        cloudArr.forEach(o=>{
-            const size = 12 + Math.round((o.n/maxN)*12); // 12~24px
-            const el = document.createElement('span');
-            el.className='ct';
-            el.style.fontSize = size+'px';
-            el.style.background = hex2rgba(o.color,0.1);
-            el.style.color = o.color;
-            el.style.borderColor = hex2rgba(o.color,0.3);
-            el.innerHTML = `${o.t} <small>×${o.n}</small>`;
-            cloud.appendChild(el);
-        });
-    }
+    if(cloudArr.length===0){ cloud.innerHTML = '<span class="cmt-empty">暂无标签</span>'; }
+    else { cloudArr.forEach(o=>{
+        const size = 12 + Math.round((o.n/maxN)*12);
+        const el = document.createElement('span');
+        el.className='ct';
+        el.style.fontSize = size+'px';
+        el.style.background = hex2rgba(o.color,0.1);
+        el.style.color = o.color;
+        el.style.borderColor = hex2rgba(o.color,0.3);
+        el.innerHTML = `${o.t} <small>×${o.n}</small>`;
+        cloud.appendChild(el);
+    }); }
 
     // module bars
     const mb = document.getElementById('modBars');
@@ -773,10 +1068,8 @@ function renderResults(comments, allHits){
         needPills.innerHTML = '<span class="cmt-empty">本次评价未直接命中十三种需求维度（需结合上下文由智能体进一步判断）。</span>';
     } else {
         needPills.innerHTML = '';
-        // dedupe by tag
         const seenN = new Set();
-        needHits.forEach(h=>{
-            if(seenN.has(h.t)) return; seenN.add(h.t);
+        needHits.forEach(h=>{ if(seenN.has(h.t)) return; seenN.add(h.t);
             const el = document.createElement('span');
             el.className='need-pill';
             el.textContent = h.t;
@@ -1156,9 +1449,13 @@ function renderMotMix(allHits){
 
 /* ===================== 重置 / 智能体 ===================== */
 function resetDemo(){
+    TAG_STATE = [];
     document.getElementById('results').classList.remove('show');
     document.getElementById('pipelineWrap').classList.remove('show');
     document.getElementById('cmtCards').innerHTML='';
+    document.getElementById('tagTable').innerHTML='';
+    document.getElementById('ovSamples').innerHTML='';
+    document.getElementById('ovCloud').innerHTML='';
     window.scrollTo({top:0, behavior:'smooth'});
 }
 function toggleAgentCards(){
