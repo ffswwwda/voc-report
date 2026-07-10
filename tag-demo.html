@@ -1772,7 +1772,7 @@ const UNEXPECTED_KEYWORDS = ['一起用','情侣','swap','幻想','角色扮演'
 function classifyNeedQuad(h){
     if(h.m==='使用阻碍') return 'noncustomer';
     if(h.m==='产品改进建议' || h.m==='购买目的') return 'explicit';
-    if(h.m==='购买动机' || h.m==='用户画像') return 'implicit';
+    if(h.m==='购买动机') return 'implicit';
     if(h.m==='使用场景'){
         const txt = (h.t||'') + ' ' + (h.kw||'');
         if(UNEXPECTED_KEYWORDS.some(k=>txt.includes(k))) return 'unexpected';
@@ -1795,7 +1795,7 @@ function renderNeedQuad(allHits){
     });
     const total = Object.values(buckets).reduce((s,a)=>s+a.length,0);
     if(total===0){
-        box.innerHTML = '<div class="an-empty">未命中可映射到四象限的需求标签（可补充购买目的、使用场景、使用阻碍、购买动机、用户画像或十三种需求相关表述）。</div>';
+        box.innerHTML = '<div class="an-empty">未命中可映射到四象限的需求标签（可补充购买目的、使用场景、使用阻碍、购买动机或十三种需求相关表述）。</div>';
         return;
     }
     const order = ['noncustomer','explicit','implicit','unexpected'];
