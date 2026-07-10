@@ -604,23 +604,26 @@ function smartSplit(text, mode){
         return arr.length ? arr : [clean.trim()].filter(Boolean);
     }
     // 智能模式
-    // 1) 空行 或 分隔线 ---/***/===
-    let blocks = clean.split(/\n\s*\n+|\n\s*[-=*]{3,}\s*\n/).map(b=>b.trim()).filter(b=>b.length>0);
-    if(blocks.length>=2) return blocks;
-    // 2) 连续 4 个以上空格，也视为新一条分隔（如一句评价里多空格隔开的两句）
-    blocks = clean.split(/ {4,}/).map(b=>b.trim()).filter(b=>b.length>0);
+    // 1) 先按 空行 / 分隔线 粗切大块
+    // 2) 对每一大块内部，再用「连续 4 个以上空格」细切（如一句评价里多空格隔开的两句）
+    const splitOuter = s => s.split(/\n\s*\n+|\n\s*[-=*]{3,}\s*\n/).map(b=>b.trim()).filter(b=>b.length>0);
+    const split4 = s => s.split(/ {4,}/).map(b=>b.trim()).filter(b=>b.length>0);
+    let blocks = [];
+    (splitOuter(clean).length ? splitOuter(clean) : [clean]).forEach(chunk => {
+        split4(chunk).forEach(b => { if(b) blocks.push(b); });
+    });
     if(blocks.length>=2) return blocks;
     // 3) 序号前缀：1. 2、 3) ① 等
     if(/^\s*\d+[.、)]\s+/m.test(clean) || /^[①②③④⑤⑥⑦⑧⑨⑩]\s*/m.test(clean)){
         blocks = clean.split(/^\s*(?:\d+[.、)]\s*|[①②③④⑤⑥⑦⑧⑨⑩]\s*)/m).map(b=>b.trim()).filter(b=>b.length>0);
         if(blocks.length>=2) return blocks;
     }
-    // 3) 星级行：★★★★★
+    // 4) 星级行：★★★★★
     if(/^[★☆]+\s*/m.test(clean)){
         blocks = clean.split(/^[★☆]+\s*/m).map(b=>b.trim()).filter(b=>b.length>0);
         if(blocks.length>=2) return blocks;
     }
-    // 4) 启发式：多条短评价按换行分开（避免拆断单条长段落）
+    // 5) 启发式：多条短评价按换行分开（避免拆断单条长段落）
     const lines = clean.split(/\n/).map(l=>l.trim()).filter(l=>l.length>0);
     if(lines.length>=2){
         const avg = lines.reduce((s,l)=>s+l.length,0)/lines.length;
