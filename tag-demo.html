@@ -279,7 +279,7 @@ textarea::placeholder{color:var(--muted);}
                     <option value="blank">按空行分段</option>
                     <option value="line">每行一条</option>
                 </select>
-                <span class="sm-hint">复制多条评价时，智能模式自动识别分隔（空行 / 序号 1. / 星级 ★ / 多行短评）</span>
+                <span class="sm-hint">复制多条评价时，智能模式自动识别分隔（空行 / 4 个以上空格 / 序号 1. / 星级 ★ / 多行短评）</span>
             </div>
         </div>
         <div class="cfg-block">
@@ -607,7 +607,10 @@ function smartSplit(text, mode){
     // 1) 空行 或 分隔线 ---/***/===
     let blocks = clean.split(/\n\s*\n+|\n\s*[-=*]{3,}\s*\n/).map(b=>b.trim()).filter(b=>b.length>0);
     if(blocks.length>=2) return blocks;
-    // 2) 序号前缀：1. 2、 3) ① 等
+    // 2) 连续 4 个以上空格，也视为新一条分隔（如一句评价里多空格隔开的两句）
+    blocks = clean.split(/ {4,}/).map(b=>b.trim()).filter(b=>b.length>0);
+    if(blocks.length>=2) return blocks;
+    // 3) 序号前缀：1. 2、 3) ① 等
     if(/^\s*\d+[.、)]\s+/m.test(clean) || /^[①②③④⑤⑥⑦⑧⑨⑩]\s*/m.test(clean)){
         blocks = clean.split(/^\s*(?:\d+[.、)]\s*|[①②③④⑤⑥⑦⑧⑨⑩]\s*)/m).map(b=>b.trim()).filter(b=>b.length>0);
         if(blocks.length>=2) return blocks;
