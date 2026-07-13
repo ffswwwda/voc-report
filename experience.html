@@ -13,14 +13,6 @@
     --bg:#F8FAFC; --card:#FFFFFF; --radius:16px; --shadow:0 4px 20px rgba(15,23,42,.07);
 }
 
-/* ===== 深空全息 夜晚模式（Radium deep-space）变量覆盖 ===== */
-body[data-theme="dark"]{
-    --indigo:#4d8bff; --indigo-d:#3b6fd4; --blue:#4d8bff; --blue-l:rgba(0,240,255,.10);
-    --brand:#00f0ff; --brand-bg:rgba(0,240,255,.14);
-    --ink:#e2e8f0; --slate:#f1f5f9; --muted:#94a3b8; --line:rgba(255,255,255,.08);
-    --green:#4ade80; --pink:#f43f5e; --amber:#f59e0b; --cyan:#00f0ff; --purple:#a78bfa;
-    --bg:#0F1525; --card:rgba(15,21,37,.6); --shadow:0 1px 3px rgba(0,0,0,.12);
-}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
     background:var(--bg); color:var(--ink); line-height:1.6; -webkit-font-smoothing:antialiased;}
@@ -29,10 +21,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .topbar a{color:var(--slate); text-decoration:none; font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px;}
 .topbar a:hover{color:var(--indigo);}
 .topbar .brand{margin-left:auto; font-weight:700; color:var(--indigo); display:flex; align-items:center; gap:6px;}
-.theme-toggle{display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border:1px solid var(--line); border-radius:999px; background:#fff; color:var(--slate); font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; transition:all .18s ease; white-space:nowrap;}
-.theme-toggle:hover{background:#F1F5F9; border-color:#CBD5E1; color:var(--indigo);}
-.theme-toggle .theme-icon{font-size:15px; line-height:1;}
-.theme-toggle[data-active="dark"]{background:#E0E7FF; border-color:#6366F1; color:#4338CA;}
 
 /* ===== Hero ===== */
 .hero{max-width:920px; margin:0 auto; padding:56px 24px 28px; text-align:center;}
@@ -240,16 +228,11 @@ textarea::placeholder{color:var(--muted);}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="radium-dark.css">
 </head>
 <body>
 
 <div class="topbar">
     <a href="index.html">← 返回主网页</a>
-    <button type="button" class="theme-toggle" id="themeToggle" aria-label="切换白天/夜晚模式">
-        <span class="theme-icon">☀️</span>
-        <span class="theme-text">白天</span>
-    </button>
     <span class="brand">🦞 VOC全流程分析</span>
 </div>
 
@@ -375,26 +358,6 @@ textarea::placeholder{color:var(--muted);}
 </div>
 
 <script>
-/* ===================== 白天/夜晚模式切换（跨页共享 voc_theme） ===================== */
-(function(){
-    function applyTheme(isDark){
-        document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
-        var btn = document.getElementById('themeToggle');
-        if(!btn) return;
-        btn.setAttribute('data-active', isDark ? 'dark' : 'light');
-        btn.innerHTML = isDark
-            ? '<span class="theme-icon">🌙</span><span class="theme-text">夜晚</span>'
-            : '<span class="theme-icon">☀️</span><span class="theme-text">白天</span>';
-    }
-    var saved = localStorage.getItem('voc_theme');
-    applyTheme(saved === 'dark');
-    var btn = document.getElementById('themeToggle');
-    if(btn) btn.addEventListener('click', function(){
-        var next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        localStorage.setItem('voc_theme', next);
-        applyTheme(next === 'dark');
-    });
-})();
 /* ============ 数据模型 ============ */
 const PURPOSES = {
     product_dev:{name:'产品开发', icon:'🛠️', desc:'用户最需要什么功能？该改进什么？',

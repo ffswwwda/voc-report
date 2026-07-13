@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>框架深度分析 · VOC 全流程分析</title>
-<link rel="stylesheet" href="radium-dark.css">
 <style>
 /* ============ 设计令牌：白天默认（对齐 JTBD 报告模板） ============ */
 :root{
@@ -69,14 +68,11 @@ h1,h2,h3{letter-spacing:-.01em;line-height:1.3;}
 .brand{font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;min-width:0;}
 .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--brand);box-shadow:0 0 12px var(--brand);}
 .brand small{font-weight:500;color:var(--muted);font-size:12px;}
-.theme-toggle{
   display:inline-flex;align-items:center;gap:7px;cursor:pointer;
   border:1px solid var(--line);background:var(--card-2);
   color:var(--slate);font-size:13px;font-weight:600;
   padding:8px 13px;border-radius:11px;transition:.18s;white-space:nowrap;
 }
-.theme-toggle:hover{border-color:var(--brand);color:var(--brand);}
-.theme-toggle .ti{font-size:15px;}
 
 /* ============ Hero ============ */
 .hero{
@@ -179,14 +175,6 @@ h1,h2,h3{letter-spacing:-.01em;line-height:1.3;}
 
 .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px;}
 
-/* ============ 夜晚模式：配色由 radium-dark.css 统一定义（完全复刻参考页 voc-report-home-radium） ============ */
-body[data-theme="dark"]{
-  --brand:#00f0ff; --brand2:#a78bfa; --pink:#f43f5e; --amber:#f59e0b;
-  --teal:#2dd4bf; --red:#f87171; --green:#4ade80; --slate:#f1f5f9; --muted:#94a3b8;
-  --bg:#0F1525; --card:rgba(15,21,37,.6); --card-2:rgba(255,255,255,.04);
-  --line:rgba(255,255,255,.08); --ink:#e2e8f0;
-  --brand-bg:rgba(0,240,255,.14);
-}
 
 @media (max-width:680px){
   .grid2,.grid3,.matrix{grid-template-columns:1fr;}
@@ -201,32 +189,11 @@ body[data-theme="dark"]{
     <a class="back-link" href="experience.html">← 返回全流程分析</a>
     <div class="brand"><span class="dot"></span><span id="brandName">框架深度分析</span> <small id="brandSub">基于真实 VOC 标签</small></div>
   </div>
-  <button class="theme-toggle" id="themeToggle" data-active="light"><span class="ti">☀️</span><span class="tt">白天</span></button>
 </div>
 
 <div class="wrap" id="app"><!-- 动态渲染 --></div>
 
 <script>
-/* ===================== 跨页主题切换 ===================== */
-(function(){
-  function applyTheme(isDark){
-    document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    var btn = document.getElementById('themeToggle');
-    if(!btn) return;
-    btn.setAttribute('data-active', isDark ? 'dark' : 'light');
-    btn.innerHTML = isDark
-      ? '<span class="ti">🌙</span><span class="tt">夜晚</span>'
-      : '<span class="ti">☀️</span><span class="tt">白天</span>';
-  }
-  var saved = localStorage.getItem('voc_theme');
-  applyTheme(saved === 'dark');
-  var btn = document.getElementById('themeToggle');
-  if(btn) btn.addEventListener('click', function(){
-    var next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('voc_theme', next);
-    applyTheme(next === 'dark');
-  });
-})();
 
 /* ===================== 数据读取 ===================== */
 const LS_KEY = 'voc_tag_profile';
