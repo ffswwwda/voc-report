@@ -2443,7 +2443,7 @@
             pointer-events: none;
             transition: opacity .18s ease, transform .18s ease, visibility .18s;
         }
-        #nav-fab:hover #nav-menu {
+        #nav-fab.open #nav-menu {
             opacity: 1;
             visibility: visible;
             transform: translateY(-50%) scale(1);
@@ -6329,21 +6329,32 @@
                     const navH = (document.querySelector('.nav-bar')?.offsetHeight || 64) + 16;
                     const top = targetEl.getBoundingClientRect().top + window.pageYOffset - navH;
                     window.scrollTo({ top: top, behavior: 'smooth' });
+                    navFab.classList.remove('open');
                 }
             });
         }
     });
 
-    // 菜单靠近右边缘时翻转到左侧
-    navFab.addEventListener('mouseenter', function() {
+    // 悬停展开：用 JS 管理显隐，留 260ms 缓冲，避免鼠标从按钮移到菜单经过空隙时菜单收回
+    let navMenuTimer = null;
+    function openNavMenu() {
         if (navFab.classList.contains('dragging')) return;
+        if (navMenuTimer) { clearTimeout(navMenuTimer); navMenuTimer = null; }
         const rect = navFab.getBoundingClientRect();
-        if (rect.right + 175 > window.innerWidth - 8) {
-            navFab.classList.add('menu-left');
-        } else {
-            navFab.classList.remove('menu-left');
-        }
+        if (rect.right + 175 > window.innerWidth - 8) navFab.classList.add('menu-left');
+        else navFab.classList.remove('menu-left');
+        navFab.classList.add('open');
+    }
+    function scheduleCloseNavMenu() {
+        if (navMenuTimer) clearTimeout(navMenuTimer);
+        navMenuTimer = setTimeout(function() { navFab.classList.remove('open'); }, 260);
+    }
+    navFab.addEventListener('mouseenter', openNavMenu);
+    navFab.addEventListener('mouseleave', scheduleCloseNavMenu);
+    navMenu.addEventListener('mouseenter', function() {
+        if (navMenuTimer) { clearTimeout(navMenuTimer); navMenuTimer = null; }
     });
+    navMenu.addEventListener('mouseleave', scheduleCloseNavMenu);
 
     // 拖动逻辑（鼠标 + 触摸，位置持久化到 localStorage）
     (function() {
