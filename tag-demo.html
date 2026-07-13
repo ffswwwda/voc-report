@@ -331,7 +331,7 @@ textarea::placeholder{color:var(--muted);}
 
 /* 结果表格 */
 .res-toolbar{
-    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;
     margin:18px 0 10px; padding:12px 14px; background:linear-gradient(135deg,#F5F3FF,#EEF2FF);
     border:1px solid #E9D5FF; border-radius:12px;
     position:sticky; top:58px; z-index:40;
@@ -339,6 +339,7 @@ textarea::placeholder{color:var(--muted);}
 }
 .res-toolbar .rt-info{font-size:13px; color:#4C1D95; font-weight:600;}
 .res-toolbar .rt-info b{color:#7C3AED;}
+.rt-actions{display:flex; align-items:center; gap:6px;}
 .export-btn{
     border:none; cursor:pointer; background:linear-gradient(135deg,#059669,#0891B2);
     color:#fff; font-size:13px; font-weight:800; padding:9px 16px; border-radius:999px;
@@ -350,6 +351,12 @@ textarea::placeholder{color:var(--muted);}
 }
 .export-btn:hover{transform:translateY(-2px);}
 .export-btn:disabled{opacity:.45; cursor:not-allowed; box-shadow:none;}
+@media(max-width:680px){
+    .res-toolbar{flex-direction:column; align-items:stretch; gap:10px; padding:12px;}
+    .res-toolbar .rt-info{text-align:center; font-size:12px;}
+    .rt-actions{width:100%; justify-content:stretch; gap:8px;}
+    .rt-actions .export-btn{flex:1; padding:10px 8px; font-size:12px;}
+}
 
 .tag-table-wrap{max-height:560px; overflow:auto; border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow);}
 table.tag-table{border-collapse:collapse; width:100%; font-size:12.5px; background:var(--card);}
@@ -639,8 +646,10 @@ table.tag-table tbody tr:hover{background:rgba(124,58,237,.05);}
 
     <div class="res-toolbar">
         <div class="rt-info" id="rtInfo"></div>
-        <button class="export-btn" id="exportBtn" onclick="exportResultXlsx()">⬇️ 导出打标结果 Excel</button>
-        <button class="export-btn" id="expExperienceBtn" onclick="exportToExperience()" title="把当前打标结果带入 VOC 全流程分析页做深度分析">🚀 带入全流程分析</button>
+        <div class="rt-actions">
+            <button class="export-btn" id="exportBtn" onclick="exportResultXlsx()">⬇️ 导出打标结果 Excel</button>
+            <button class="export-btn" id="expExperienceBtn" onclick="exportToExperience()" title="把当前打标结果带入 VOC 全流程分析页做深度分析">🚀 带入全流程分析</button>
+        </div>
     </div>
     <div class="tag-table-wrap"><div id="tagTable"></div></div>
 
