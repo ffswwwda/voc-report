@@ -2349,26 +2349,28 @@
             margin-top: 80px;
         }
 
-        /* ===== 回到顶部按钮 ===== */
+        /* ===== 回到顶部按钮（胶囊 + 文字） ===== */
         #back-to-top {
             position: fixed;
             right: 28px;
             bottom: 28px;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
+            height: 44px;
+            padding: 0 18px;
+            border-radius: 999px;
             background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
             color: #fff;
             border: none;
             cursor: pointer;
-            font-size: 22px;
-            line-height: 48px;
-            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
             opacity: 0;
             visibility: hidden;
             transform: translateY(12px);
-            transition: opacity .3s ease, transform .3s ease, visibility .3s;
+            transition: opacity .3s ease, transform .3s ease, visibility .3s, box-shadow .25s ease;
             z-index: 999;
         }
         #back-to-top.show {
@@ -2381,7 +2383,103 @@
             transform: translateY(-2px);
         }
         @media (max-width: 768px) {
-            #back-to-top { right: 16px; bottom: 16px; width: 42px; height: 42px; font-size: 19px; line-height: 42px; }
+            #back-to-top { right: 16px; bottom: 16px; height: 38px; padding: 0 13px; font-size: 12.5px; gap: 4px; }
+        }
+
+        /* ===== 左侧导航栏（默认仅图标，悬停展开显示文字） ===== */
+        #side-rail {
+            position: fixed;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px 8px;
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.10);
+            max-height: 84vh;
+            overflow: visible;
+            transition: background .25s ease, box-shadow .25s ease, padding .25s ease;
+        }
+        #side-rail:hover {
+            background: #ffffff;
+            box-shadow: 0 12px 34px rgba(15, 23, 42, 0.16);
+            padding: 12px 14px 12px 10px;
+        }
+        .side-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            border-radius: 12px;
+            color: #475569;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background .2s ease, color .2s ease;
+        }
+        .side-item:hover {
+            background: #EFF6FF;
+            color: #2563EB;
+        }
+        .side-item.active {
+            color: #2563EB;
+        }
+        .side-item.active::before {
+            content: "";
+            position: absolute;
+            left: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 24px;
+            border-radius: 4px;
+            background: #2563EB;
+        }
+        .side-icon {
+            flex: 0 0 auto;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            line-height: 1;
+            border-radius: 9px;
+            background: #F1F5F9;
+            transition: background .2s ease, transform .2s ease;
+        }
+        .side-item:hover .side-icon,
+        .side-item.active .side-icon {
+            background: #DBEAFE;
+            transform: scale(1.06);
+        }
+        .side-label {
+            font-size: 13.5px;
+            font-weight: 600;
+            opacity: 0;
+            max-width: 0;
+            overflow: hidden;
+            transform: translateX(-6px);
+            transition: opacity .22s ease, transform .22s ease, max-width .26s ease;
+        }
+        #side-rail:hover .side-label {
+            opacity: 1;
+            max-width: 160px;
+            transform: translateX(0);
+        }
+        .side-item.active .side-label {
+            color: #2563EB;
+        }
+        @media (max-width: 1180px) {
+            #side-rail { display: none; }
         }
 
         /* 响应式 */
@@ -2758,6 +2856,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
+
+<!-- 左侧导航栏（默认仅显示图标，悬停展开显示文字，点击跳转对应板块） -->
+<nav id="side-rail" aria-label="页面板块导航">
+    <a class="side-item" href="#section-tags"><span class="side-icon">🏷</span><span class="side-label">标签体系</span></a>
+    <a class="side-item" href="#brand-roulette"><span class="side-icon">🎲</span><span class="side-label">需求盲盒转盘</span></a>
+    <a class="side-item" href="experience.html"><span class="side-icon">🚀</span><span class="side-label">VOC全流程分析</span></a>
+    <a class="side-item" href="#section-purpose-wizard"><span class="side-icon">🎯</span><span class="side-label">分析目的</span></a>
+    <a class="side-item" href="#section-framework"><span class="side-icon">🧩</span><span class="side-label">分析框架</span></a>
+    <a class="side-item" href="hip_mold_report.html"><span class="side-icon">📊</span><span class="side-label">分析成果</span></a>
+    <a class="side-item" href="#skill-download"><span class="side-icon">🦞</span><span class="side-label">智能体</span></a>
+</nav>
 
 <!-- Hero 区域 -->
 <div class="hero-section" id="capture-area">
@@ -5944,7 +6053,7 @@
     <p style="margin-top: 8px;">Generated by WorkBuddy · 2026</p>
 </footer>
 
-<button id="back-to-top" title="回到顶部" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<button id="back-to-top" title="回到顶部" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ 回到顶部</button>
 
 <script>
     // ===== 框架迷你演示逻辑 =====
@@ -6177,6 +6286,41 @@
         } else {
             backToTop.classList.remove('show');
         }
+    });
+
+    // ===== 左侧导航栏：滚动高亮 + 平滑滚动 =====
+    const sideItems = document.querySelectorAll('#side-rail .side-item');
+    const sideSectionIds = ['section-tags', 'brand-roulette', 'section-purpose-wizard', 'section-framework', 'skill-download'];
+    function updateSideRail() {
+        const navH = (document.querySelector('.nav-bar')?.offsetHeight || 64);
+        let current = '';
+        sideSectionIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && (el.getBoundingClientRect().top - navH) <= 100) {
+                current = id;
+            }
+        });
+        sideItems.forEach(item => {
+            item.classList.remove('active');
+            const href = item.getAttribute('href');
+            if (href === '#' + current) item.classList.add('active');
+        });
+    }
+    window.addEventListener('scroll', updateSideRail);
+    window.addEventListener('load', updateSideRail);
+    updateSideRail();
+
+    document.querySelectorAll('#side-rail a[href^="#"]').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                const navH = (document.querySelector('.nav-bar')?.offsetHeight || 64) + 16;
+                const top = targetEl.getBoundingClientRect().top + window.pageYOffset - navH;
+                window.scrollTo({ top: top, behavior: 'smooth' });
+            }
+        });
     });
 
     // ===== 平滑滚动（仅对有 href 的导航项）=====
